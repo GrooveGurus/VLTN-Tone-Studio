@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { usePlaybackClock, useCountInBeats } from "@/song/performance/playback-clock";
+import { t } from "@lingui/core/macro";
 
 /** Index of the song beat that is sounding, or -1 while stopped or before the first beat. Only a change of beat re-renders. */
 function useBeatIndex(bpm: number, firstBeat: number): number {
@@ -23,14 +24,14 @@ export function BeatIndicator({ bpm, beats, firstBeat, large = false }: BeatGrid
   const downbeat = beat >= 0 && beat % beats === 0;
   if (countIn > 0) {
     return (
-      <span role="status" aria-label={`Count-in ${countIn}`} className={`font-bold text-amber-400 ${large ? "text-5xl" : "text-base"}`}>
+      <span role="status" aria-label={t`Count-in ${countIn}`} className={`font-bold text-amber-400 ${large ? "text-5xl" : "text-base"}`}>
         {countIn}
       </span>
     );
   }
   const box = large ? "size-14" : "size-4";
   return (
-    <span role="img" aria-label={downbeat ? "Downbeat" : "Beat"} className={`relative inline-flex items-center justify-center ${box}`}>
+    <span role="img" aria-label={downbeat ? t`Downbeat` : t`Beat`} className={`relative inline-flex items-center justify-center ${box}`}>
       <span className="absolute inline-flex size-full rounded-full border border-seam" />
       {beat >= 0 && (
         <span key={beat} className={`absolute inline-flex size-full animate-ping rounded-full ${downbeat ? "bg-amber-400" : "bg-sky-400"} opacity-75`} />

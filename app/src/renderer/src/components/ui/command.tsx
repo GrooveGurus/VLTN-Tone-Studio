@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { t } from "@lingui/core/macro";
 
 function Command({
   className,
@@ -29,7 +30,7 @@ function Command({
 
 function CommandDialog({
   title = "Command Palette",
-  description = "Search for a command to run...",
+  description = t`Search for a command to run...`,
   children,
   className,
   showCloseButton = true,

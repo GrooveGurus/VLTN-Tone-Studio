@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { defineConfig, externalizeDepsPlugin } from "electron-vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import { lingui } from "@lingui/vite-plugin";
 import { pdfjsAssets } from "./scripts/pdfjs-assets";
 
 export default defineConfig({
@@ -20,7 +21,7 @@ export default defineConfig({
   },
   renderer: {
     resolve: { alias: { "@": resolve("src/renderer/src"), "@shared": resolve("src/shared") } },
-    plugins: [react(), tailwindcss(), pdfjsAssets()],
+    plugins: [react(), lingui({ macroTransform: true }), tailwindcss(), pdfjsAssets()],
     // Two pages: the app, and the band follower page (spec 44), which band sync serves on the local network.
     build: { rollupOptions: { input: { index: resolve("src/renderer/index.html"), follower: resolve("src/renderer/follower.html") } } },
     worker: { format: 'es' },

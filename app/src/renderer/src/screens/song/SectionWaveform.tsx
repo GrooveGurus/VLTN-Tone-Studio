@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { peaks } from "@/song/stems/mix";
 import type { Section } from "@/song/performance/sections";
+import { t } from "@lingui/core/macro";
 
 const BUCKETS = 600;
 
@@ -48,7 +49,7 @@ export function SectionWaveform({
       width={BUCKETS}
       height={80}
       role="img"
-      aria-label="Waveform with section boundaries. Click to place the selected section's edge."
+      aria-label={t`Waveform with section boundaries. Click to place the selected section's edge.`}
       className="h-20 w-full cursor-crosshair rounded-md bg-well"
       onClick={(e) => {
         if (!duration) return;

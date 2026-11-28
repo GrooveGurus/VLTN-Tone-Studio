@@ -12,6 +12,7 @@ import { GP200_EQ_DEFAULTS, clampGp200Eq } from "./gp200-globals";
 import { appEqValues, clampGp150Global, gp150EqIndex, gp150GlobalRecords, gp150GlobalSpec, type Gp150GlobalName, type Gp150Globals } from "./gp150-globals";
 import type { DeviceDriver, DriverEvent, DriverOptions, GlobalsSnapshot, ProgressOptions, SyncSnapshot } from "./types";
 import type { BleMidiConnection } from "@/bluetooth/connection";
+import { t } from "@lingui/core/macro";
 
 /** Slot tables and tempo range, the same on the GP-150 and GP-180. */
 const PROFILE = profileFor("gp150");
@@ -34,7 +35,7 @@ export interface Gp150GlobalsSnapshot extends GlobalsSnapshot {
 /** int32 LE sample block → samples. */
 function irSamples(data: Uint8Array): Int32Array {
   if (data.byteLength === 0 || data.byteLength % 4 !== 0 || data.byteLength > USER_IR_MAX_SAMPLES * 4)
-    throw new RangeError(`A GP-150 User IR is up to ${USER_IR_MAX_SAMPLES} samples of 4 bytes; got ${data.byteLength} bytes.`);
+    throw new RangeError(t`A GP-150 User IR is up to ${USER_IR_MAX_SAMPLES} samples of 4 bytes; got ${data.byteLength} bytes.`);
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   return Int32Array.from({ length: data.byteLength / 4 }, (_, i) => view.getInt32(i * 4, true));
 }
@@ -260,7 +261,7 @@ export class Gp150Driver implements DeviceDriver {
     if (!this.#edit) await this.#readBuffer();
     if (buffer !== this.#buffer || !this.#edit) return;
     const fxid = parsePrst(this.#edit).blocks[block]?.fxid;
-    if (fxid === undefined) throw new RangeError(`The GP-150 has no module ${block}`);
+    if (fxid === undefined) throw new RangeError(t`The GP-150 has no module ${block}`);
     this.#edit = applyPatchEdits(this.#edit, { blocks: { [block]: { params: { [index]: value } } } });
     await this.#session.setParam(block, index, fxid, value);
   }
@@ -316,7 +317,7 @@ export class Gp150Driver implements DeviceDriver {
   async setGlobalEq(index: number, value: number): Promise<void> {
     const v = clampGp200Eq(index, value);
     if (!this.#eq) await this.readGlobals();
-    if (!this.#eq) throw new RangeError("The GP-150 didn't report its Global EQ");
+    if (!this.#eq) throw new RangeError(t`The GP-150 didn't report its Global EQ`);
     const values = [...this.#eq];
     values[gp150EqIndex(index)] = v;
     this.#eq = values;
@@ -334,7 +335,7 @@ export class Gp150Driver implements DeviceDriver {
 
   /** `file`: the 2696-byte SnapTone upload file of the GP-5 family (the GP-150 takes the same VTSI file). */
   async uploadSnapTone(slot: number, name: string, file: Uint8Array, opts: ProgressOptions = {}): Promise<string> {
-    if (file.byteLength !== SNAPTONE_FILE_BYTES) throw new RangeError(`A GP-150 SnapTone is the ${SNAPTONE_FILE_BYTES}-byte SnapTone file; got ${file.byteLength} bytes.`);
+    if (file.byteLength !== SNAPTONE_FILE_BYTES) throw new RangeError(t`A GP-150 SnapTone is the ${SNAPTONE_FILE_BYTES}-byte SnapTone file; got ${file.byteLength} bytes.`);
     return (await this.#session.uploadSnapTone(slot + 1, name, file, { confirm: true, onProgress: opts.onProgress })).name;
   }
 

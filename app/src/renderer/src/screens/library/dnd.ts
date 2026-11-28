@@ -3,6 +3,7 @@ import type { DragEvent } from "react";
 import { useDevice } from "@/state/device";
 import { pedalName, slotLabel } from "@/state/device-model";
 import { useLibrary, type LibraryDrag } from "./store";
+import { t } from "@lingui/core/macro";
 
 export const LOCAL_MIME = "application/x-gp5-local-preset";
 export const SLOTS_MIME = "application/x-gp5-slots";
@@ -36,9 +37,9 @@ function ghost(source: HTMLElement, title: string, origin: string): HTMLElement 
 export function startDrag(e: DragEvent<HTMLElement>, drag: LibraryDrag, mime: string) {
   e.dataTransfer.effectAllowed = drag.kind === "local" ? "copy" : "copyMove";
   e.dataTransfer.setData(mime, JSON.stringify(drag.kind === "local" ? { id: drag.preset.id, collectionId: drag.preset.collectionId } : drag.slots));
-  const title = drag.kind === "local" ? drag.preset.name : drag.slots.length === 1 ? (e.currentTarget.dataset.name ?? `Slot ${slotLabel(useDevice.getState().device, drag.slots[0])}`) : `${drag.slots.length} slots`;
+  const title = drag.kind === "local" ? drag.preset.name : drag.slots.length === 1 ? (e.currentTarget.dataset.name ?? t`Slot ${slotLabel(useDevice.getState().device, drag.slots[0])}`) : t`${drag.slots.length} slots`;
   const collection = drag.kind === "local" ? useLibrary.getState().collections.find((c) => c.id === drag.preset.collectionId)?.title : null;
-  const origin = drag.kind === "local" ? `From ${collection ?? "this computer"}` : `From the ${pedalName(useDevice.getState().device)}. Alt copies`;
+  const origin = drag.kind === "local" ? `From ${collection ?? "this computer"}` : t`From the ${pedalName(useDevice.getState().device)}. Alt copies`;
   const el = ghost(e.currentTarget, title, origin);
   e.dataTransfer.setDragImage(el, 16, 16);
   setTimeout(() => el.remove(), 0);

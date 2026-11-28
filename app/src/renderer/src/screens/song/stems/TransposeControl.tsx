@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { MAX_SEMITONES } from "@/song/stems/transpose-core";
 import { transposeStems } from "@/song/stems/transpose";
 import type { Stems } from "@/song/types";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export const fmtShift = (n: number) => (n === 0 ? "0" : `${n > 0 ? "+" : "−"}${Math.abs(n)}`);
 
@@ -47,7 +49,7 @@ export function useTranspose(stems: Stems, beforeSwap: () => void) {
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") return;
       setJob(null);
-      notifyError("Couldn't change the key", e);
+      notifyError(t`Couldn't change the key`, e);
     }
   };
 
@@ -58,19 +60,19 @@ export function useTranspose(stems: Stems, beforeSwap: () => void) {
 export function TransposeControl({ semitones, job, onChange }: { semitones: number; job: { semitones: number; progress: number } | null; onChange(semitones: number): void }) {
   const shown = job ? job.semitones : semitones;
   return (
-    <div role="group" aria-label="Transpose" className="flex shrink-0 items-center gap-1" title="Tune the whole song down or up without changing its tempo">
-      <span className="mr-0.5 text-[12px] text-silkscreen-3">Key</span>
-      <Button variant="outline" size="icon-sm" aria-label="One semitone down" disabled={shown <= -MAX_SEMITONES} onClick={() => onChange(shown - 1)}>
+    <div role="group" aria-label={t`Transpose`} className="flex shrink-0 items-center gap-1" title={t`Tune the whole song down or up without changing its tempo`}>
+      <Trans><span className="mr-0.5 text-[12px] text-silkscreen-3">Key</span></Trans>
+      <Button variant="outline" size="icon-sm" aria-label={t`One semitone down`} disabled={shown <= -MAX_SEMITONES} onClick={() => onChange(shown - 1)}>
         <MinusIcon aria-hidden />
       </Button>
       <span className="w-14 text-center text-[12px] text-silkscreen-2 tabular-nums" aria-live="polite">
-        {job ? `${Math.round(job.progress * 100)}%` : `${fmtShift(shown)} st`}
+        {job ? `${Math.round(job.progress * 100)}%` : t`${fmtShift(shown)} st`}
       </span>
-      <Button variant="outline" size="icon-sm" aria-label="One semitone up" disabled={shown >= MAX_SEMITONES} onClick={() => onChange(shown + 1)}>
+      <Button variant="outline" size="icon-sm" aria-label={t`One semitone up`} disabled={shown >= MAX_SEMITONES} onClick={() => onChange(shown + 1)}>
         <PlusIcon aria-hidden />
       </Button>
       <Button variant="ghost" size="xs" disabled={shown === 0 && !job} onClick={() => onChange(0)}>
-        Reset
+        <Trans>Reset</Trans>
       </Button>
     </div>
   );

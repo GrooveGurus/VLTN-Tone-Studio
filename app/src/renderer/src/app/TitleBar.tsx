@@ -5,6 +5,7 @@ import { PresetSwitcher } from "./PresetSwitcher";
 import { EditModeSelect } from "./EditModeSelect";
 import { DeviceChip } from "./DeviceChip";
 import { SearchButton } from "./SearchButton";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * 52px drag region: brand, preset switcher, search, device chip. Controls sit in
@@ -28,7 +29,7 @@ export function TitleBar({ className }: { className?: string }) {
         <span className="grid size-[22px] place-items-center text-silkscreen" aria-hidden>
           <Cable className="size-3.5" strokeWidth={2.25} />
         </span>
-        <b className="text-[15px] font-semibold tracking-[-0.01em] max-[900px]:hidden">Tone Studio</b>
+        <Trans><b className="text-[15px] font-semibold tracking-[-0.01em] max-[900px]:hidden">Tone Studio</b></Trans>
       </div>
       <PresetSwitcher />
       <EditModeSelect />

@@ -4,10 +4,12 @@ import { useClickSamples, MAX_CLICK_SAMPLE_SECONDS } from "@/song/performance/cl
 import { AUDIO_ACCEPT } from "@/song/decode";
 import type { ClickSampleSlot } from "@shared/host/click-samples";
 import type { StemPlayer } from "@/song/stems/player";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const SLOTS: { slot: ClickSampleSlot; label: string }[] = [
-  { slot: "down", label: "Downbeat" },
-  { slot: "other", label: "Other beats" },
+  { slot: "down", get label() { return t`Downbeat`; } },
+  { slot: "other", get label() { return t`Other beats`; } },
 ];
 
 /** Reads the saved samples once and hands them to the player, so the "My samples" sound is ready before Play. */
@@ -24,10 +26,10 @@ export function ClickSampleSettings() {
   const samples = useClickSamples();
   return (
     <fieldset className="space-y-2">
-      <legend>My samples</legend>
+      <legend><Trans>My samples</Trans></legend>
       <p>
-        Load a short hit (WAV, FLAC or MP3, at most {MAX_CLICK_SAMPLE_SECONDS} seconds) for each slot, then choose My samples as the sound. An empty slot uses
-        the click.
+        <Trans>Load a short hit (WAV, FLAC or MP3, at most {MAX_CLICK_SAMPLE_SECONDS} seconds) for each slot, then choose My samples as the sound. An empty slot uses
+        the click.</Trans>
       </p>
       {SLOTS.map(({ slot, label }) => (
         <div key={slot} className="flex items-center gap-2">
@@ -35,7 +37,7 @@ export function ClickSampleSettings() {
             <span className="w-24">{label}</span>
             <input
               type="file"
-              aria-label={`${label} sample`}
+              aria-label={t`${label} sample`}
               accept={AUDIO_ACCEPT}
               className="w-40 text-xs"
               onChange={(e) => {
@@ -45,9 +47,9 @@ export function ClickSampleSettings() {
               }}
             />
           </label>
-          <span className="truncate text-xs">{samples[slot]?.name ?? "Click"}</span>
+          <span className="truncate text-xs">{samples[slot]?.name ?? t`Click`}</span>
           <Button type="button" size="sm" variant="outline" disabled={!samples[slot]} onClick={() => void samples.clear(slot)}>
-            Clear
+            <Trans>Clear</Trans>
           </Button>
         </div>
       ))}

@@ -14,6 +14,8 @@ import type { ChartMetadata } from "@/song/performance/import/import-result";
 import { ClockOverDuration, PositionSlider } from "./PlaybackDisplay";
 import { SectionStrip } from "./SectionStrip";
 import { SongPreparationStatus } from "./SongPreparationStatus";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** The reader with its status lines and transport, used both inline and as the full-screen stage view. */
 export function StageView({
@@ -65,7 +67,7 @@ export function StageView({
   const armed = useSession(session, selectArmed);
   const powerError = useStagePower(stage && (starting || playing || library.playlistPlaying));
   const duration = player?.duration ?? 0;
-  const nextTitle = library.index?.songs.find((s) => s.id === library.queue[library.position + 1])?.title ?? "End of set";
+  const nextTitle = library.index?.songs.find((s) => s.id === library.queue[library.position + 1])?.title ?? t`End of set`;
   // Off by default: a full-screen flash is for performers who cannot look at the beat light.
   const [edgeFlash, setEdgeFlash] = useState(false);
   return (
@@ -80,28 +82,28 @@ export function StageView({
         chords={chords}
         shift={shift}
         songKey={songKey}
-        title={source?.name ?? "Performance"}
+        title={source?.name ?? t`Performance`}
         onEditStart={session.pause}
         onSaveChart={stage ? undefined : onSaveChart}
         onImportMetadata={stage ? undefined : onImportMetadata}
         status={
           <>
-            {stage && <p>Stage mode: seeking and editing locked. {queued ? `Set ${library.position + 1} / ${library.queue.length}` : ""}</p>}
-            {stage && (playing || library.playlistPlaying) && !powerError && host.song.stagePower && <p>Desktop sleep prevention requested during playback.</p>}
+            {stage && <p><Trans>Stage mode: seeking and editing locked.</Trans> {queued ? t`Set ${library.position + 1} / ${library.queue.length}` : ""}</p>}
+            {stage && (playing || library.playlistPlaying) && !powerError && host.song.stagePower && <p><Trans>Desktop sleep prevention requested during playback.</Trans></p>}
             {stage && <PracticeMuteBanner />}
             {stage && <SongPreparationStatus session={session} />}
             {stage && library.error && <p role="alert">{library.error}</p>}
             {stage && library.notice && <p role="status">{library.notice}</p>}
-            {stage && queued && <p>Next: {nextTitle}</p>}
+            {stage && queued && <p><Trans>Next: {nextTitle}</Trans></p>}
             {stage && powerError && <p role="alert">{powerError}</p>}
             <p role="status">
-              MIDI: {output?.state === "connected" ? `${output.name} · ${armed ? "Cues armed" : "Cues disarmed"}` : "Output disconnected · Cues disarmed"}
+              MIDI: {output?.state === "connected" ? `${output.name} · ${armed ? "Cues armed" : "Cues disarmed"}` : t`Output disconnected · Cues disarmed`}
             </p>
             {lateNotice && lateNotice.dropped + (lateNotice.resynced ? 1 : 0) > 0 && (
               <p role="status" className="text-amber-400">
-                {lateNotice.dropped} late MIDI command{lateNotice.dropped === 1 ? "" : "s"} dropped at {Math.floor(lateNotice.position / 60)}:
-                {String(Math.floor(lateNotice.position % 60)).padStart(2, "0")}
-                {lateNotice.resynced ? " (resynced)" : ""}
+                <Trans>{lateNotice.dropped} late MIDI command</Trans>{lateNotice.dropped === 1 ? "" : "s"} <Trans>dropped at {Math.floor(lateNotice.position / 60)}:
+                {String(Math.floor(lateNotice.position % 60)).padStart(2, "0")}</Trans>
+                {lateNotice.resynced ? t` (resynced)` : ""}
               </p>
             )}
             {(error || parseError) && (
@@ -118,16 +120,16 @@ export function StageView({
               disabled={!starting && (!player || !!parseError || library.busy)}
               onClick={() => (starting ? session.cancelStart() : playing ? session.pause() : session.startPlayback())}
             >
-              {starting ? "Cancel start" : playing ? "Pause" : queued && library.queue.length > 1 ? "Play playlist" : "Play song"}
+              {starting ? t`Cancel start` : playing ? t`Pause` : queued && library.queue.length > 1 ? t`Play playlist` : t`Play song`}
             </Button>
             <Button variant="outline" disabled={!player || stage} onClick={() => void session.seek(0)}>
-              Rewind
+              <Trans>Rewind</Trans>
             </Button>
             <BeatIndicator large {...beat} />
             {speedNote && <span className="rounded-md border border-seam px-2 py-1 text-sm tabular-nums">{speedNote}</span>}
             {stage && (
               <Button variant="outline" aria-pressed={edgeFlash} onClick={() => setEdgeFlash(!edgeFlash)}>
-                {edgeFlash ? "Edge flash on" : "Edge flash off"}
+                {edgeFlash ? t`Edge flash on` : t`Edge flash off`}
               </Button>
             )}
             {/* In Stage the sections replace the seek bar: seeking stays locked, jumps between sections do not. */}
@@ -136,18 +138,18 @@ export function StageView({
             ) : (
               <PositionSlider
                 disabled={stage}
-                label="Expanded song position"
+                label={t`Expanded song position`}
                 className="min-w-32 flex-1"
                 duration={duration}
                 onSeek={(value) => void session.seek(value)}
               />
             )}
             <Button variant="outline" onClick={session.panicAndDisarm}>
-              Panic / stop MIDI
+              <Trans>Panic / stop MIDI</Trans>
             </Button>
             {stage && (
               <Button variant="outline" onClick={session.pause}>
-                Stop playback
+                <Trans>Stop playback</Trans>
               </Button>
             )}
             <ClockOverDuration className="text-sm" duration={duration} />

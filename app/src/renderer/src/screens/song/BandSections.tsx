@@ -5,6 +5,8 @@ import { BASS_PART_CHOICES, type BassPartChoice } from "@/song/band/bass-parts";
 import type { SectionOverride, SectionPlan } from "@/song/band/arrangement";
 import { BandSectionMore } from "./BandSectionMore";
 import { BASS_PART_LABELS } from "./band-labels";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export interface BandSectionRow {
   plan: SectionPlan;
@@ -41,16 +43,16 @@ export function BandSections({
         <table className="w-full min-w-[56rem] text-left text-sm">
           <thead className="text-silkscreen-3">
             <tr>
-              <th className="py-1 pr-2 font-normal">Section</th>
-              <th className="py-1 pr-2 font-normal">Style</th>
-              <th className="py-1 pr-2 font-normal">Energy</th>
-              <th className="py-1 pr-2 font-normal">Fill</th>
-              <th className="py-1 pr-2 font-normal">Drums</th>
-              <th className="py-1 pr-2 font-normal">Bass</th>
-              <th className="py-1 pr-2 font-normal">Bass part</th>
-              <th className="py-1 pr-2 font-normal">Busy</th>
-              <th className="py-1 pr-2 font-normal">Loud</th>
-              <th className="py-1 pr-2 font-normal">More</th>
+              <th className="py-1 pr-2 font-normal"><Trans>Section</Trans></th>
+              <th className="py-1 pr-2 font-normal"><Trans>Style</Trans></th>
+              <th className="py-1 pr-2 font-normal"><Trans>Energy</Trans></th>
+              <th className="py-1 pr-2 font-normal"><Trans>Fill</Trans></th>
+              <th className="py-1 pr-2 font-normal"><Trans>Drums</Trans></th>
+              <th className="py-1 pr-2 font-normal"><Trans>Bass</Trans></th>
+              <th className="py-1 pr-2 font-normal"><Trans>Bass part</Trans></th>
+              <th className="py-1 pr-2 font-normal"><Trans>Busy</Trans></th>
+              <th className="py-1 pr-2 font-normal"><Trans>Loud</Trans></th>
+              <th className="py-1 pr-2 font-normal"><Trans>More</Trans></th>
             </tr>
           </thead>
           <tbody>
@@ -70,7 +72,7 @@ export function BandSections({
                   </td>
                   <td className="py-1.5 pr-2">
                     <Select value={plan.style} disabled={disabled} onValueChange={(value) => onChange(plan.sectionId, { style: value as StyleId })}>
-                      <SelectTrigger size="sm" aria-label={`Style of ${name}`}>
+                      <SelectTrigger size="sm" aria-label={t`Style of ${name}`}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -88,7 +90,7 @@ export function BandSections({
                       disabled={disabled}
                       onValueChange={(value) => onChange(plan.sectionId, { energy: Number(value) as SectionPlan["energy"] })}
                     >
-                      <SelectTrigger size="sm" aria-label={`Energy of ${name}`}>
+                      <SelectTrigger size="sm" aria-label={t`Energy of ${name}`}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -102,7 +104,7 @@ export function BandSections({
                   </td>
                   <td className="py-1.5 pr-2">
                     <Checkbox
-                      aria-label={`Fill at the end of ${name}`}
+                      aria-label={t`Fill at the end of ${name}`}
                       disabled={disabled}
                       checked={plan.fill}
                       onCheckedChange={(checked) => onChange(plan.sectionId, { fill: checked === true })}
@@ -110,7 +112,7 @@ export function BandSections({
                   </td>
                   <td className="py-1.5 pr-2">
                     <Checkbox
-                      aria-label={`Drums in ${name}`}
+                      aria-label={t`Drums in ${name}`}
                       disabled={disabled}
                       checked={plan.play.drums}
                       onCheckedChange={(checked) => onChange(plan.sectionId, { play: { ...plan.play, drums: checked === true } })}
@@ -118,7 +120,7 @@ export function BandSections({
                   </td>
                   <td className="py-1.5 pr-2">
                     <Checkbox
-                      aria-label={`Bass in ${name}`}
+                      aria-label={t`Bass in ${name}`}
                       disabled={disabled}
                       checked={plan.play.bass}
                       onCheckedChange={(checked) => onChange(plan.sectionId, { play: { ...plan.play, bass: checked === true } })}
@@ -127,7 +129,7 @@ export function BandSections({
                   <td className="py-1.5 pr-2">
                     <div className="flex items-center gap-2">
                       <Select value={choice} disabled={disabled} onValueChange={(value) => onChange(plan.sectionId, { bassPart: value as BassPartChoice })}>
-                        <SelectTrigger size="sm" aria-label={`Bass part of ${name}`} className="w-32">
+                        <SelectTrigger size="sm" aria-label={t`Bass part of ${name}`} className="w-32">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -138,7 +140,7 @@ export function BandSections({
                           ))}
                         </SelectContent>
                       </Select>
-                      {choice === "auto" && <span className="whitespace-nowrap text-xs text-silkscreen-3">Auto · {BASS_PART_LABELS[plan.bassPart]}</span>}
+                      {choice === "auto" && <span className="whitespace-nowrap text-xs text-silkscreen-3"><Trans>Auto · {BASS_PART_LABELS[plan.bassPart]}</Trans></span>}
                     </div>
                   </td>
                   <td className="py-1.5 pr-2">
@@ -147,7 +149,7 @@ export function BandSections({
                       disabled={disabled}
                       onValueChange={(value) => onChange(plan.sectionId, { busy: Number(value) as SectionPlan["busy"] })}
                     >
-                      <SelectTrigger size="sm" aria-label={`Busy of ${name}`} className="w-16">
+                      <SelectTrigger size="sm" aria-label={t`Busy of ${name}`} className="w-16">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -165,7 +167,7 @@ export function BandSections({
                       disabled={disabled}
                       onValueChange={(value) => onChange(plan.sectionId, { loud: Number(value) as SectionPlan["loud"] })}
                     >
-                      <SelectTrigger size="sm" aria-label={`Loud of ${name}`} className="w-16">
+                      <SelectTrigger size="sm" aria-label={t`Loud of ${name}`} className="w-16">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -186,7 +188,7 @@ export function BandSections({
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-xs text-silkscreen-3">Energy shapes the drums. Busy and Loud shape the bass, and Loud also softens or hardens the drums.</p>
+      <p className="mt-2 text-xs text-silkscreen-3"><Trans>Energy shapes the drums. Busy and Loud shape the bass, and Loud also softens or hardens the drums.</Trans></p>
     </>
   );
 }

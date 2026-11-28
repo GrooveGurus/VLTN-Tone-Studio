@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { profileFor } from "@shared/devices";
 import { isGp5Family } from "@/state/device-model";
 import type { PresetSummary } from "./preset-summary";
+import { t } from "@lingui/core/macro";
 
 const CORE = [2, 9, 3, 4, 5];
 const DEFAULT_ORDER = [0, 1, 2, 9, 3, 4, 5, 6, 7, 8];
@@ -13,7 +14,7 @@ const DEFAULT_ORDER = [0, 1, 2, 9, 3, 4, 5, 6, 7, 8];
 export function MiniChain({ chain, className }: { chain: Pick<PresetSummary, "device" | "order" | "blocks"> | null; className?: string }) {
   if (!chain) {
     return (
-      <span className={cn("relative inline-flex h-[18px] w-[150px] items-center", className)} aria-label="Chain not read yet">
+      <span className={cn("relative inline-flex h-[18px] w-[150px] items-center", className)} aria-label={t`Chain not read yet`}>
         <span className="h-0 w-full border-t border-dashed border-seam-strong" />
       </span>
     );
@@ -38,7 +39,7 @@ export function MiniChain({ chain, className }: { chain: Pick<PresetSummary, "de
   return (
     <span
       role="img"
-      aria-label={on.length ? `Chain: ${on.join(", ")} on` : "Chain: all blocks off"}
+      aria-label={on.length ? t`Chain: ${on.join(", ")} on` : t`Chain: all blocks off`}
       className={cn(
         "relative inline-flex h-[18px] flex-none items-center gap-[3px] before:absolute before:inset-x-0.5 before:top-1/2 before:h-px before:bg-cable before:opacity-60",
         className,

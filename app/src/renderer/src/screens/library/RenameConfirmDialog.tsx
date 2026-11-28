@@ -15,6 +15,8 @@ import { notifySuccess } from "@/app/notify";
 import { usePedalName, useDevice, useProfile } from "@/state/device";
 import { editPrst } from "@/state/preset-codec";
 import { emptyName, useLibrary } from "./store";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Rename on the pedal: name only, the sound is unchanged. Keeps the known body's chain in step. */
 async function renameOnPedal(slot: number, name: string) {
@@ -38,7 +40,7 @@ export function RenameConfirmDialog({ request, onClose }: { request: { slot: num
     setError(null);
     try {
       await renameOnPedal(slot, name);
-      notifySuccess(`Slot ${slotLabel(slot)} renamed to ${name}`, undefined, { label: "Undo", run: () => renameOnPedal(slot, old) });
+      notifySuccess(t`Slot ${slotLabel(slot)} renamed to ${name}`, undefined, { label: t`Undo`, run: () => renameOnPedal(slot, old) });
       onClose();
     } catch (e) {
       setError(describeError(e, slot));
@@ -60,10 +62,10 @@ export function RenameConfirmDialog({ request, onClose }: { request: { slot: num
       <AlertDialogContent className="max-w-[440px]">
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Rename slot {slotLabel(slot)} to {name}?
+            <Trans>Rename slot {slotLabel(slot)} to {name}?</Trans>
           </AlertDialogTitle>
           <AlertDialogDescription>
-            The {pedal} stores the new name for {old}. Only the name changes; the sound stays the same.
+            <Trans>The {pedal} stores the new name for {old}. Only the name changes; the sound stays the same.</Trans>
           </AlertDialogDescription>
         </AlertDialogHeader>
         {error && (
@@ -73,11 +75,11 @@ export function RenameConfirmDialog({ request, onClose }: { request: { slot: num
         )}
         <AlertDialogFooter>
           <AlertDialogCancel variant="ghost" disabled={running}>
-            Cancel
+            <Trans>Cancel</Trans>
           </AlertDialogCancel>
           <Button disabled={running} onClick={() => void confirm()}>
             {running && <Spinner data-icon="inline-start" />}
-            {running ? "Renaming" : "Rename on pedal"}
+            {running ? t`Renaming` : t`Rename on pedal`}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -22,6 +22,7 @@ import { RenameConfirmDialog } from "./RenameConfirmDialog";
 import { importPicked } from "./import";
 import { INIT_NAME, clearSteps, copySteps, moveSteps, swapSteps } from "./plans";
 import { emptyName, isEmptyName, useLibrary } from "./store";
+import { t } from "@lingui/core/macro";
 
 const nameOf = (slot: number) => useDevice.getState().names[slot]?.name ?? emptyName();
 /** "GP-5" / "GP-50" for copy built outside React (dialog plans, errors) */
@@ -57,11 +58,11 @@ async function readSlots(slots: number[], verb: string): Promise<{ slot: number;
     for (const [i, slot] of slots.entries()) {
       let prst = knownBody(slot);
       if (!offline && !(d.slot === slot && prst)) {
-        useLibrary.setState({ job: { label: `${verb}: reading slot ${label(slot)}`, progress: i / slots.length } });
+        useLibrary.setState({ job: { label: t`${verb}: reading slot ${label(slot)}`, progress: i / slots.length } });
         prst = d.slot === slot && d.saved ? d.saved.prst : await useDevice.getState().readPreset(slot);
         lib.setBody(slot, prst, "pedal");
       }
-      if (!prst) throw new Error(`Slot ${label(slot)} hasn't been read yet. Connect the ${pedal()} or wait for the backup to finish.`);
+      if (!prst) throw new Error(t`Slot ${label(slot)} hasn't been read yet. Connect the ${pedal()} or wait for the backup to finish.`);
       out.push({ slot, name: nameOf(slot), prst });
     }
   } finally {
@@ -109,8 +110,8 @@ export function useLibraryActions(): LibraryActions {
 }
 
 function reportImport(added: LocalPreset[], rejected: { fileName: string; reason: string }[]) {
-  if (added.length) notifySuccess(added.length === 1 ? `Imported ${added[0].name}` : `Imported ${added.length} presets`, "They're in Imported files. Drag one onto a slot to write it.");
-  for (const r of rejected) notifyError(`Couldn't import ${r.fileName}`, new Error(r.reason));
+  if (added.length) notifySuccess(added.length === 1 ? t`Imported ${added[0].name}` : t`Imported ${added.length} presets`, t`They're in Imported files. Drag one onto a slot to write it.`);
+  for (const r of rejected) notifyError(t`Couldn't import ${r.fileName}`, new Error(r.reason));
 }
 
 export function LibraryActionsProvider({ children }: { children: ReactNode }) {
@@ -138,14 +139,14 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
     const planCopy = (slots: number[], target: number) => {
       const steps = copySteps(slots, target, slotCount());
       if (!steps?.length) return;
-      const title = slots.length === 1 ? `Copy ${nameOf(slots[0])} to slot ${label(target)}?` : `Copy ${slots.length} slots to slots ${label(target)}–${label(target + slots.length - 1)}?`;
-      const doneTitle = slots.length === 1 ? `${nameOf(slots[0])} is now also in slot ${label(target)}` : `Copied ${slots.length} slots`;
+      const title = slots.length === 1 ? t`Copy ${nameOf(slots[0])} to slot ${label(target)}?` : t`Copy ${slots.length} slots to slots ${label(target)}–${label(target + slots.length - 1)}?`;
+      const doneTitle = slots.length === 1 ? t`${nameOf(slots[0])} is now also in slot ${label(target)}` : t`Copied ${slots.length} slots`;
       // One source can't overwrite a slot a later step reads, so the pedal can copy it itself.
       if (slots.length === 1 && can("copyPreset")) {
         setBulk({
           title,
-          description: `The ${pedal()} copies the preset inside the pedal.`,
-          action: `Copy to slot ${label(target)}`,
+          description: t`The ${pedal()} copies the preset inside the pedal.`,
+          action: t`Copy to slot ${label(target)}`,
           steps,
           native: { kind: "copy", from: slots[0], to: target },
           doneTitle,
@@ -154,8 +155,8 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
       }
       setBulk({
         title,
-        description: `Tone Studio reads the presets from the ${pedal()}, writes them to the new slots and reads each one back to check it.`,
-        action: steps.length === 1 ? `Write to slot ${label(target)}` : `Write ${steps.length} slots`,
+        description: t`Tone Studio reads the presets from the ${pedal()}, writes them to the new slots and reads each one back to check it.`,
+        action: steps.length === 1 ? t`Write to slot ${label(target)}` : t`Write ${steps.length} slots`,
         steps,
         doneTitle,
       });
@@ -164,13 +165,13 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
     const planMove = (slots: number[], target: number) => {
       const steps = moveSteps(slots, target, slotCount());
       if (!steps?.length) return;
-      const title = slots.length === 1 ? `Move ${nameOf(slots[0])} to slot ${label(target)}?` : `Move ${slots.length} slots to slot ${label(target)}?`;
-      const doneTitle = slots.length === 1 ? `${nameOf(slots[0])} moved to slot ${label(target)}` : `Moved ${slots.length} slots`;
+      const title = slots.length === 1 ? t`Move ${nameOf(slots[0])} to slot ${label(target)}?` : t`Move ${slots.length} slots to slot ${label(target)}?`;
+      const doneTitle = slots.length === 1 ? t`${nameOf(slots[0])} moved to slot ${label(target)}` : t`Moved ${slots.length} slots`;
       if (slots.length === 1 && can("movePreset")) {
         setBulk({
           title,
-          description: `The ${pedal()} moves it inside the pedal; the slots in between shift by one.`,
-          action: `Move to slot ${label(target)}`,
+          description: t`The ${pedal()} moves it inside the pedal; the slots in between shift by one.`,
+          action: t`Move to slot ${label(target)}`,
           steps,
           native: { kind: "move", from: slots[0], to: target },
           doneTitle,
@@ -179,8 +180,8 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
       }
       setBulk({
         title,
-        description: `The slots in between shift to make room, so ${steps.length} slots are rewritten. Each one is read back to check it.`,
-        action: `Rewrite ${steps.length} slots`,
+        description: t`The slots in between shift to make room, so ${steps.length} slots are rewritten. Each one is read back to check it.`,
+        action: t`Rewrite ${steps.length} slots`,
         steps,
         doneTitle,
       });
@@ -191,7 +192,7 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
         try {
           await afterImport(await host.files.pickPrstFiles(), opts?.thenWrite ? "pick" : undefined);
         } catch (e) {
-          notifyError("Couldn't import presets", e);
+          notifyError(t`Couldn't import presets`, e);
         }
       },
       async importOpenFiles(files, dropSlot) {
@@ -201,14 +202,14 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
           const picked = [...(withPath.length ? await host.files.readPaths(withPath.map((f) => f.path!)) : []), ...(dropped.length ? await host.files.readDropped(dropped) : [])];
           await afterImport(picked, dropSlot);
         } catch (e) {
-          notifyError("Couldn't import presets", e);
+          notifyError(t`Couldn't import presets`, e);
         }
       },
       async importDropped(files, dropSlot) {
         try {
           await afterImport(await host.files.readDropped(files), dropSlot);
         } catch (e) {
-          notifyError("Couldn't import presets", e);
+          notifyError(t`Couldn't import presets`, e);
         }
       },
       writeLocal(preset, slot) {
@@ -217,7 +218,7 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
           prepareForDevice(preset.prst, useDevice.getState().device ?? presetDevice(preset.prst));
         } catch (e) {
           // A preset of another family carries its plain refusal (crossFamilyNote); unrecognised bytes get the generic reason.
-          notifyError(`Can't write ${preset.name}`, sniffPrst(preset.prst) ? e : new Error(`This file can't be read as a ${PRST_MODELS} preset.`));
+          notifyError(t`Can't write ${preset.name}`, sniffPrst(preset.prst) ? e : new Error(t`This file can't be read as a ${PRST_MODELS} preset.`));
           return;
         }
         if (slot !== undefined) {
@@ -226,9 +227,9 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
         }
         const initial = preset.slot ?? useDevice.getState().names.find((n) => isEmptyName(n.name))?.slot ?? null;
         setPick({
-          title: `Write ${preset.name} to…`,
-          description: `Choose the slot on the ${pedal()}. You confirm before anything is written.`,
-          confirmLabel: (s) => `Continue with slot ${label(s)}`,
+          title: t`Write ${preset.name} to…`,
+          description: t`Choose the slot on the ${pedal()}. You confirm before anything is written.`,
+          confirmLabel: (s) => t`Continue with slot ${label(s)}`,
           initial,
           preview: (s) => [{ slot: s, from: "blank" }],
           sourceName: () => preset.name,
@@ -241,9 +242,9 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
       copySlots(slots, target) {
         if (target !== undefined) return planCopy(slots, target);
         setPick({
-          title: `Copy ${slotList(slots)} to…`,
-          description: "Choose where the first one goes; the others follow in order.",
-          confirmLabel: (s) => `Continue with slot ${label(s)}`,
+          title: t`Copy ${slotList(slots)} to…`,
+          description: t`Choose where the first one goes; the others follow in order.`,
+          confirmLabel: (s) => t`Continue with slot ${label(s)}`,
           initial: useDevice.getState().names.find((n) => isEmptyName(n.name))?.slot ?? null,
           preview: (s) => copySteps(slots, s, slotCount()),
           onPick: (s) => {
@@ -255,9 +256,9 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
       moveSlots(slots, target) {
         if (target !== undefined) return planMove(slots, target);
         setPick({
-          title: `Move ${slotList(slots)} to…`,
-          description: "Choose the new position. The slots in between shift to make room.",
-          confirmLabel: (s) => `Continue with slot ${label(s)}`,
+          title: t`Move ${slotList(slots)} to…`,
+          description: t`Choose the new position. The slots in between shift to make room.`,
+          confirmLabel: (s) => t`Continue with slot ${label(s)}`,
           initial: null,
           preview: (s) => moveSteps(slots, s, slotCount()),
           onPick: (s) => {
@@ -268,22 +269,22 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
       },
       swapSlots(x, y) {
         setBulk({
-          title: `Swap slots ${label(x)} and ${label(y)}?`,
-          description: `${nameOf(x)} goes to slot ${label(y)} and ${nameOf(y)} to slot ${label(x)}. Both are read back to check them.`,
-          action: `Swap slots ${label(x)} and ${label(y)}`,
+          title: t`Swap slots ${label(x)} and ${label(y)}?`,
+          description: t`${nameOf(x)} goes to slot ${label(y)} and ${nameOf(y)} to slot ${label(x)}. Both are read back to check them.`,
+          action: t`Swap slots ${label(x)} and ${label(y)}`,
           steps: swapSteps(x, y),
-          doneTitle: `Swapped slots ${label(x)} and ${label(y)}`,
+          doneTitle: t`Swapped slots ${label(x)} and ${label(y)}`,
         });
       },
       clearSlots(slots) {
         // The GP-200 family has no empty slot to copy: every slot always holds a patch, so it gets an init patch.
         if (profileOrDefault(useDevice.getState().device).emptyName === null) {
           setBulk({
-            title: `Reset ${slotList(slots)} to the init patch?`,
-            description: `${slots.length === 1 ? "It becomes" : "Each becomes"} an init patch named ${INIT_NAME}, with every block off. Tone Studio writes ${slots.length === 1 ? "it" : "them"} and reads each one back to check it.`,
+            title: t`Reset ${slotList(slots)} to the init patch?`,
+            description: t`${slots.length === 1 ? t`It becomes` : t`Each becomes`} an init patch named ${INIT_NAME}, with every block off. Tone Studio writes ${slots.length === 1 ? t`it` : t`them`} and reads each one back to check it.`,
             action: `Reset ${slotList(slots)}`,
             steps: clearSteps(slots),
-            doneTitle: `Reset ${slotList(slots)} to the init patch`,
+            doneTitle: t`Reset ${slotList(slots)} to the init patch`,
           });
           return;
         }
@@ -291,14 +292,14 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
         if (!used.length) return;
         const native = can("deletePreset");
         setBulk({
-          title: `Clear ${slotList(used)}?`,
+          title: t`Clear ${slotList(used)}?`,
           description: native
-            ? `The ${pedal()} clears ${used.length === 1 ? "the slot" : "the slots"} itself.`
-            : `They become empty presets named ${emptyName()}, copied from an empty slot on your pedal.`,
+            ? t`The ${pedal()} clears ${used.length === 1 ? t`the slot` : t`the slots`} itself.`
+            : t`They become empty presets named ${emptyName()}, copied from an empty slot on your pedal.`,
           action: `Clear ${slotList(used)}`,
           steps: clearSteps(used),
           ...(native ? { native: { kind: "delete" as const, slots: used } } : {}),
-          doneTitle: `Cleared ${slotList(used)}`,
+          doneTitle: t`Cleared ${slotList(used)}`,
         });
       },
       duplicateSlot(slot) {
@@ -307,7 +308,7 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
         const names = useDevice.getState().names;
         const empty = names.find((n) => n.slot > slot && isEmptyName(n.name)) ?? names.find((n) => isEmptyName(n.name));
         if (!empty) {
-          notifyError("No empty slot", new Error(`Every slot on the ${pedal()} is in use. Clear one first, or use Copy to… to replace a slot.`));
+          notifyError(t`No empty slot`, new Error(t`Every slot on the ${pedal()} is in use. Clear one first, or use Copy to… to replace a slot.`));
           return;
         }
         planCopy([slot], empty.slot);
@@ -316,9 +317,9 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
         try {
           const items = await readSlots(slots, "Export");
           const to = await host.files.exportPresets(items.map((i) => ({ fileName: slotFileName(i.slot, i.name, presetDevice(i.prst)), prst: i.prst })));
-          if (to) notifySuccess(items.length === 1 ? `Exported ${items[0].name}` : `Exported ${items.length} presets`, host.kind === "web" ? "Saved to your downloads." : `Saved to ${to}.`);
+          if (to) notifySuccess(items.length === 1 ? t`Exported ${items[0].name}` : t`Exported ${items.length} presets`, host.kind === "web" ? t`Saved to your downloads.` : t`Saved to ${to}.`);
         } catch (e) {
-          notifyError("Couldn't export", new Error(describeError(e)));
+          notifyError(t`Couldn't export`, new Error(describeError(e)));
         }
       },
       async backupSlots(slots) {
@@ -326,33 +327,33 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
           const items = await readSlots(slots, "Back up");
           const info = await host.files.saveBackup(items);
           await useLibrary.getState().refreshCollections();
-          notifySuccess(`Backed up ${slotList(slots)}`, `They're in the ${info.id.slice(info.id.indexOf("/") + 1)} backup.`);
+          notifySuccess(t`Backed up ${slotList(slots)}`, t`They're in the ${info.id.slice(info.id.indexOf("/") + 1)} backup.`);
         } catch (e) {
-          notifyError("Couldn't back up", new Error(describeError(e)));
+          notifyError(t`Couldn't back up`, new Error(describeError(e)));
         }
       },
       async addSlotsToCollection(slots, collectionId) {
         try {
-          const items = await readSlots(slots, "Add to collection");
+          const items = await readSlots(slots, t`Add to collection`);
           await host.files.addPresets(
             collectionId,
-            items.map((i) => ({ name: i.name, prst: i.prst, slot: i.slot, source: `Slot ${label(i.slot)} on ${pedal()}` })),
+            items.map((i) => ({ name: i.name, prst: i.prst, slot: i.slot, source: t`Slot ${label(i.slot)} on ${pedal()}` })),
           );
           const lib = useLibrary.getState();
           await lib.refreshCollections();
           if (lib.currentId === collectionId) await lib.reloadPresets();
-          const title = useLibrary.getState().collections.find((c) => c.id === collectionId)?.title ?? "the collection";
-          notifySuccess(`Added ${slotList(slots)} to ${title}`);
+          const title = useLibrary.getState().collections.find((c) => c.id === collectionId)?.title ?? t`the collection`;
+          notifySuccess(t`Added ${slotList(slots)} to ${title}`);
         } catch (e) {
-          notifyError("Couldn't add to the collection", new Error(describeError(e)));
+          notifyError(t`Couldn't add to the collection`, new Error(describeError(e)));
         }
       },
       async exportLocal(presets) {
         try {
           const to = await host.files.exportPresets(presets.map((p) => ({ fileName: p.fileName, prst: p.prst })));
-          if (to) notifySuccess(presets.length === 1 ? `Exported ${presets[0].name}` : `Exported ${presets.length} presets`, host.kind === "web" ? "Saved to your downloads." : `Saved to ${to}.`);
+          if (to) notifySuccess(presets.length === 1 ? t`Exported ${presets[0].name}` : t`Exported ${presets.length} presets`, host.kind === "web" ? t`Saved to your downloads.` : t`Saved to ${to}.`);
         } catch (e) {
-          notifyError("Couldn't export", e);
+          notifyError(t`Couldn't export`, e);
         }
       },
       async addLocalToCollection(presets, collectionId) {
@@ -362,10 +363,10 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
             presets.map((p) => ({ name: p.name, prst: p.prst, slot: p.slot, source: p.source ?? p.fileName, fileName: p.fileName })),
           );
           await useLibrary.getState().refreshCollections();
-          const title = useLibrary.getState().collections.find((c) => c.id === collectionId)?.title ?? "the collection";
-          notifySuccess(`Added ${presets.length === 1 ? presets[0].name : `${presets.length} presets`} to ${title}`);
+          const title = useLibrary.getState().collections.find((c) => c.id === collectionId)?.title ?? t`the collection`;
+          notifySuccess(t`Added ${presets.length === 1 ? presets[0].name : t`${presets.length} presets`} to ${title}`);
         } catch (e) {
-          notifyError("Couldn't add to the collection", e);
+          notifyError(t`Couldn't add to the collection`, e);
         }
       },
       async removeLocal(preset) {
@@ -375,16 +376,16 @@ export function LibraryActionsProvider({ children }: { children: ReactNode }) {
           await lib.refreshCollections();
           await lib.reloadPresets();
           if (lib.localSelected === preset.id) lib.selectLocal(null);
-          notifySuccess(isElectron ? `Moved ${preset.name} to the Trash` : `Removed ${preset.name}`);
+          notifySuccess(isElectron ? t`Moved ${preset.name} to the Trash` : t`Removed ${preset.name}`);
         } catch (e) {
-          notifyError(`Couldn't remove ${preset.name}`, e);
+          notifyError(t`Couldn't remove ${preset.name}`, e);
         }
       },
       async readSlot(slot) {
         try {
           await readSlots([slot], "Read");
         } catch (e) {
-          notifyError(`Couldn't read slot ${label(slot)}`, new Error(describeError(e, slot)));
+          notifyError(t`Couldn't read slot ${label(slot)}`, new Error(describeError(e, slot)));
         }
       },
       renameSlot(slot, name) {
@@ -433,13 +434,13 @@ function FileWriteDialog({ write, onClose }: { write: FileWrite; onClose(): void
   const restoring = collection?.kind === "backup" || collection?.kind === "replaced";
   const verb = restoring ? "Restore" : empty ? "Write" : "Replace";
   const title = empty
-    ? `${restoring ? "Restore" : "Write"} ${preset.name} to slot ${label(slot)}?`
+    ? t`${restoring ? t`Restore` : t`Write`} ${preset.name} to slot ${label(slot)}?`
     : activeSlot === slot
-      ? `Overwrite ${current} in slot ${label(slot)}?`
+      ? t`Overwrite ${current} in slot ${label(slot)}?`
       : restoring
-        ? `Restore ${preset.name} to slot ${label(slot)}?`
-        : `Replace ${current} in slot ${label(slot)}?`;
-  const action = dropped.length ? `Write without ${dropped.map((d) => d.split(" ")[0]).join(", ")}` : empty ? `Write to slot ${label(slot)}` : `${verb === "Restore" ? "Restore" : "Replace"} slot ${label(slot)}`;
+        ? t`Restore ${preset.name} to slot ${label(slot)}?`
+        : t`Replace ${current} in slot ${label(slot)}?`;
+  const action = dropped.length ? t`Write without ${dropped.map((d) => d.split(" ")[0]).join(", ")}` : empty ? t`Write to slot ${label(slot)}` : `${verb === "Restore" ? "Restore" : "Replace"} slot ${label(slot)}`;
 
   return (
     <ConfirmWriteDialog
@@ -447,7 +448,7 @@ function FileWriteDialog({ write, onClose }: { write: FileWrite; onClose(): void
       onOpenChange={(o) => !o && onClose()}
       title={title}
       slot={slot}
-      replacing={empty ? null : { name: current, detail: activeSlot === slot ? "the saved version" : bodySummary ? describeSummary(bodySummary, snapTones) : undefined }}
+      replacing={empty ? null : { name: current, detail: activeSlot === slot ? t`the saved version` : bodySummary ? describeSummary(bodySummary, snapTones) : undefined }}
       incoming={{ name: preset.name, detail: `${collection?.title ?? "This computer"}, ${preset.fileName}`, prst: prepared.prst }}
       action={action}
       notes={

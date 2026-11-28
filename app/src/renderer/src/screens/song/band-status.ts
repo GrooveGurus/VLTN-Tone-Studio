@@ -5,10 +5,11 @@ import { GENERATED_PART_NAMES } from "@/song/band/generated-names";
 import { effectiveChoice, type PartChoices, type PartKeys } from "@/song/band/part-choice";
 import type { TrackInfo } from "@/song/tracks";
 import type { Section } from "@/song/performance/sections";
+import { t } from "@lingui/core/macro";
 
 export type PartKind = "drums" | "bass";
 const PART_KINDS: readonly PartKind[] = ["drums", "bass"];
-const LABEL: Record<PartKind, string> = { drums: "Drums", bass: "Bass" };
+const LABEL: Record<PartKind, string> = { get drums() { return t`Drums`; }, get bass() { return t`Bass`; } };
 const SINGULAR: Record<PartKind, string> = { drums: "drum", bass: "bass" };
 
 /** The section names for the ids where a part is missing, in the order given. */
@@ -20,7 +21,7 @@ function sectionNames(ids: readonly string[], sections: readonly Section[]): str
 /** One line on what the split found for a part: present, absent, missing in some sections, or not checked. */
 export function presenceLine(kind: PartKind, presence: PartPresence, absentSections: readonly string[], sections: readonly Section[]): string {
   if (presence === "present") return `${LABEL[kind]} found in the song`;
-  if (presence === "absent") return `No ${kind} found`;
+  if (presence === "absent") return t`No ${kind} found`;
   if (presence === "partial") return `${LABEL[kind]} missing in ${sectionNames(absentSections, sections)}`;
   return `${LABEL[kind]} not checked (the song was not split)`;
 }
@@ -31,7 +32,7 @@ export function missingNotice(missing: MissingParts | null | undefined, sections
   const kinds = PART_KINDS.filter((kind) => missing[kind] === "absent" || missing[kind] === "partial");
   if (!kinds.length) return null;
   const findings = kinds.map((kind) => presenceLine(kind, missing[kind], missing.absentSections[kind], sections));
-  const ask = kinds.length === 2 ? "Generate drum and bass parts?" : `Generate a ${SINGULAR[kinds[0]]} part?`;
+  const ask = kinds.length === 2 ? t`Generate drum and bass parts?` : t`Generate a ${SINGULAR[kinds[0]]} part?`;
   return `${findings.join(". ")}. ${ask}`;
 }
 

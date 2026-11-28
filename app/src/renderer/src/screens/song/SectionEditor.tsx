@@ -6,6 +6,8 @@ import { usePlaybackClock } from "@/song/performance/playback-clock";
 import { MAX_SECTIONS, MAX_SECTION_NAME, SECTION_MODES, SECTION_MODE_LABELS, isSectionMode, snapToBeat, sortedSections, type Section } from "@/song/performance/sections";
 import { sectionsFromDetected, type DetectedSection } from "@/song/analysis/sections";
 import { SectionWaveform } from "./SectionWaveform";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Default length of a section added at the playhead, in seconds. */
 const NEW_SECTION_S = 8;
@@ -72,35 +74,35 @@ export function SectionEditor({
   };
 
   return (
-    <section aria-label="Section editor" className="flex flex-col gap-3">
+    <section aria-label={t`Section editor`} className="flex flex-col gap-3">
       <SectionWaveform channels={channels} duration={duration} sections={sections} selected={selected} onPick={pick} />
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <Button variant="outline" size="sm" onClick={add} disabled={!duration || sections.length >= MAX_SECTIONS}>
-          Add section at playhead
+          <Trans>Add section at playhead</Trans>
         </Button>
-        <span className="text-muted-foreground">Click the waveform to place</span>
+        <Trans><span className="text-muted-foreground">Click the waveform to place</span></Trans>
         {offerReplace && (
           <Button variant="outline" size="sm" onClick={replace}>
-            Replace with detected sections
+            <Trans>Replace with detected sections</Trans>
           </Button>
         )}
         {replaced && (
           <Button variant="outline" size="sm" onClick={undoReplace}>
-            Undo
+            <Trans>Undo</Trans>
           </Button>
         )}
         <Button variant={edge === "start" ? "default" : "outline"} size="sm" aria-pressed={edge === "start"} onClick={() => setEdge("start")}>
-          Start
+          <Trans>Start</Trans>
         </Button>
         <Button variant={edge === "end" ? "default" : "outline"} size="sm" aria-pressed={edge === "end"} onClick={() => setEdge("end")}>
-          End
+          <Trans>End</Trans>
         </Button>
       </div>
       <ul className="flex flex-col gap-2">
         {ordered.map((section) => (
           <li key={section.id} className="flex flex-wrap items-center gap-2 rounded-lg border border-seam px-3 py-2 text-sm" data-selected={section.id === selected}>
             <Input
-              aria-label="Section name"
+              aria-label={t`Section name`}
               className="w-40"
               maxLength={MAX_SECTION_NAME}
               value={section.name}
@@ -108,7 +110,7 @@ export function SectionEditor({
               onChange={(e) => update(section.id, { name: e.target.value })}
             />
             <Input
-              aria-label="Start, seconds"
+              aria-label={t`Start, seconds`}
               type="number"
               step={0.01}
               min={0}
@@ -119,7 +121,7 @@ export function SectionEditor({
               onBlur={() => update(section.id, { start: snap(section.start) })}
             />
             <Input
-              aria-label="End, seconds"
+              aria-label={t`End, seconds`}
               type="number"
               step={0.01}
               min={0}
@@ -135,7 +137,7 @@ export function SectionEditor({
                 if (isSectionMode(value)) update(section.id, { mode: value });
               }}
             >
-              <SelectTrigger size="sm" aria-label="At the end">
+              <SelectTrigger size="sm" aria-label={t`At the end`}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -147,7 +149,7 @@ export function SectionEditor({
               </SelectContent>
             </Select>
             <Button variant="outline" size="sm" onClick={() => onSections(sections.filter((s) => s.id !== section.id))}>
-              Delete
+              <Trans>Delete</Trans>
             </Button>
           </li>
         ))}

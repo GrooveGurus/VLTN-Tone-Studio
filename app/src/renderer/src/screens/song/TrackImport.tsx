@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { useSong } from "@/song/store";
 import { useSongLibrary } from "@/song/library";
 import { AUDIO_ACCEPT, isAudioFileName } from "@/song/decode";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * Adds the user's own audio files to the song as tracks: several files, or a whole folder (the folder's other files are skipped
@@ -37,7 +39,7 @@ export function TrackImport({ playing = false }: { playing?: boolean }) {
   const blocked = working || playing;
   return (
     <section
-      aria-label="Import tracks"
+      aria-label={t`Import tracks`}
       className="flex flex-col gap-2 rounded-lg border border-dashed border-seam px-3 py-2 text-sm"
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
@@ -47,21 +49,21 @@ export function TrackImport({ playing = false }: { playing?: boolean }) {
     >
       <div className="flex flex-wrap items-center gap-2">
         <Button size="sm" variant="outline" disabled={blocked} onClick={() => files.current?.click()}>
-          Add tracks…
+          <Trans>Add tracks…</Trans>
         </Button>
         <Button size="sm" variant="outline" disabled={blocked} onClick={() => folder.current?.click()}>
-          Add folder…
+          <Trans>Add folder…</Trans>
         </Button>
         {playing ? (
           <span role="note" className="text-led-warn">
-            Stop playback to add tracks.
+            <Trans>Stop playback to add tracks.</Trans>
           </span>
         ) : (
-          <span className="opacity-70">Drop audio files here. Imported tracks are saved with the song.</span>
+          <span className="opacity-70"><Trans>Drop audio files here. Imported tracks are saved with the song.</Trans></span>
         )}
         {canApply && (
           <Button size="sm" variant="outline" disabled={working} onClick={() => void useSongLibrary.getState().applyTrackSettings()}>
-            Apply track settings to similar songs
+            <Trans>Apply track settings to similar songs</Trans>
           </Button>
         )}
         <input

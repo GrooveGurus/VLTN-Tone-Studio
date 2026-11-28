@@ -16,6 +16,8 @@ import { useDevice, usePedalName, useProfile } from "@/state/device";
 import type { OpenFile } from "@/state/ui";
 import { CurvePlot, type CurveSeries } from "./CurvePlot";
 import { Section } from "./parts";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const METER_FLOOR_DB = -60;
 const PLOT_POINTS = Array.from({ length: 6 * 9 + 1 }, (_, i) => 40 * 2 ** (i / 6)); // 40 Hz–20 kHz, 1/6 octave
@@ -30,7 +32,7 @@ export function Meter({ level }: { level: Level | null }) {
       <div
         className="relative h-2 flex-1 overflow-hidden rounded-pill bg-muted"
         role="meter"
-        aria-label="Input level"
+        aria-label={t`Input level`}
         aria-valuemin={METER_FLOOR_DB}
         aria-valuemax={0}
         aria-valuenow={Math.round(level?.rmsDb ?? METER_FLOOR_DB)}
@@ -39,7 +41,7 @@ export function Meter({ level }: { level: Level | null }) {
         <div className="absolute inset-y-0 w-0.5 bg-silkscreen-2" style={{ left: `calc(${peak}% - 1px)` }} />
       </div>
       <span className={cn("w-20 text-right text-[11px] tabular-nums", hot ? "text-led-fault" : "text-silkscreen-3")}>
-        {level ? (hot ? "Too loud" : `${level.rmsDb.toFixed(0)} dBFS`) : "No signal"}
+        {level ? (hot ? t`Too loud` : t`${level.rmsDb.toFixed(0)} dBFS`) : t`No signal`}
       </span>
     </div>
   );
@@ -50,10 +52,10 @@ function InputPicker({ disabled }: { disabled: boolean }) {
   const inputId = useIrMatch((s) => s.inputId);
   return (
     <label className="flex items-center gap-2 text-[12px] text-silkscreen-2">
-      Record from
+      <Trans>Record from</Trans>
       <Select value={inputId ?? ""} onValueChange={(v) => void useIrMatch.getState().selectInput(v)} disabled={disabled}>
-        <SelectTrigger className="h-8 w-72" aria-label="Audio input to record from">
-          <SelectValue placeholder="Choose an input" />
+        <SelectTrigger className="h-8 w-72" aria-label={t`Audio input to record from`}>
+          <SelectValue placeholder={t`Choose an input`} />
         </SelectTrigger>
         <SelectContent>
           {inputs.map((i) => (
@@ -76,8 +78,8 @@ export function resultSeries(result: MatchedIr, against = "your recording"): Cur
   const mid = response.filter(([f]) => f >= 200 && f <= 4000);
   const offset = mid.reduce((a, [, db]) => a + db, 0) / mid.length;
   return [
-    { label: `Correction measured (song − ${against})`, points: result.curve.centers.map((f, i): [number, number] => [f, result.curve.db[i]]), className: "stroke-silkscreen-3", dashed: true },
-    { label: "Matched IR", points: response.map(([f, db]): [number, number] => [f, db - offset]), className: "stroke-block-cab" },
+    { label: t`Correction measured (song − ${against})`, points: result.curve.centers.map((f, i): [number, number] => [f, result.curve.db[i]]), className: "stroke-silkscreen-3", dashed: true },
+    { label: t`Matched IR`, points: response.map(([f, db]): [number, number] => [f, db - offset]), className: "stroke-block-cab" },
   ];
 }
 
@@ -93,9 +95,9 @@ function Result({ result, playedS }: { result: MatchedIr; playedS: number }) {
   const save = async () => {
     try {
       const where = await useIrMatch.getState().save(fileName);
-      if (where) notifySuccess("Saved the matched IR", where);
+      if (where) notifySuccess(t`Saved the matched IR`, where);
     } catch (e) {
-      notifyError("Couldn't save the IR", e);
+      notifyError(t`Couldn't save the IR`, e);
     }
   };
   const send = () => {
@@ -105,24 +107,24 @@ function Result({ result, playedS }: { result: MatchedIr; playedS: number }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <CurvePlot title="Correction between your recording and the song, and the matched IR's response" series={resultSeries(result)} />
+      <CurvePlot title={t`Correction between your recording and the song, and the matched IR's response`} series={resultSeries(result)} />
       <p className="text-[12px] text-pretty text-silkscreen-3">
-        From {playedS.toFixed(0)} s of playing. A {IR_TAPS}-sample minimum-phase IR at 44.1 kHz; the {pedal} keeps its first {kept} samples ({((kept / IR_RATE) * 1000).toFixed(1)} ms), and a minimum-phase IR puts its energy first. It
-        follows the song from {MATCH_LO_HZ} Hz to {MATCH_HI_HZ / 1000} kHz (at most ±{MAX_CORRECTION_DB} dB) and rolls off like a cabinet outside that. Write it to a User IR slot,
-        then pick that slot in the CAB block.
+        <Trans>From {playedS.toFixed(0)} s of playing. A {IR_TAPS}-sample minimum-phase IR at 44.1 kHz; the {pedal} keeps its first {kept} samples ({((kept / IR_RATE) * 1000).toFixed(1)} ms), and a minimum-phase IR puts its energy first. It
+        follows the song from {MATCH_LO_HZ} Hz to</Trans> {MATCH_HI_HZ / 1000} <Trans>kHz (at most ±{MAX_CORRECTION_DB} dB) and rolls off like a cabinet outside that. Write it to a User IR slot,
+        then pick that slot in the CAB block.</Trans>
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <Button onClick={() => void save()}>
           <Download data-icon="inline-start" />
-          Save WAV…
+          <Trans>Save WAV…</Trans>
         </Button>
         <Button variant="outline" onClick={send}>
           <Send data-icon="inline-start" />
-          Write to a User IR slot…
+          <Trans>Write to a User IR slot…</Trans>
         </Button>
         <Button variant="ghost" onClick={() => void useIrMatch.getState().open()}>
           <RotateCcw data-icon="inline-start" />
-          Record again
+          <Trans>Record again</Trans>
         </Button>
       </div>
       <LocalIrDialog file={sendFile} onClose={() => setSendFile(null)} />
@@ -148,26 +150,26 @@ export function IrMatchCard() {
   );
 
   return (
-    <Section title="Match the cabinet with an IR">
+    <Section title={t`Match the cabinet with an IR`}>
       <p className="text-[12px] text-pretty text-silkscreen-3">
-        The {pedal} is also a USB audio interface. Tone Studio turns its CAB block off, records you playing about {RECORD_S} s in the song's style, compares that with the
-        guitar in the song and designs an impulse response (IR) to use in place of the cabinet. Audition the proposed preset first, so the amp is close.
+        <Trans>The {pedal} is also a USB audio interface. Tone Studio turns its CAB block off, records you playing about {RECORD_S} s in the song's style, compares that with the
+        guitar in the song and designs an impulse response (IR) to use in place of the cabinet. Audition the proposed preset first, so the amp is close.</Trans>
       </p>
 
       {step.kind === "idle" && (
         <div className="flex flex-wrap items-center gap-3">
           <Button disabled={!connected || auditionBusy} onClick={() => void useIrMatch.getState().open()}>
             <Mic data-icon="inline-start" />
-            Start the IR match
+            <Trans>Start the IR match</Trans>
           </Button>
-          {!connected && <span className="text-[12px] text-silkscreen-3">Connect the {pedal} first; the recording goes through it.</span>}
+          {!connected && <span className="text-[12px] text-silkscreen-3"><Trans>Connect the {pedal} first; the recording goes through it.</Trans></span>}
         </div>
       )}
 
       {step.kind === "opening" && (
         <p role="status" className="flex items-center gap-2 text-[12px] text-silkscreen-2">
           <Spinner />
-          Opening the audio input…
+          <Trans>Opening the audio input…</Trans>
         </p>
       )}
 
@@ -177,35 +179,35 @@ export function IrMatchCard() {
           <Meter level={level} />
           {step.kind === "ready" ? (
             <p className="text-[12px] text-pretty text-silkscreen-2">
-              The CAB block is off now (it comes back when you finish). Pick the {pedal} as the input, check the meter moves when you play without reaching the top,
-              then record the part, or something like it, the way the song plays it.
+              <Trans>The CAB block is off now (it comes back when you finish). Pick the {pedal} as the input, check the meter moves when you play without reaching the top,
+              then record the part, or something like it, the way the song plays it.</Trans>
             </p>
           ) : (
             <div className="flex flex-col gap-1.5" role="status">
               <div className="flex items-center justify-between text-[12px]">
-                <b className="font-semibold">Recording: keep playing</b>
+                <Trans><b className="font-semibold">Recording: keep playing</b></Trans>
                 <span className="text-silkscreen-2 tabular-nums">
                   {Math.min(seconds, RECORD_S).toFixed(0)} / {RECORD_S} s
                 </span>
               </div>
-              <Progress value={(Math.min(seconds, RECORD_S) / RECORD_S) * 100} aria-label="Recording progress" />
+              <Progress value={(Math.min(seconds, RECORD_S) / RECORD_S) * 100} aria-label={t`Recording progress`} />
             </div>
           )}
           <div className="flex flex-wrap items-center gap-2">
             {step.kind === "ready" ? (
               <Button onClick={() => useIrMatch.getState().record()}>
                 <Mic data-icon="inline-start" />
-                Record {RECORD_S} s
+                <Trans>Record {RECORD_S} s</Trans>
               </Button>
             ) : (
               <Button variant="outline" disabled={seconds < MIN_PLAYING_S} onClick={() => void useIrMatch.getState().finish()}>
                 <Square data-icon="inline-start" />
-                Stop and match
+                <Trans>Stop and match</Trans>
               </Button>
             )}
             <Button variant="ghost" onClick={() => void useIrMatch.getState().cancel()}>
               <X data-icon="inline-start" />
-              Cancel
+              <Trans>Cancel</Trans>
             </Button>
           </div>
         </div>
@@ -221,13 +223,13 @@ export function IrMatchCard() {
           <div>
             <Button variant="outline" disabled={!connected || auditionBusy} onClick={() => void useIrMatch.getState().open()}>
               <RotateCcw data-icon="inline-start" />
-              Try again
+              <Trans>Try again</Trans>
             </Button>
           </div>
         </div>
       )}
 
-      {live && <span className="sr-only" aria-live="polite">{step.kind === "recording" ? "Recording" : ""}</span>}
+      {live && <span className="sr-only" aria-live="polite">{step.kind === "recording" ? t`Recording` : ""}</span>}
     </Section>
   );
 }

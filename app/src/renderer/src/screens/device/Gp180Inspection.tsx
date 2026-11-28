@@ -3,6 +3,8 @@ import { useDevice } from "@/state/device";
 import { parsePrst, blocksOfMask } from "@/gp150/lib/prst.mjs";
 import { BLOCKS } from "@/gp150/lib/protocol.mjs";
 import { gp150ModelByFxid } from "@/gp150/app/catalog-adapter";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Inspect the last-read preset bytes and hardware assignments. */
 export function Gp180Inspection() {
@@ -23,7 +25,7 @@ export function Gp180Inspection() {
   const isRealGp180 = device === "gp180";
   if (!isRealGp180) return null;
 
-  const targetName = (target: number) => BLOCKS[target] ?? `Special target ${target}`;
+  const targetName = (target: number) => BLOCKS[target] ?? t`Special target ${target}`;
   const parameterName = (target: number, param: number) => {
     if (!parsedPatch) return `Parameter ${param}`;
     const block = parsedPatch.blocks[target];
@@ -33,42 +35,42 @@ export function Gp180Inspection() {
   };
 
   return (
-    <section aria-label="GP-180 preset inspection" className="rounded-xl bg-faceplate p-6">
-      <h2 className="text-xl font-bold">GP-180 preset inspection</h2>
+    <section aria-label={t`GP-180 preset inspection`} className="rounded-xl bg-faceplate p-6">
+      <h2 className="text-xl font-bold"><Trans>GP-180 preset inspection</Trans></h2>
 
       {parsedPatch && (
         <>
           <p className="mt-3 text-sm text-silkscreen-3">
-            {mode === "mock" ? "Simulated data" : status === "connected" ? "Read from the connected pedal" : "Last read; pedal disconnected"} · Preset{" "}
-            {String(parsedPatch.slot + 1).padStart(3, "0")} · {parsedPatch.tempo} BPM
+            {mode === "mock" ? t`Simulated data` : status === "connected" ? t`Read from the connected pedal` : t`Last read; pedal disconnected`} <Trans>· Preset{" "}
+            {String(parsedPatch.slot + 1).padStart(3, "0")} · {parsedPatch.tempo} BPM</Trans>
           </p>
           <div className="mt-4 grid gap-6 md:grid-cols-2">
             <div>
-              <h3 className="font-semibold">Knobs 1–3</h3>
+              <h3 className="font-semibold"><Trans>Knobs 1–3</Trans></h3>
               <ul className="mt-2 space-y-1 text-sm">
                 {parsedPatch.knobs.map((k, i) => (
                   <li key={i}>
-                    Knob {i + 1}: {targetName(k.target)} / {parameterName(k.target, k.param)}
+                    <Trans>Knob</Trans> {i + 1}: {targetName(k.target)} / {parameterName(k.target, k.param)}
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 text-xs text-silkscreen-3">Special target IDs are shown as reported; their meaning has not been verified.</p>
-              <h3 className="mt-4 font-semibold">Footswitch assignments</h3>
+              <p className="mt-2 text-xs text-silkscreen-3"><Trans>Special target IDs are shown as reported; their meaning has not been verified.</Trans></p>
+              <h3 className="mt-4 font-semibold"><Trans>Footswitch assignments</Trans></h3>
               <ul className="mt-2 space-y-1 text-sm">
                 {parsedPatch.footswitches.map((mask, i) => (
                   <li key={i}>
                     {["A", "B", "C"][i] ?? i + 1}:{" "}
                     {blocksOfMask(mask)
                       .map((k) => BLOCKS[k])
-                      .join(", ") || "No effect blocks assigned"}
+                      .join(", ") || t`No effect blocks assigned`}
                   </li>
                 ))}
               </ul>
             </div>
             <div className="overflow-x-auto">
-              <h3 className="font-semibold">Expression records · target {targetName(parsedPatch.exp.target)}</h3>
+              <h3 className="font-semibold"><Trans>Expression records · target {targetName(parsedPatch.exp.target)}</Trans></h3>
               <p className="mt-1 text-xs text-silkscreen-3">
-                Raw records retained by the preset. Flags and unassigned parameter codes are shown without inferring their function.
+                <Trans>Raw records retained by the preset. Flags and unassigned parameter codes are shown without inferring their function.</Trans>
               </p>
               <table className="mt-2 w-full text-left text-sm">
                 <thead>
@@ -84,7 +86,7 @@ export function Gp180Inspection() {
                   {parsedPatch.exp.entries.map((e, i) => (
                     <tr key={i}>
                       <td>{i + 1}</td>
-                      <td>{e.param === 0xffff ? "Unassigned (65535)" : e.param}</td>
+                      <td>{e.param === 0xffff ? t`Unassigned (65535)` : e.param}</td>
                       <td>{e.min}</td>
                       <td>{e.max}</td>
                       <td>{e.flag}</td>

@@ -2,6 +2,8 @@ import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { BAND_SYNC_LIMITS } from "@shared/band-sync";
 import { FollowerView } from "./FollowerView";
 import type { FollowerClient, FollowerState } from "./follower-client";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * The band follower's page (spec 44). It asks for the PIN until the performer's app accepts it, then shows the song. It has no controls of
@@ -21,8 +23,8 @@ function PinForm({ client, state }: { client: FollowerClient; state: FollowerSta
   };
   return (
     <main className="follower follower-pin">
-      <form onSubmit={submit} aria-label="Join the band sync">
-        <h1>VLTN band sync</h1>
+      <form onSubmit={submit} aria-label={t`Join the band sync`}>
+        <h1><Trans>VLTN band sync</Trans></h1>
         <p role="status">{state.message}</p>
         <label>
           PIN
@@ -36,7 +38,7 @@ function PinForm({ client, state }: { client: FollowerClient; state: FollowerSta
           />
         </label>
         <button type="submit" disabled={pin.length !== BAND_SYNC_LIMITS.pinDigits}>
-          Join
+          <Trans>Join</Trans>
         </button>
       </form>
     </main>

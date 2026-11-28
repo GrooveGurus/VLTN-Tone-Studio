@@ -14,6 +14,8 @@ import { isCurrent, type NamedAudio } from "@/song/analysis/song-analysis";
 
 // The chart editor is loaded when this panel first renders it, so the CodeMirror code is kept out of the main bundle.
 import { HelpNote } from "@/components/ui/help-note";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const ChartCodeEditor = lazy(() => import("./ChartCodeEditor"));
 
@@ -33,7 +35,7 @@ function chartLine(text: string, onChord: (name: string) => void) {
         <button
           key={i}
           type="button"
-          aria-label={`Show ${part.slice(1, -1)} guitar voicings`}
+          aria-label={t`Show ${part.slice(1, -1)} guitar voicings`}
           className="mr-1 cursor-pointer rounded font-bold text-sky-400 hover:bg-sky-400/15"
           onClick={() => onChord(part.slice(1, -1))}
         >
@@ -155,11 +157,11 @@ export function PerformanceAnalysis({
   return (
     <>
       <div className="flex flex-wrap items-center gap-3">
-        <h2 className="font-semibold">Lyrics & chords</h2>
+        <h2 className="font-semibold"><Trans>Lyrics & chords</Trans></h2>
         <label>
-          Transpose{" "}
+          <Trans>Transpose{" "}</Trans>
           <input
-            aria-label="Transpose semitones"
+            aria-label={t`Transpose semitones`}
             className={field + " w-20"}
             type="number"
             min="-12"
@@ -169,9 +171,9 @@ export function PerformanceAnalysis({
           />
         </label>
         <label>
-          Capo{" "}
+          <Trans>Capo{" "}</Trans>
           <input
-            aria-label="Capo fret"
+            aria-label={t`Capo fret`}
             className={field + " w-16"}
             type="number"
             min="0"
@@ -181,7 +183,7 @@ export function PerformanceAnalysis({
           />
         </label>
         <label className="cursor-pointer underline">
-          Import TXT / LRC / ChordPro
+          <Trans>Import TXT / LRC / ChordPro</Trans>
           <input
             type="file"
             accept=".txt,.lrc,.cho,.chordpro"
@@ -196,39 +198,41 @@ export function PerformanceAnalysis({
         <Button
           variant="outline"
           onClick={() =>
-            void host.song.saveFiles([{ name: "performance.lrc", bytes: new TextEncoder().encode(chart) }], "Export lyrics and MIDI cues").catch(session.fail)
+            void host.song.saveFiles([{ name: "performance.lrc", bytes: new TextEncoder().encode(chart) }], t`Export lyrics and MIDI cues`).catch(session.fail)
           }
         >
-          Export chart
+          <Trans>Export chart</Trans>
         </Button>
       </div>
       {/* Lyrics from the vocals, with the model choice, are on show rather than folded away, as the stem split's choices are. */}
-      <section aria-label="Lyrics from vocals" className="flex flex-col gap-2 rounded border border-seam p-3">
-        <h3 className="font-semibold">Lyrics from vocals</h3>
+      <section aria-label={t`Lyrics from vocals`} className="flex flex-col gap-2 rounded border border-seam p-3">
+        <h3 className="font-semibold"><Trans>Lyrics from vocals</Trans></h3>
         <LyricsTrack audio={stems?.vocals} storageKey={storageKey} onTextChange={onLyrics} follow={false} />
       </section>
       <details>
-        <summary className="cursor-pointer font-semibold">Chart editor</summary>
+        <summary className="cursor-pointer font-semibold"><Trans>Chart editor</Trans></summary>
         <div className="grid gap-4 lg:grid-cols-2">
           <div>
             <Suspense
-              fallback={<textarea aria-label="Lyrics and MIDI chart" className={field + " min-h-64 w-full font-mono text-sm"} value={chart} readOnly />}
+              fallback={<textarea aria-label={t`Lyrics and MIDI chart`} className={field + " min-h-64 w-full font-mono text-sm"} value={chart} readOnly />}
             >
               <ChartCodeEditor
-                label="Lyrics and MIDI chart"
+                label={t`Lyrics and MIDI chart`}
                 value={chart}
                 onChange={onSaveChart}
-                hint={"[00:00.00] [C]Verse\n[00:10.00] [Am]Your lyrics {midi:pc 1 0}\n[00:20.00] [F]Chorus {midi:cc 1 64 127}"}
+                hint={`[00:00.00] [C]Verse
+[00:10.00] [Am]Your lyrics {midi:pc 1 0}
+[00:20.00] [F]Chorus {midi:cc 1 64 127}`}
               />
             </Suspense>
             <HelpNote>
               <p>
-                Saved locally for this audio filename and length. LRC timestamps enable scrolling and MIDI. Chords use [Am] or [C/G]. MIDI: pc, cc, note, off,
-                sysex. Note cues need a matching off cue. Transpose changes the chart only.
+                <Trans>Saved locally for this audio filename and length. LRC timestamps enable scrolling and MIDI. Chords use [Am] or [C/G]. MIDI: pc, cc, note, off,
+                sysex. Note cues need a matching off cue. Transpose changes the chart only.</Trans>
               </p>
             </HelpNote>
           </div>
-          <div className="max-h-96 overflow-auto rounded border border-seam p-4 text-2xl leading-relaxed" aria-label="Performance lyrics">
+          <div className="max-h-96 overflow-auto rounded border border-seam p-4 text-2xl leading-relaxed" aria-label={t`Performance lyrics`}>
             {cues.length ? (
               <ChartLines cues={cues} shift={shift} flats={flats} onChord={onSelectChord} />
             ) : (
@@ -237,11 +241,11 @@ export function PerformanceAnalysis({
           </div>
         </div>
         <div>
-          <h2 className="font-semibold">Chords from stems</h2>
+          <h2 className="font-semibold"><Trans>Chords from stems</Trans></h2>
           <label>
-            Chord source{" "}
-            <select aria-label="Chord source" className={field} value={chordChoice} onChange={(e) => onChordChoice(e.target.value as StemName | "")}>
-              <option value="">Automatic - {automaticSource || "no usable stem"}</option>
+            <Trans>Chord source{" "}</Trans>
+            <select aria-label={t`Chord source`} className={field} value={chordChoice} onChange={(e) => onChordChoice(e.target.value as StemName | "")}>
+              <option value=""><Trans>Automatic -</Trans> {automaticSource || t`no usable stem`}</option>
               {STEM_NAMES.filter((name) => stems?.[name]).map((name) => (
                 <option key={name} value={name}>
                   {name}
@@ -251,16 +255,16 @@ export function PerformanceAnalysis({
           </label>
           <HelpNote>
             <p>
-              Guitar is preferred. If it is missing or silent, automatic selection tries piano, then other stems. Override the source if the song has no guitar
-              but separation left sound in that stem.
+              <Trans>Guitar is preferred. If it is missing or silent, automatic selection tries piano, then other stems. Override the source if the song has no guitar
+              but separation left sound in that stem.</Trans>
             </p>
           </HelpNote>
           <p className="text-sm text-silkscreen-3">
             {analysing
-              ? "Analysing harmonic stem…"
+              ? t`Analysing harmonic stem…`
               : stems
-                ? `Estimated chords from ${chordSource}. Review by ear; N means uncertain or silence.`
-                : "Split the song in Stems to estimate its chords automatically."}
+                ? t`Estimated chords from ${chordSource}. Review by ear; N means uncertain or silence.`
+                : t`Split the song in Stems to estimate its chords automatically.`}
           </p>
           {!!chords.length && (
             <>
@@ -274,7 +278,7 @@ export function PerformanceAnalysis({
                       <button
                         type="button"
                         className="cursor-pointer rounded text-sky-400 hover:bg-sky-400/15"
-                        aria-label={`Show ${transpose(`[${c.name}]`, shift, flats).slice(1, -1)} guitar voicings`}
+                        aria-label={t`Show ${transpose(`[${c.name}]`, shift, flats).slice(1, -1)} guitar voicings`}
                         onClick={() => onSelectChord(transpose(`[${c.name}]`, shift, flats).slice(1, -1))}
                       >
                         {transpose(`[${c.name}]`, shift, flats)}
@@ -289,19 +293,19 @@ export function PerformanceAnalysis({
                   void host.song
                     .saveFiles(
                       [{ name: "estimated-chords.lrc", bytes: new TextEncoder().encode(chords.map((c) => `${lrcTime(c.time)} [${c.name}]`).join("\n")) }],
-                      "Export estimated chords",
+                      t`Export estimated chords`,
                     )
                     .catch(session.fail)
                 }
               >
-                Export chord estimates
+                <Trans>Export chord estimates</Trans>
               </Button>
               <Button
                 className="ml-2"
                 variant="outline"
                 onClick={() => onSaveChart(chart + "\n" + chords.map((c) => `${lrcTime(c.time)} [${c.name}]`).join("\n"))}
               >
-                Append estimates to chart
+                <Trans>Append estimates to chart</Trans>
               </Button>
             </>
           )}

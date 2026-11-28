@@ -5,6 +5,8 @@ import { getSetting, readOptions, setSetting } from "@/song/performance/settings
 import { audibleRange, CROSSFADE_MAX_S } from "@/song/performance/transition";
 import { END_BEHAVIOUR_LABELS, END_BEHAVIOURS, isEndBehaviour, shapeFromOptions, type StoredShape } from "@/song/performance/song-shape";
 import type { SilenceEnds } from "@/song/analysis/silence";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const field = "rounded border border-seam bg-transparent p-2";
 
@@ -42,7 +44,7 @@ export function SongShapeControls({
   const auto = () => {
     const range = audio ? audibleRange(audio.channels, audio.sampleRate) : null;
     if (!range) {
-      setNote("This song is silent, so there is no audible part to trim to.");
+      setNote(t`This song is silent, so there is no audible part to trim to.`);
       return;
     }
     setNote("");
@@ -55,65 +57,65 @@ export function SongShapeControls({
   // With no trim start of its own, the song starts after the silence the analysis found (see playerShapeFromOptions). 0 plays from the very start.
   const autoStart = shape.trimStart === undefined && silence && silence.start > 0 ? silence.start : undefined;
   return (
-    <div aria-label="Song shape" className="flex flex-wrap items-end gap-3 rounded border border-seam p-3">
+    <div aria-label={t`Song shape`} className="flex flex-wrap items-end gap-3 rounded border border-seam p-3">
       {offer && (
         <Button
           variant="outline"
           onClick={() => save({ trimEnd: offer.end })}
         >
-          Trim end silence ({trailing.toFixed(1)} s)
+          <Trans>Trim end silence ({trailing.toFixed(1)} s)</Trans>
         </Button>
       )}
       <label className="flex flex-col gap-1">
-        Trim start (s)
+        <Trans>Trim start (s)</Trans>
         <input
           type="number"
           min={0}
           step={0.1}
           className={field}
           value={shape.trimStart ?? ""}
-          placeholder={autoStart === undefined ? undefined : `${autoStart.toFixed(1)} (silence skipped)`}
-          title="Empty skips the silence at the start of the song. 0 plays from the very start."
+          placeholder={autoStart === undefined ? undefined : t`${autoStart.toFixed(1)} (silence skipped)`}
+          title={t`Empty skips the silence at the start of the song. 0 plays from the very start.`}
           onChange={(e) => save({ trimStart: parse(e.target.value) })}
         />
       </label>
       <label className="flex items-center gap-2">
         <input type="checkbox" checked={shape.trimStart === 0} onChange={(e) => save({ trimStart: e.target.checked ? 0 : undefined })} />
-        Play from the very start
+        <Trans>Play from the very start</Trans>
       </label>
       <p className="w-full text-sm text-silkscreen-3">
         {autoStart !== undefined
-          ? `Automatically skipping ${autoStart.toFixed(1)} s of detected start silence. Quiet intros may be included; select Play from the very start to keep them.`
+          ? t`Automatically skipping ${autoStart.toFixed(1)} s of detected start silence. Quiet intros may be included; select Play from the very start to keep them.`
           : shape.trimStart === 0
-            ? "Playing from the very start, including any silence or quiet intro."
+            ? t`Playing from the very start, including any silence or quiet intro.`
             : shape.trimStart !== undefined
-              ? `Starting at ${shape.trimStart.toFixed(1)} s (manual trim).`
-              : "Playing from the very start; no start silence detected."}
+              ? t`Starting at ${shape.trimStart.toFixed(1)} s (manual trim).`
+              : t`Playing from the very start; no start silence detected.`}
       </p>
       <label className="flex flex-col gap-1">
-        Trim end (s)
+        <Trans>Trim end (s)</Trans>
         <input type="number" min={0} step={0.1} className={field} value={shape.trimEnd ?? ""} onChange={(e) => save({ trimEnd: parse(e.target.value) })} />
       </label>
-      <Button variant="outline" disabled={!audio} title="Trim to the audible part of the song." onClick={auto}>
-        Auto
+      <Button variant="outline" disabled={!audio} title={t`Trim to the audible part of the song.`} onClick={auto}>
+        <Trans>Auto</Trans>
       </Button>
       <Button
         variant="outline"
         disabled={shape.trimStart === undefined && shape.trimEnd === undefined}
         onClick={() => save({ trimStart: undefined, trimEnd: undefined })}
       >
-        Clear trim
+        <Trans>Clear trim</Trans>
       </Button>
       <label className="flex flex-col gap-1">
-        Fade in (s)
+        <Trans>Fade in (s)</Trans>
         <input type="number" min={0} max={CROSSFADE_MAX_S} step={0.5} className={field} value={shape.fadeIn} onChange={(e) => save({ fadeIn: fade(e.target.value) })} />
       </label>
       <label className="flex flex-col gap-1">
-        Fade out (s)
+        <Trans>Fade out (s)</Trans>
         <input type="number" min={0} max={CROSSFADE_MAX_S} step={0.5} className={field} value={shape.fadeOut} onChange={(e) => save({ fadeOut: fade(e.target.value) })} />
       </label>
       <label className="flex flex-col gap-1">
-        At the end
+        <Trans>At the end</Trans>
         <select
           className={field}
           value={shape.endBehaviour}

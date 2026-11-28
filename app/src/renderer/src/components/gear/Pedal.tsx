@@ -8,6 +8,7 @@ import { formatValue } from "./knob-math";
 import { Jewel } from "./amp-parts";
 import { Defs, Enclosure, FootswitchArt, KnobArt, LightBar, Screw, SlideSwitch, T } from "./parts";
 import { paramTitle, type GearBaseProps, type GearKnob } from "./types";
+import { t as lt } from "@lingui/core/macro";
 
 export type PedalLayout = "row" | "hero" | "tri" | "grid" | "dense";
 
@@ -42,7 +43,7 @@ export function Pedal(props: PedalProps) {
   return (
     <GearFrame
       view={[W, H]}
-      label={`${name} ${block} pedal, ${on ? "on" : "bypassed"}`}
+      label={lt`${name} ${block} pedal, ${on ? lt`on` : lt`bypassed`}`}
       interactive={interactive}
       disabled={disabled}
       className={className}

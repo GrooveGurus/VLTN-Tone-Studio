@@ -11,9 +11,12 @@ import { useSong } from "@/song/store";
 import { STEM_NAMES } from "@/song/types";
 import { findModel, missingBytes, type SeparationModel, type SeparationModelId } from "@shared/host/song";
 import { PartPicker } from "./PartPicker";
-import { StemMixer } from "./StemMixer";
+import { StemMixer, STEM_LABEL } from "./StemMixer";
+import { joinAnd } from "@/screens/rig/order";
 import { AfterSplitOptions, AnalyseSongButton, RunStatus } from "./AfterSplitOptions";
 import { megabytes, SplitOptions, useDownloadedFiles } from "./SplitOptions";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const PANEL = "glass rounded-xl min-w-0 min-h-0";
 const SPLIT_DETAIL = {
@@ -24,8 +27,8 @@ const SPLIT_DETAIL = {
 
 /** "drums, bass, guitar, piano, vocals and everything else" for the stems `model` makes. */
 function stemList(model: SeparationModel | undefined): string {
-  const named = (model?.stems ?? []).filter((s) => s !== "other");
-  return named.length ? `${named.join(", ")} and everything else` : "stems";
+  const named = (model?.stems ?? []).filter((s) => s !== "other").map((s) => STEM_LABEL[s].toLowerCase());
+  return named.length ? joinAnd([...named, t`everything else`]) : t`stems`;
 }
 
 /**
@@ -58,7 +61,7 @@ export function StemsPanel({ onPick }: { onPick: () => void }) {
     if (el.firstElementChild) ro.observe(el.firstElementChild);
     return () => ro.disconnect();
   }, [source, stems, status.kind]);
-  const splitButton = <Button onClick={() => void useSong.getState().split()}>{missing ? `Download ${missing} MB and split` : "Split into stems"}</Button>;
+  const splitButton = <Button onClick={() => void useSong.getState().split()}>{missing ? t`Download ${missing} MB and split` : t`Split into stems`}</Button>;
 
   // A song with only imported tracks (no split stem) has nothing to mix: show the split prompt instead.
   const hasStems = !!stems && STEM_NAMES.some((n) => stems[n]);
@@ -73,13 +76,13 @@ export function StemsPanel({ onPick }: { onPick: () => void }) {
       </div>
     );
 
-  if (status.kind === "decoding") return <Working title="Reading the song" />;
+  if (status.kind === "decoding") return <Working title={t`Reading the song`} />;
   if (status.kind === "model") {
     const mb = megabytes(status.bytes);
     return (
       <Working
-        title={`Downloading the ${model?.label ?? "separation"} model`}
-        detail={`First split with it only: ${Math.round(status.fraction * mb)} of ${mb} MB. It is kept for next time.`}
+        title={t`Downloading the ${model?.label ?? t`separation`} model`}
+        detail={t`First split with it only: ${Math.round(status.fraction * mb)} of ${mb} MB. It is kept for next time.`}
         fraction={status.fraction}
         onCancel={() => cancelModelDownload(model?.id)}
       />
@@ -88,7 +91,7 @@ export function StemsPanel({ onPick }: { onPick: () => void }) {
   if (status.kind === "splitting")
     return (
       <Working
-        title={status.passes > 1 ? `Splitting into stems, pass ${status.pass} of ${status.passes}` : "Splitting into stems"}
+        title={status.passes > 1 ? t`Splitting into stems, pass ${status.pass} of ${status.passes}` : t`Splitting into stems`}
         detail={SPLIT_DETAIL[status.backend ?? "starting"]}
         fraction={status.fraction}
       />
@@ -98,19 +101,19 @@ export function StemsPanel({ onPick }: { onPick: () => void }) {
     return (
       <div className="grid flex-1 place-items-center p-6">
         <Alert variant="destructive" className="max-w-lg">
-          <AlertTitle>{source ? "The split didn't finish" : "This song can't be opened"}</AlertTitle>
+          <AlertTitle>{source ? t`The split didn't finish` : t`This song can't be opened`}</AlertTitle>
           <AlertDescription>
             <p>{status.message}</p>
             <div className="mt-3 flex gap-2">
               {source && (
                 <Button size="sm" onClick={() => void useSong.getState().split()}>
                   <RotateCcw data-icon="inline-start" />
-                  Try again
+                  <Trans>Try again</Trans>
                 </Button>
               )}
               <Button size="sm" variant="outline" onClick={onPick}>
                 <FileUp data-icon="inline-start" />
-                Open a song…
+                <Trans>Open a song…</Trans>
               </Button>
             </div>
           </AlertDescription>
@@ -129,7 +132,7 @@ export function StemsPanel({ onPick }: { onPick: () => void }) {
                   <AudioLines />
                 </EmptyMedia>
                 <EmptyTitle>{source.name}</EmptyTitle>
-                <EmptyDescription>Split it into {stemList(model)}.</EmptyDescription>
+                <EmptyDescription><Trans>Split it into {stemList(model)}.</Trans></EmptyDescription>
               </EmptyHeader>
               <EmptyContent className="max-w-xl gap-4">
                 <PartPicker className="w-full" />
@@ -151,16 +154,16 @@ export function StemsPanel({ onPick }: { onPick: () => void }) {
           <EmptyMedia variant="icon">
             <AudioLines />
           </EmptyMedia>
-          <EmptyTitle>Split a song into stems</EmptyTitle>
+          <EmptyTitle><Trans>Split a song into stems</Trans></EmptyTitle>
           <EmptyDescription>
-            Drop an audio file here (WAV, MP3, FLAC, M4A or OGG) or choose one. Tone Studio separates it on this computer into {stemList(model)}.
-            {missing > 0 && ` The first split with the ${model?.label} model downloads it (${missing} MB) once.`}
+            <Trans>Drop an audio file here (WAV, MP3, FLAC, M4A or OGG) or choose one. Tone Studio separates it on this computer into {stemList(model)}.</Trans>
+            {missing > 0 && t` The first split with the ${model?.label ?? ""} model downloads it (${missing} MB) once.`}
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent className="flex-row justify-center gap-2">
           <Button onClick={onPick}>
             <FileUp data-icon="inline-start" />
-            Open a song…
+            <Trans>Open a song…</Trans>
           </Button>
         </EmptyContent>
       </Empty>
@@ -193,7 +196,7 @@ function Working({
           {detail && <p className="text-[12px] text-pretty text-silkscreen-3">{detail}</p>}
           <Button size="sm" variant="ghost" className="ml-auto" onClick={onCancel}>
             <X data-icon="inline-start" />
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
         </div>
       </div>

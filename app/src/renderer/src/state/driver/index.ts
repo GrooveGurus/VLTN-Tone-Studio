@@ -8,6 +8,7 @@ import { Gp150Driver } from "./gp150-driver";
 import { Gp200Driver } from "./gp200-driver";
 import { Gp5Driver } from "./gp5-driver";
 import { DRIVER_FAMILIES, SUPPORTED_DEVICE_KEYS, hasDriver, type DeviceDriver, type DriverFamily, type DriverOptions } from "./types";
+import { t } from "@lingui/core/macro";
 
 interface DriverFactory {
   /** Open the ports matching `port` */
@@ -38,7 +39,7 @@ export function unsupportedModelError(device: DeviceKey): ConnectionError {
   const { name } = profileFor(device);
   return {
     code: "unsupported-model",
-    message: `${name} support is coming in a later version of Tone Studio. This version works with the ${listNames(SUPPORTED_DEVICE_KEYS, "and")}.`,
+    message: t`${name} support is coming in a later version of Tone Studio. This version works with the ${listNames(SUPPORTED_DEVICE_KEYS, "and")}.`,
   };
 }
 

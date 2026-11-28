@@ -10,6 +10,8 @@ import { AddSongsDialog } from "./AddSongsDialog";
 import { PlaylistPreflight } from "./PlaylistPreflight";
 import { EntryOverrideControls } from "./EntryOverrideControls";
 import { overridesFor, withOverride, type EntryOverride } from "@shared/entry-overrides";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const field = "rounded border border-seam bg-transparent p-2";
 const row = "flex flex-wrap items-center gap-2 rounded border border-seam p-2";
@@ -52,7 +54,7 @@ export function SetEditor({
   const title = (id: string) => byId.get(id)?.title ?? "Missing song";
   const queueIds = (ids: string[], entryOverrides: (EntryOverride | null)[]) => {
     const reason = library.addToQueue(ids, entryOverrides);
-    setHint(reason ?? (ids.length ? `Queued ${ids.length} song${ids.length === 1 ? "" : "s"}.` : ""));
+    setHint(reason ?? (ids.length ? t`Queued ${ids.length} song${ids.length === 1 ? "" : "s"}.` : ""));
   };
   const entries = (start: number, end: number) => draft.songs.slice(start, end);
   const startSet = (at: number) => {
@@ -65,7 +67,7 @@ export function SetEditor({
   const addSongs = (ids: string[]) => {
     if (addAt === null || !ids.length) return;
     onChange(insertSongs(draft, addAt, ids));
-    setHint(`Added ${ids.length} song${ids.length === 1 ? "" : "s"}. Save the playlist to keep them.`);
+    setHint(t`Added ${ids.length} song${ids.length === 1 ? "" : "s"}. Save the playlist to keep them.`);
   };
   const moveTo = (from: number, to: number) => edit(moveEntry(view, from, to));
   const off = busy || dirty;
@@ -73,59 +75,59 @@ export function SetEditor({
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         <Button disabled={!playlist.songs.length || off} onClick={() => void library.playPlaylist([...playlist.songs], 0, undefined, overrides)}>
-          Play playlist
+          <Trans>Play playlist</Trans>
         </Button>
         <Button
           variant="outline"
           disabled={!playlist.songs.length || off}
           onClick={() => void library.load(playlist.songs[0], [...playlist.songs], 0, overrides)}
         >
-          Load set paused
+          <Trans>Load set paused</Trans>
         </Button>
         <Button variant="outline" disabled={!playlist.songs.length || off} onClick={() => queueIds(playlist.songs, overrides)}>
-          Queue all
+          <Trans>Queue all</Trans>
         </Button>
         <Button variant="outline" disabled={busy} onClick={() => setAddAt(draft.songs.length)}>
-          Add songs…
+          <Trans>Add songs…</Trans>
         </Button>
       </div>
-      {!draft.songs.length && <p className="text-sm">No songs yet. Add songs to fill the playlist.</p>}
-      {dirty && <p className="text-sm text-silkscreen-3">Save the playlist first to play it.</p>}
+      {!draft.songs.length && <p className="text-sm"><Trans>No songs yet. Add songs to fill the playlist.</Trans></p>}
+      {dirty && <p className="text-sm text-silkscreen-3"><Trans>Save the playlist first to play it.</Trans></p>}
       <p className="text-sm">
-        {draft.songs.length} entries · {formatTime(duration)} · Automatically advances during playback
+        <Trans>{draft.songs.length} entries · {formatTime(duration)} · Automatically advances during playback</Trans>
       </p>
       <PlaylistPreflight key={playlist.id} ids={playlist.songs} disabled={busy} revision={library.index} songs={songs} />
       <ol className="space-y-2">
         {blocks.map((block, b) => (
           <li key={`${block.start}-${block.set?.id ?? "lead"}`} className="space-y-2">
             {block.set ? (
-              <div className={row} aria-label={`Set ${block.name}`}>
+              <div className={row} aria-label={t`Set ${block.name}`}>
                 <input
-                  aria-label="Set name"
+                  aria-label={t`Set name`}
                   value={block.set.name}
                   className={field}
                   disabled={busy}
                   onChange={(e) => edit({ sets: renameSet(draft.sets, block.set!.id, e.target.value) })}
                 />
-                <span className="flex-1 text-sm text-silkscreen-3">
+                <Trans><span className="flex-1 text-sm text-silkscreen-3">
                   {block.count} songs · {formatTime(block.seconds)}
-                </span>
+                </span></Trans>
                 <Button
                   variant="outline"
                   disabled={!block.count || off}
                   onClick={() => void library.playPlaylist(entries(block.start, block.end), 0, block.set!.id, overrides.slice(block.start, block.end))}
                 >
-                  Play set
+                  <Trans>Play set</Trans>
                 </Button>
                 <Button variant="outline" disabled={busy} onClick={() => setAddAt(block.end)}>
-                  Add songs to this set…
+                  <Trans>Add songs to this set…</Trans>
                 </Button>
                 <Button variant="outline" disabled={busy} onClick={() => edit({ sets: deleteSet(draft.sets, block.set!.id) })}>
-                  Remove set heading
+                  <Trans>Remove set heading</Trans>
                 </Button>
               </div>
             ) : (
-              b === 0 && blocks.length > 1 && <p className="text-sm text-silkscreen-3">Before the first set</p>
+              b === 0 && blocks.length > 1 && <p className="text-sm text-silkscreen-3"><Trans>Before the first set</Trans></p>
             )}
             {entries(block.start, block.end).map((id, offset) => {
               const i = block.start + offset;
@@ -135,38 +137,38 @@ export function SetEditor({
                     {i + 1}. {title(id)}
                   </span>
                   <Button variant="outline" disabled={off} onClick={() => void library.playPlaylist([...playlist.songs], i, undefined, overrides)}>
-                    Play from here
+                    <Trans>Play from here</Trans>
                   </Button>
                   <Button variant="outline" disabled={off} onClick={() => void library.load(id, [...playlist.songs], i, overrides)}>
-                    Load paused
+                    <Trans>Load paused</Trans>
                   </Button>
                   <Button variant="outline" disabled={off} onClick={() => queueIds(playlist.songs.slice(i), overrides.slice(i))}>
-                    Queue from here
+                    <Trans>Queue from here</Trans>
                   </Button>
                   {!draft.sets.some((set) => set.start === i) && i > 0 && (
-                    <Button variant="outline" aria-label={`Start a set at entry ${i + 1}`} disabled={busy} onClick={() => startSet(i)}>
-                      Start a set here
+                    <Button variant="outline" aria-label={t`Start a set at entry ${i + 1}`} disabled={busy} onClick={() => startSet(i)}>
+                      <Trans>Start a set here</Trans>
                     </Button>
                   )}
                   <EntryOverrideControls
-                    label={`Entry ${i + 1}`}
+                    label={t`Entry ${i + 1}`}
                     value={draft.overrides[i]}
                     disabled={busy}
                     onChange={(next) => edit({ overrides: withOverride(draft.overrides, i, next) })}
                   />
-                  <Button aria-label={`Move entry ${i + 1} up`} variant="outline" disabled={i === 0 || busy} onClick={() => moveTo(i, i - 1)}>
+                  <Button aria-label={t`Move entry ${i + 1} up`} variant="outline" disabled={i === 0 || busy} onClick={() => moveTo(i, i - 1)}>
                     ↑
                   </Button>
                   <Button
-                    aria-label={`Move entry ${i + 1} down`}
+                    aria-label={t`Move entry ${i + 1} down`}
                     variant="outline"
                     disabled={i === draft.songs.length - 1 || busy}
                     onClick={() => moveTo(i, i + 1)}
                   >
                     ↓
                   </Button>
-                  <Button aria-label={`Remove entry ${i + 1}`} variant="outline" disabled={busy} onClick={() => removeAt(i)}>
-                    Remove
+                  <Button aria-label={t`Remove entry ${i + 1}`} variant="outline" disabled={busy} onClick={() => removeAt(i)}>
+                    <Trans>Remove</Trans>
                   </Button>
                 </div>
               );

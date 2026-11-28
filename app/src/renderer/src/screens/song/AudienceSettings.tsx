@@ -9,6 +9,8 @@ import { AUDIENCE_LIMITS, AUDIENCE_ROTATIONS, type AudienceRotation } from "@sha
 import type { AudienceStatus } from "@shared/host/audience";
 import { useAudienceSettings } from "@/song/performance/audience-settings";
 import { HelpNote } from "@/components/ui/help-note";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** The audience display's controls and status: where it shows, how it is laid out, and blackout (spec 43). */
 export function AudienceSettings() {
@@ -33,19 +35,19 @@ export function AudienceSettings() {
   const onDisplay = status?.windowing === "display";
   return (
     <SettingsCard
-      title="Audience display"
-      summary={status?.open ? "Audience display is on" : "Audience display is off"}
+      title={t`Audience display`}
+      summary={status?.open ? t`Audience display is on` : t`Audience display is off`}
       storageKey="audience"
       defaultOpen={false}
       actions={
         <>
           {status?.open ? (
             <Button variant="outline" onClick={() => run(host.audience.close())}>
-              Close audience display
+              <Trans>Close audience display</Trans>
             </Button>
           ) : (
             <Button variant="outline" onClick={() => run(host.audience.open())}>
-              Open audience display
+              <Trans>Open audience display</Trans>
             </Button>
           )}
           <Button
@@ -53,29 +55,29 @@ export function AudienceSettings() {
             aria-pressed={settings.blackout}
             onClick={() => settings.update({ blackout: !settings.blackout })}
           >
-            {settings.blackout ? "Blackout on" : "Blackout"}
+            {settings.blackout ? t`Blackout on` : t`Blackout`}
           </Button>
         </>
       }
     >
       <p role="status" className="text-sm text-silkscreen-2">
-        {error || status?.message || "Checking the audience display…"}
+        {error || status?.message || t`Checking the audience display…`}
       </p>
       <div className="flex flex-wrap items-center gap-4 text-sm">
         {onDisplay && (
           <label className="flex items-center gap-2">
-            Show on
+            <Trans>Show on</Trans>
             <Select
               value={status?.displayId === null || status?.displayId === undefined ? "window" : String(status.displayId)}
               onValueChange={(value) => run(host.audience.chooseDisplay(value === "window" ? null : Number(value)))}
             >
-              <SelectTrigger aria-label="Audience display location" className="w-72">
+              <SelectTrigger aria-label={t`Audience display location`} className="w-72">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="window">A window</SelectItem>
+                <SelectItem value="window"><Trans>A window</Trans></SelectItem>
                 {status?.displayId !== null && status?.displayId !== undefined && !status.displays.some((d) => d.id === status.displayId) && (
-                  <SelectItem value={String(status.displayId)}>Chosen display (not connected)</SelectItem>
+                  <SelectItem value={String(status.displayId)}><Trans>Chosen display (not connected)</Trans></SelectItem>
                 )}
                 {status?.displays.map((display) => (
                   <SelectItem key={display.id} value={String(display.id)}>
@@ -88,24 +90,24 @@ export function AudienceSettings() {
         )}
         <label className="flex items-center gap-2">
           <Checkbox
-            aria-label="Black between songs"
+            aria-label={t`Black between songs`}
             checked={settings.blackBetweenSongs}
             onCheckedChange={(checked) => settings.update({ blackBetweenSongs: checked === true })}
           />
-          Black between songs
+          <Trans>Black between songs</Trans>
         </label>
         <label className="flex items-center gap-2">
           <Checkbox
-            aria-label="Show chords on the audience display"
+            aria-label={t`Show chords on the audience display`}
             checked={settings.showChords}
             onCheckedChange={(checked) => settings.update({ showChords: checked === true })}
           />
-          Show chords
+          <Trans>Show chords</Trans>
         </label>
         <label className="flex items-center gap-2">
-          Rotation
+          <Trans>Rotation</Trans>
           <Select value={String(settings.rotation)} onValueChange={(value) => settings.update({ rotation: Number(value) as AudienceRotation })}>
-            <SelectTrigger aria-label="Audience display rotation" className="w-28">
+            <SelectTrigger aria-label={t`Audience display rotation`} className="w-28">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -118,9 +120,9 @@ export function AudienceSettings() {
           </Select>
         </label>
         <label className="flex min-w-56 flex-1 items-center gap-3">
-          Text size {Math.round(settings.fontScale * 100)}%
+          <Trans>Text size {Math.round(settings.fontScale * 100)}%</Trans>
           <Slider
-            aria-label="Audience text size"
+            aria-label={t`Audience text size`}
             min={Math.round(AUDIENCE_LIMITS.fontMin * 100)}
             max={Math.round(AUDIENCE_LIMITS.fontMax * 100)}
             step={5}
@@ -130,7 +132,7 @@ export function AudienceSettings() {
         </label>
       </div>
       <HelpNote>
-        <p>The audience window shows the lyrics and chords of the song on screen, or its PDF page, and follows playback. Closing it does not stop playback.</p>
+        <p><Trans>The audience window shows the lyrics and chords of the song on screen, or its PDF page, and follows playback. Closing it does not stop playback.</Trans></p>
       </HelpNote>
     </SettingsCard>
   );

@@ -72,6 +72,8 @@ import { audienceModel, type AudienceSongInput } from "@/song/performance/audien
 import { useAudienceSettings } from "@/song/performance/audience-settings";
 import { useChartPage } from "@/song/performance/pdf/current-page";
 import { PerformanceViewSwitcher, readPerformanceView, savePerformanceView, type PerformanceView as ViewName } from "./PerformanceViews";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 function readNumber(raw: string, fallback: number, min: number, max: number): number {
   const n = raw === "" ? NaN : Number(raw);
@@ -83,8 +85,8 @@ let sessionId = 0;
 function speedNote(speed: { rate: number; semitones: number; cents: number }): string | null {
   if (speed.rate === 1 && speed.semitones === 0 && speed.cents === 0) return null;
   const signed = (value: number) => (value > 0 ? "+" : "") + value;
-  const parts = [`Speed ${Math.round(speed.rate * 100)}%`];
-  if (speed.semitones || speed.cents) parts.push(`Pitch ${signed(speed.semitones)} st${speed.cents ? ` ${signed(speed.cents)} ct` : ""}`);
+  const parts = [t`Speed ${Math.round(speed.rate * 100)}%`];
+  if (speed.semitones || speed.cents) parts.push(t`Pitch ${signed(speed.semitones)} st${speed.cents ? t` ${signed(speed.cents)} ct` : ""}`);
   return parts.join(" · ");
 }
 /** The metronome mode a song starts with when it has none of its own. Earlier builds stored the on/off toggle as "true" or "false". */
@@ -637,12 +639,12 @@ function PerformanceView({ stage, setStage, shown }: { stage: boolean; setStage:
   const shownView = (name: ViewName) => (!stage && view === name ? "contents" : "none");
 
   return (
-    <section className="glass flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto rounded-xl p-5" aria-label="Performance">
+    <section className="glass flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto rounded-xl p-5" aria-label={t`Performance`}>
       <div style={{ display: stage ? "none" : "contents" }}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <PerformanceViewSwitcher view={view} onView={chooseView} />
           <Button variant="outline" onClick={() => setStage(true)}>
-            Enter stage mode
+            <Trans>Enter stage mode</Trans>
           </Button>
         </div>
         <PracticeMuteBanner note={noTrackNote(practiceSet(practiceKinds), practiceTracks)} />
@@ -670,14 +672,14 @@ function PerformanceView({ stage, setStage, shown }: { stage: boolean; setStage:
         ))}
         {source || analysis.step || analysis.detecting || analysis.message ? (
           <p className="flex flex-wrap items-center gap-2 text-xs" role="status">
-            <span>{analysis.detecting ? "Detecting…" : analysis.step ? `Analysing the song: ${analysis.step}…` : analysis.message}</span>
+            <span>{analysis.detecting ? t`Detecting…` : analysis.step ? t`Analysing the song: ${analysis.step}…` : analysis.message}</span>
             {analysis.step || analysis.detecting ? (
               <Button variant="outline" size="sm" onClick={analysis.cancel}>
-                Cancel
+                <Trans>Cancel</Trans>
               </Button>
             ) : (
               <Button variant="outline" size="sm" disabled={!source || playing || library.playlistPlaying || !!library.busy} onClick={() => detectTempo(true)}>
-                Analyse again
+                <Trans>Analyse again</Trans>
               </Button>
             )}
           </p>
@@ -737,7 +739,7 @@ function PerformanceView({ stage, setStage, shown }: { stage: boolean; setStage:
         />
       </div>
       <div style={{ display: shownView("song") }}>
-        <p className="text-xs text-silkscreen-3">Saved with this song.</p>
+        <p className="text-xs text-silkscreen-3"><Trans>Saved with this song.</Trans></p>
         <SpeedControls session={session} bpm={bpm} />
         <SongShapeControls
           key={key}
@@ -754,7 +756,7 @@ function PerformanceView({ stage, setStage, shown }: { stage: boolean; setStage:
           libraryKey={savedSong?.key ?? undefined}
           onSpellingKey={setSpellingKey}
         />
-        <h3 className="text-sm font-semibold">Solo scale</h3>
+        <h3 className="text-sm font-semibold"><Trans>Solo scale</Trans></h3>
         <SoloScales key={`${key}:${soloVersion}`} songKey={spellingKey} shift={shapeShift} capo={capo} storageKey={key} />
         <SongMapImport
           songKey={key}
@@ -832,7 +834,7 @@ function PerformanceView({ stage, setStage, shown }: { stage: boolean; setStage:
         />
       </div>
       <div style={{ display: shownView("setup") }}>
-        <p className="text-xs text-silkscreen-3">These settings apply to every song.</p>
+        <p className="text-xs text-silkscreen-3"><Trans>These settings apply to every song.</Trans></p>
         <PerformanceOutputs player={player} />
         <AudienceSettings />
         <BandSyncSettings />

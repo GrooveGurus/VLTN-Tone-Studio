@@ -12,6 +12,8 @@ import { useActiveIndex } from "@/song/performance/playback-clock";
 import { LyricsModelPicker } from "./LyricsModelPicker";
 import { findLyricsModel } from "@/song/performance/lyrics-models";
 import { HelpNote } from "@/components/ui/help-note";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** What the chart's source means to the performer, shown under its title. */
 const SOURCE_NOTE = {
@@ -48,7 +50,7 @@ export function LyricsTrack({
   const source = chartSourceOf(options);
   const previous = previousChartOf(options);
   // The button names the model, so the choice above it is never a surprise.
-  const modelLabel = findLyricsModel(choice.model)?.label ?? "Better";
+  const modelLabel = findLyricsModel(choice.model)?.label ?? t`Better`;
   const lines = useMemo(
     () =>
       text
@@ -74,7 +76,7 @@ export function LyricsTrack({
       setSetting(storageKey, ":lyrics", value);
       markLyricsEdited(storageKey);
     } catch {
-      setError("Could not save lyrics locally. Export them to keep a copy.");
+      setError(t`Could not save lyrics locally. Export them to keep a copy.`);
     }
   };
   useEffect(() => {
@@ -96,33 +98,33 @@ export function LyricsTrack({
     }
   };
   return (
-    <section aria-label="Lyrics text track" className="space-y-3 rounded border border-seam p-4">
-      <h3 className="font-semibold">Lyrics text track · from vocals</h3>
+    <section aria-label={t`Lyrics text track`} className="space-y-3 rounded border border-seam p-4">
+      <h3 className="font-semibold"><Trans>Lyrics text track · from vocals</Trans></h3>
       <HelpNote>
         <p>
-          Empty lyrics are generated from the vocals stem when you open Performance. You can switch tabs while transcription runs. Transcription runs on this
-          computer after a one-time model download; singing can be misheard. Your chart and MIDI cues are kept separately.
+          <Trans>Empty lyrics are generated from the vocals stem when you open Performance. You can switch tabs while transcription runs. Transcription runs on this
+          computer after a one-time model download; singing can be misheard. Your chart and MIDI cues are kept separately.</Trans>
         </p>
       </HelpNote>
       {!!text && <p className="text-sm text-silkscreen-3">{SOURCE_NOTE[source]}</p>}
       {confirming && (
         <div className="flex flex-wrap items-center gap-3 text-sm">
-          <span>Replace these lyrics? You can restore them afterwards.</span>
+          <Trans><span>Replace these lyrics? You can restore them afterwards.</span></Trans>
           <Button
             onClick={() => {
               setConfirming(false);
               transcribe();
             }}
           >
-            Replace lyrics
+            <Trans>Replace lyrics</Trans>
           </Button>
           <Button variant="outline" onClick={() => setConfirming(false)}>
-            Keep them
+            <Trans>Keep them</Trans>
           </Button>
         </div>
       )}
-      <section aria-label="Lyrics model" className="flex flex-col gap-2">
-        <h3 className="text-sm font-semibold">Lyrics model</h3>
+      <section aria-label={t`Lyrics model`} className="flex flex-col gap-2">
+        <h3 className="text-sm font-semibold"><Trans>Lyrics model</Trans></h3>
         <LyricsModelPicker
           choice={choice}
           disabled={busy}
@@ -134,9 +136,9 @@ export function LyricsTrack({
       </section>
       <div className="flex flex-wrap items-center gap-3">
         <label>
-          Lyrics language{" "}
+          <Trans>Lyrics language{" "}</Trans>
           <select
-            aria-label="Lyrics language"
+            aria-label={t`Lyrics language`}
             className="ml-2 rounded border border-seam bg-background p-2"
             disabled={busy}
             value={language}
@@ -146,13 +148,13 @@ export function LyricsTrack({
               try {
                 setSetting(storageKey, ":options", JSON.stringify({ ...readOptions(storageKey, {}), lyricsLanguage: next }));
               } catch {
-                setError("Could not save language preference.");
+                setError(t`Could not save language preference.`);
               }
             }}
           >
             {LYRIC_LANGUAGES.map((value) => (
               <option key={value} value={value}>
-                {value === "auto" ? "Detect automatically" : value[0].toUpperCase() + value.slice(1)}
+                {value === "auto" ? t`Detect automatically` : value[0].toUpperCase() + value.slice(1)}
               </option>
             ))}
           </select>
@@ -165,11 +167,11 @@ export function LyricsTrack({
             else transcribe();
           }}
         >
-          {`${text ? "Transcribe again" : "Generate lyrics from vocals"} (${modelLabel})`}
+          {`${text ? "Transcribe again" : t`Generate lyrics from vocals`} (${modelLabel})`}
         </Button>
         {text && source === "aligned" && (
           <Button variant="outline" disabled={!available || busy} onClick={() => transcribe(lrcTexts(text).join("\n"))}>
-            Time my lyrics again
+            <Trans>Time my lyrics again</Trans>
           </Button>
         )}
         {previous && (
@@ -180,12 +182,12 @@ export function LyricsTrack({
               if (restoreLyricsChart(storageKey)) setText(getSetting(storageKey, ":lyrics"));
             }}
           >
-            Restore the previous lyrics
+            <Trans>Restore the previous lyrics</Trans>
           </Button>
         )}
         {busy && (
           <Button variant="outline" onClick={() => cancelLyrics(storageKey)}>
-            Cancel transcription
+            <Trans>Cancel transcription</Trans>
           </Button>
         )}
         <Button
@@ -193,31 +195,31 @@ export function LyricsTrack({
           disabled={!text}
           onClick={() =>
             void host.song
-              .saveFiles([{ name: "lyrics.lrc", bytes: new TextEncoder().encode(text) }], "Export lyrics text track")
+              .saveFiles([{ name: "lyrics.lrc", bytes: new TextEncoder().encode(text) }], t`Export lyrics text track`)
               .catch((e) => setError(String(e)))
           }
         >
-          Export lyrics
+          <Trans>Export lyrics</Trans>
         </Button>
       </div>
       <details>
-        <summary>Paste lyrics and time them</summary>
+        <summary><Trans>Paste lyrics and time them</Trans></summary>
         <HelpNote>
-          <p>One line per lyric line; a blank line starts a new section. Your words are kept exactly as typed. Only the timing comes from the vocals.</p>
+          <p><Trans>One line per lyric line; a blank line starts a new section. Your words are kept exactly as typed. Only the timing comes from the vocals.</Trans></p>
         </HelpNote>
         <textarea
-          aria-label="Pasted lyrics"
+          aria-label={t`Pasted lyrics`}
           className="min-h-32 w-full rounded border border-seam bg-transparent p-2"
           disabled={busy}
           value={pasted}
           onChange={(e) => setPasted(e.target.value)}
         />
         <Button disabled={!available || busy || !pasted.trim()} onClick={() => transcribe(pasted)}>
-          Time pasted lyrics
+          <Trans>Time pasted lyrics</Trans>
         </Button>
       </details>
-      {!available && <p>Split the song to get a vocals stem with audio before generating lyrics.</p>}
-      <p role="status">{status || (!text ? "No lyrics yet. Generate them from vocals, or import a lyric chart below." : "")}</p>
+      {!available && <p><Trans>Split the song to get a vocals stem with audio before generating lyrics.</Trans></p>}
+      <p role="status">{status || (!text ? t`No lyrics yet. Generate them from vocals, or import a lyric chart below.` : "")}</p>
       {(error || job?.error) && (
         <p role="alert" className="text-red-400">
           {error || job?.error}
@@ -225,7 +227,7 @@ export function LyricsTrack({
       )}
       {!!text && (
         <>
-          <div aria-label="Transcribed lyrics" className="max-h-64 overflow-auto text-2xl leading-relaxed">
+          <div aria-label={t`Transcribed lyrics`} className="max-h-64 overflow-auto text-2xl leading-relaxed">
             {lines.length ? (
               lines.map((line, i) => (
                 <p key={i} ref={i === active ? activeLine : undefined} className={i === active ? "rounded bg-white/10 font-bold" : "text-silkscreen-3"}>
@@ -237,9 +239,9 @@ export function LyricsTrack({
             )}
           </div>
           <details>
-            <summary>Edit transcribed words and timestamps</summary>
+            <summary><Trans>Edit transcribed words and timestamps</Trans></summary>
             <textarea
-              aria-label="Lyrics text track editor"
+              aria-label={t`Lyrics text track editor`}
               className="min-h-48 w-full rounded border border-seam bg-transparent p-2 font-mono"
               disabled={busy}
               value={text}

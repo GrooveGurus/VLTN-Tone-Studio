@@ -20,12 +20,14 @@ import { STEM_NAMES, type StemName, type Stems, type SplitInfo } from "@/song/ty
 import { findModel } from "@shared/host/song";
 import { performanceKey, readOptions, setSetting } from "@/song/performance/settings";
 import { SplitOptions } from "./SplitOptions";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const PANEL = "glass rounded-xl min-w-0 min-h-0";
 const WAVE_BUCKETS = 800;
-const HINTS = [{ keys: ["Space"], label: "play" }];
+const HINTS = [{ keys: ["Space"], get label() { return t`play`; } }];
 /** The name each split stem has in the mixers: the Stems tab and the Performance mixer show the same ones. */
-export const STEM_LABEL: Record<StemName, string> = { drums: "Drums", bass: "Bass", other: "Other", vocals: "Vocals", guitar: "Guitar", piano: "Piano" };
+export const STEM_LABEL: Record<StemName, string> = { get drums() { return t`Drums`; }, get bass() { return t`Bass`; }, get other() { return t`Other`; }, get vocals() { return t`Vocals`; }, get guitar() { return t`Guitar`; }, get piano() { return t`Piano`; } };
 const STEM_COLOR: Record<StemName, string> = {
   drums: "var(--block-dst)",
   bass: "var(--block-mod)",
@@ -34,7 +36,7 @@ const STEM_COLOR: Record<StemName, string> = {
   guitar: "var(--block-amp)",
   piano: "var(--block-dly)",
 };
-const BACKEND_LABEL = { webgpu: "on the graphics card (WebGPU)", wasm: "on the processor (WebAssembly)" } as const;
+const BACKEND_LABEL = { get webgpu() { return t`on the graphics card (WebGPU)`; }, get wasm() { return t`on the processor (WebAssembly)`; } } as const;
 const COUNT_WORD = ["No", "One", "Two", "Three", "Four", "Five", "Six"];
 
 const isEditable = (el: Element | null) =>
@@ -47,9 +49,9 @@ async function exportStems(songName: string, stems: Stems, names: StemName[], bi
   try {
     const files = names.map((n) => ({ name: `${baseName(songName)} - ${n}.wav`, bytes: encodeWav(stems[n]!, bits) }));
     const where = await host.song.saveFiles(files, "Export stems");
-    if (where) notifySuccess("Stems exported", where);
+    if (where) notifySuccess(t`Stems exported`, where);
   } catch (e) {
-    notifyError("Couldn't export the stems", e);
+    notifyError(t`Couldn't export the stems`, e);
   }
 }
 
@@ -57,7 +59,7 @@ async function exportStems(songName: string, stems: Stems, names: StemName[], bi
 function splitSummary({ model, quality, seconds, backends, range }: SplitInfo): string {
   const where = backends.length === 1 ? BACKEND_LABEL[backends[0]] : "on the graphics card and the processor";
   const part = range ? ` ${formatTime(range.start)} – ${formatTime(range.end)}` : "";
-  return `Split${part} with ${findModel(model)?.label ?? model}, ${findQuality(quality)?.label ?? quality} in ${seconds.toFixed(1)} s ${where}.`;
+  return t`Split${part} with ${findModel(model)?.label ?? model}, ${findQuality(quality)?.label ?? quality} in ${seconds.toFixed(1)} s ${where}.`;
 }
 
 /** Transport, one row per stem (mute, solo, volume, waveform, level), the export and splitting again. */
@@ -113,7 +115,7 @@ export function StemMixer({ stems, songName }: { stems: Stems; songName: string 
       setSetting(settingsKey, ':options', JSON.stringify({ ...options, mix: mergeMix(options.mix, savedMix.current, mix) }));
       savedMix.current = mix;
     }
-    catch (e) { notifyError('Could not save mixer settings', e); }
+    catch (e) { notifyError(t`Could not save mixer settings`, e); }
   }, [settingsKey, mix]);
 
   // Position and meters follow the audio clock while playing.
@@ -144,7 +146,7 @@ export function StemMixer({ stems, songName }: { stems: Stems; songName: string 
       await player.play();
       setPlaying(true);
     } catch (e) {
-      notifyError("Couldn't play the stems", e);
+      notifyError(t`Couldn't play the stems`, e);
     }
   }, [player]);
 
@@ -172,16 +174,16 @@ export function StemMixer({ stems, songName }: { stems: Stems; songName: string 
   const exportName = transpose.semitones ? `${songName} (${fmtShift(transpose.semitones)} st)` : songName;
 
   return (
-    <section aria-label="Stems" className={cn(PANEL, "flex min-h-0 flex-col gap-3 px-4 py-3.5")}>
+    <section aria-label={t`Stems`} className={cn(PANEL, "flex min-h-0 flex-col gap-3 px-4 py-3.5")}>
       <div className="flex min-w-0 items-center gap-3.5">
-        <Button size="icon" onClick={() => void toggle()} aria-label={playing ? "Pause" : "Play"}>
+        <Button size="icon" onClick={() => void toggle()} aria-label={playing ? t`Pause` : t`Play`}>
           {playing ? <Pause /> : <Play />}
         </Button>
         <span className="w-[92px] shrink-0 text-[12px] text-silkscreen-2 tabular-nums">
           {formatTime(time)} / {formatTime(duration)}
         </span>
         <Slider
-          aria-label="Position"
+          aria-label={t`Position`}
           className="min-w-0 flex-1"
           min={0}
           max={duration}
@@ -194,19 +196,19 @@ export function StemMixer({ stems, songName }: { stems: Stems; songName: string 
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
               <Download data-icon="inline-start" />
-              Export stems
+              <Trans>Export stems</Trans>
               <ChevronDown data-icon="inline-end" className="text-silkscreen-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>{COUNT_WORD[names.length]} WAV files, 44.1 kHz stereo</DropdownMenuLabel>
-            {transpose.semitones !== 0 && <DropdownMenuLabel>Tuned {fmtShift(transpose.semitones)} semitones, as you hear it</DropdownMenuLabel>}
-            <DropdownMenuItem onSelect={() => void exportStems(exportName, heard, names, 16)}>WAV 16-bit</DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => void exportStems(exportName, heard, names, 24)}>WAV 24-bit</DropdownMenuItem>
+            <DropdownMenuLabel><Trans>{COUNT_WORD[names.length]} WAV files, 44.1 kHz stereo</Trans></DropdownMenuLabel>
+            {transpose.semitones !== 0 && <DropdownMenuLabel><Trans>Tuned {fmtShift(transpose.semitones)} semitones, as you hear it</Trans></DropdownMenuLabel>}
+            <DropdownMenuItem onSelect={() => void exportStems(exportName, heard, names, 16)}><Trans>WAV 16-bit</Trans></DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => void exportStems(exportName, heard, names, 24)}><Trans>WAV 24-bit</Trans></DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div role="list" aria-label="Stems" className="flex min-h-0 flex-col gap-1.5 overflow-y-auto">
+      <div role="list" aria-label={t`Stems`} className="flex min-h-0 flex-col gap-1.5 overflow-y-auto">
         {names.map((name) => (
           <StemRow
             key={name}
@@ -222,31 +224,31 @@ export function StemMixer({ stems, songName }: { stems: Stems; songName: string 
       </div>
       <div className="flex min-w-0 items-center gap-3">
         <p className="min-w-0 flex-1 text-[11px] text-pretty text-silkscreen-3">
-          {lastSplit && `${splitSummary(lastSplit)} `}Solo a stem to hear it alone.
+          {lastSplit && `${splitSummary(lastSplit)} `}<Trans>Solo a stem to hear it alone.</Trans>
         </p>
         <Button variant="outline" onClick={() => useSong.getState().clearStems()}>
           <Scissors data-icon="inline-start" />
-          Choose another part…
+          <Trans>Choose another part…</Trans>
         </Button>
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline">
               <RotateCcw data-icon="inline-start" />
-              Split again…
+              <Trans>Split again…</Trans>
             </Button>
           </PopoverTrigger>
           <PopoverContent align="end" side="top" className="flex w-[440px] flex-col gap-3 bg-surface-solid-raised!">
-            <span className="text-sm font-[550] text-silkscreen-2">Split again with another model or quality</span>
+            <Trans><span className="text-sm font-[550] text-silkscreen-2">Split again with another model or quality</span></Trans>
             <SplitOptions />
             <Button className="self-end" onClick={() => void useSong.getState().split()}>
-              Split again
+              <Trans>Split again</Trans>
             </Button>
           </PopoverContent>
         </Popover>
         {stems.guitar && (
           <Button onClick={() => useNav.getState().go("song", "tone")}>
             <Guitar data-icon="inline-start" />
-            Match the guitar tone
+            <Trans>Match the guitar tone</Trans>
           </Button>
         )}
       </div>
@@ -275,14 +277,14 @@ function StemRow({ name, mix, wave, progress, level, onChange, onSeek }: StemRow
         {label}
       </span>
       <span className="flex gap-1">
-        <Toggle size="sm" pressed={mix.mute} onPressedChange={(mute) => onChange({ mute })} aria-label={`Mute ${label}`}>
+        <Toggle size="sm" pressed={mix.mute} onPressedChange={(mute) => onChange({ mute })} aria-label={t`Mute ${label}`}>
           M
         </Toggle>
-        <Toggle size="sm" pressed={mix.solo} onPressedChange={(solo) => onChange({ solo })} aria-label={`Solo ${label}`}>
+        <Toggle size="sm" pressed={mix.solo} onPressedChange={(solo) => onChange({ solo })} aria-label={t`Solo ${label}`}>
           S
         </Toggle>
       </span>
-      <Slider aria-label={`${label} volume`} min={0} max={1} step={0.01} value={[mix.volume]} onValueChange={([volume]) => onChange({ volume })} />
+      <Slider aria-label={t`${label} volume`} min={0} max={1} step={0.01} value={[mix.volume]} onValueChange={([volume]) => onChange({ volume })} />
       <div className="flex min-w-0 items-center gap-2">
         <Waveform wave={wave} progress={progress} color={STEM_COLOR[name]} dim={mix.mute} onSeek={onSeek} label={label} />
         <span className="h-9 w-1.5 shrink-0 overflow-hidden rounded-full bg-well" aria-hidden>
@@ -332,7 +334,7 @@ function Waveform({ wave, progress, color, dim, onSeek, label }: { wave: Float32
     <canvas
       ref={canvas}
       role="slider"
-      aria-label={`${label} waveform, click to seek`}
+      aria-label={t`${label} waveform, click to seek`}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.round(progress * 100)}

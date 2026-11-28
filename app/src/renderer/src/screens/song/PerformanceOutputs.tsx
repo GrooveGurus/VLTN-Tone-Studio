@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useOutputSettings } from "@/song/audio/output-settings";
 import { BUS_LABELS, BUS_NAMES, listOutputDevices, type BusName, type OutputDevice } from "@/song/audio/outputs";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** The devices the system lists, refreshed when one is plugged in or removed. */
 function useOutputDevices(): OutputDevice[] {
@@ -24,7 +26,7 @@ function useOutputDevices(): OutputDevice[] {
 /** Listed devices, plus a saved one that is not connected right now, so the choice stays visible. */
 function deviceOptions(devices: OutputDevice[], saved: OutputDevice | null): OutputDevice[] {
   if (!saved || devices.some((device) => device.deviceId === saved.deviceId)) return devices;
-  return [...devices, { deviceId: saved.deviceId, label: `${saved.label || "Saved output"} (not connected)` }];
+  return [...devices, { deviceId: saved.deviceId, label: t`${saved.label || t`Saved output`} (not connected)` }];
 }
 
 function DeviceSelect({
@@ -47,7 +49,7 @@ function DeviceSelect({
         <option value="">{defaultLabel}</option>
         {options.map((device) => (
           <option key={device.deviceId} value={device.deviceId}>
-            {device.label || `Output ${device.deviceId.slice(0, 6)}`}
+            {device.label || t`Output ${device.deviceId.slice(0, 6)}`}
           </option>
         ))}
       </select>
@@ -69,10 +71,10 @@ export function PerformanceOutputs({ player }: { player: { outputChannels: numbe
   const clickOptions = deviceOptions(devices, config.clickDevice);
 
   return (
-    <SettingsCard title="Audio outputs" summary="Main, click and aux outputs" storageKey="outputs" defaultOpen={false}>
+    <SettingsCard title={t`Audio outputs`} summary={t`Main, click and aux outputs`} storageKey="outputs" defaultOpen={false}>
       <div className="flex flex-wrap gap-3">
         <DeviceSelect
-          label="Main device"
+          label={t`Main device`}
           value={config.deviceId}
           options={mainOptions}
           defaultLabel="System default"
@@ -82,7 +84,7 @@ export function PerformanceOutputs({ player }: { player: { outputChannels: numbe
           }}
         />
         <DeviceSelect
-          label="Click device"
+          label={t`Click device`}
           value={config.clickDevice?.deviceId ?? ""}
           options={clickOptions}
           defaultLabel="Same as main"
@@ -101,10 +103,10 @@ export function PerformanceOutputs({ player }: { player: { outputChannels: numbe
             <div key={name} className="flex flex-wrap items-center gap-3 rounded-lg border border-seam px-3 py-2">
               <span className="w-14 font-medium">{BUS_LABELS[name]}</span>
               {ownDevice ? (
-                <span className="text-xs text-silkscreen-2">Outputs 1–2 of the click device</span>
+                <span className="text-xs text-silkscreen-2"><Trans>Outputs 1–2 of the click device</Trans></span>
               ) : (
                 <select
-                  aria-label={`${BUS_LABELS[name]} outputs`}
+                  aria-label={t`${BUS_LABELS[name]} outputs`}
                   className="rounded-md border border-seam bg-transparent px-2 py-1"
                   value={pair}
                   onChange={(e) => {
@@ -114,13 +116,13 @@ export function PerformanceOutputs({ player }: { player: { outputChannels: numbe
                 >
                   {pairs.map((left) => (
                     <option key={left} value={String(left)}>
-                      Outputs {left + 1}–{left + 2}
+                      <Trans>Outputs</Trans> {left + 1}–{left + 2}
                     </option>
                   ))}
                 </select>
               )}
               <input
-                aria-label={`${BUS_LABELS[name]} gain`}
+                aria-label={t`${BUS_LABELS[name]} gain`}
                 type="range"
                 min="0"
                 max="2"
@@ -129,8 +131,8 @@ export function PerformanceOutputs({ player }: { player: { outputChannels: numbe
                 value={bus.gain}
                 onChange={(e) => update({ ...config, buses: { ...config.buses, [name]: { ...bus, gain: Number(e.target.value) } } })}
               />
-              <Button variant="outline" size="sm" aria-label={`Test ${BUS_LABELS[name]}`} disabled={!player} onClick={() => player?.testTone(name)}>
-                Test
+              <Button variant="outline" size="sm" aria-label={t`Test ${BUS_LABELS[name]}`} disabled={!player} onClick={() => player?.testTone(name)}>
+                <Trans>Test</Trans>
               </Button>
             </div>
           );

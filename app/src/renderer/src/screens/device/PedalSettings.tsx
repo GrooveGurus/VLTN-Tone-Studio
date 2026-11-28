@@ -9,6 +9,8 @@ import { useDevice } from "@/state/device";
 import { attachedDevice, globalSpecsFor, pedalName } from "@/state/device-model";
 import type { GlobalRecord, Globals, SettingSpec } from "@/state/device-types";
 import { controlKind, isNamedRecord, rangeCaption, settingsGroups } from "./pedal-settings";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * Pedal settings faceplate: globals stored on the pedal, outside every preset, as the connected (or last connected)
@@ -26,12 +28,12 @@ export function PedalSettings({ offline }: { offline: boolean }) {
 
   return (
     <section
-      aria-label="Pedal settings"
+      aria-label={t`Pedal settings`}
       className="relative grid grid-cols-1 min-[1100px]:grid-cols-[220px_minmax(0,1fr)] items-start gap-y-4 overflow-hidden rounded-xl bg-faceplate px-7 py-6 shadow-[inset_0_0_0_1px_var(--seam)] min-[1360px]:grid-cols-[280px_minmax(0,1fr)_236px]"
     >
       <div className="min-w-0">
-        <h2 className="mb-1.5 text-xl leading-[1.1] font-bold tracking-[-0.01em] text-balance">Pedal settings</h2>
-        <p className="max-w-[240px] text-sm text-pretty text-silkscreen-3">Global: stored on the {pedal} and shared by every preset. Saving a preset doesn't change them.</p>
+        <h2 className="mb-1.5 text-xl leading-[1.1] font-bold tracking-[-0.01em] text-balance"><Trans>Pedal settings</Trans></h2>
+        <p className="max-w-[240px] text-sm text-pretty text-silkscreen-3"><Trans>Global: stored on the {pedal} and shared by every preset. Saving a preset doesn't change them.</Trans></p>
       </div>
 
       {globals ? (
@@ -52,7 +54,7 @@ export function PedalSettings({ offline }: { offline: boolean }) {
         </div>
       ) : (
         <div className="flex min-h-[132px] items-center justify-center px-6 text-center text-silkscreen-3 min-[1100px]:border-l min-[1360px]:border-r">
-          Connect the pedal to read its settings.
+          <Trans>Connect the pedal to read its settings.</Trans>
         </div>
       )}
 
@@ -60,18 +62,18 @@ export function PedalSettings({ offline }: { offline: boolean }) {
         {live ? (
           <span className="flex items-center gap-1.5 font-[550] text-silkscreen-2">
             <Zap className="size-3.5" aria-hidden />
-            Changes apply immediately
+            <Trans>Changes apply immediately</Trans>
           </span>
         ) : (
           <span className="flex items-center gap-1.5 font-[550] text-silkscreen-2 opacity-45">
             <Lock className="size-3.5" aria-hidden />
-            Read-only until connected
+            <Trans>Read-only until connected</Trans>
           </span>
         )}
-        <span className="text-xs text-pretty text-silkscreen-3">
+        <Trans><span className="text-xs text-pretty text-silkscreen-3">
           Every change is sent to the pedal as you make it. There is nothing to save.
-        </span>
-        {cabSim && <span className="text-xs text-pretty text-silkscreen-3">{cabSim.label}: turn it on when the pedal feeds a real guitar cabinet.</span>}
+        </span></Trans>
+        {cabSim && <span className="text-xs text-pretty text-silkscreen-3"><Trans>{cabSim.label}: turn it on when the pedal feeds a real guitar cabinet.</Trans></span>}
       </div>
     </section>
   );
@@ -101,7 +103,7 @@ function SettingControl({ spec, globals, disabled }: { spec: SettingSpec; global
       return (
         <div className="flex min-w-[92px] flex-col items-center">
           <ToggleDial label={spec.label} on={value === spec.max} disabled={disabled} onChange={(on) => set(on ? spec.max : spec.min)} />
-          <span className="mt-0.5 text-center text-xs text-silkscreen-4">On or off</span>
+          <Trans><span className="mt-0.5 text-center text-xs text-silkscreen-4">On or off</span></Trans>
         </div>
       );
     case "select":
@@ -110,7 +112,7 @@ function SettingControl({ spec, globals, disabled }: { spec: SettingSpec; global
           <span className="text-xs font-medium tracking-wide whitespace-nowrap text-silkscreen-3 uppercase">{spec.label}</span>
           <Select value={value === undefined ? "" : String(value)} onValueChange={(v) => set(Number(v))} disabled={disabled}>
             <SelectTrigger className="h-8 w-full" aria-label={spec.label}>
-              <SelectValue placeholder="Not reported" />
+              <SelectValue placeholder={t`Not reported`} />
             </SelectTrigger>
             <SelectContent>
               {(spec.labels ?? []).map((label, i) => (
@@ -159,7 +161,7 @@ function ToggleDial({ label, on, disabled, onChange }: { label: string; on: bool
         <circle cx={c} cy={c} r={inner} fill="#1c1c1e" stroke="#333336" strokeWidth={1} />
         <line x1={qx.toFixed(2)} y1={qy.toFixed(2)} x2={px.toFixed(2)} y2={py.toFixed(2)} stroke="var(--silkscreen)" strokeWidth={2} strokeLinecap="round" />
       </svg>
-      <span className="text-sm font-semibold text-silkscreen">{on ? "On" : "Off"}</span>
+      <span className="text-sm font-semibold text-silkscreen">{on ? t`On` : t`Off`}</span>
     </button>
   );
 }
@@ -184,7 +186,7 @@ export function RawRecords() {
     <Collapsible className="group/adv rounded-lg shadow-[inset_0_0_0_1px_var(--seam)]">
       <CollapsibleTrigger className="flex h-9 w-full items-center gap-2 rounded-lg px-3 text-sm font-[550] text-silkscreen-2 hover:text-silkscreen">
         <List className="size-3.5" aria-hidden />
-        Advanced: {records.length} more global {records.length === 1 ? "record" : "records"} the app can't name yet, shown read-only
+        <Trans>Advanced: {records.length} more global</Trans> {records.length === 1 ? t`record` : t`records`} <Trans>the app can't name yet, shown read-only</Trans>
         <ChevronDown className="ml-auto size-3.5 text-silkscreen-3 transition-transform group-data-[state=open]/adv:rotate-180 motion-reduce:transition-none" aria-hidden />
       </CollapsibleTrigger>
       <CollapsibleContent className="px-3 pt-1 pb-3">
@@ -205,11 +207,11 @@ export function RawRecords() {
                   {r.a}.{r.b}
                 </TableCell>
                 <TableCell className="text-silkscreen-2">
-                  {r.len} {r.len === 1 ? "byte" : "bytes"}
+                  {r.len} {r.len === 1 ? t`byte` : t`bytes`}
                 </TableCell>
                 <TableCell className="text-silkscreen-2">{r.value}</TableCell>
                 <TableCell className="text-silkscreen-2">{rawBytes(r)}</TableCell>
-                <TableCell className="text-silkscreen-3">Unknown</TableCell>
+                <TableCell className="text-silkscreen-3"><Trans>Unknown</Trans></TableCell>
               </TableRow>
             ))}
           </TableBody>

@@ -8,6 +8,8 @@ import { DEFAULT_PEDAL_CHANNELS, usePedalLibrary } from "@/song/performance/peda
 import { saveMacro, useMidiConfiguration } from "@/song/performance/midi-configuration";
 import { macroCodeFor } from "@/song/performance/midi-macros";
 import { HelpNote } from "@/components/ui/help-note";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export function PedalMidiPicker({
   time,
@@ -56,14 +58,16 @@ export function PedalMidiPicker({
   /** Saves the named command, with the channel and value now set, as a macro: one click, reused in any song. */
   const saveAsMacro = () => {
     try {
-      if (!profile || !action) throw new Error("Choose a pedal and a named command.");
+      if (!profile || !action) throw new Error(t`Choose a pedal and a named command.`);
       const commands = actionCommands(action, channel, value, assignedCC === "" ? undefined : Number(assignedCC));
       commands.forEach(midiCommand);
       // The code comes from the pedal and the action, so saving the same command again replaces its macro.
       const code = macroCodeFor(`${profile.id} ${action.id}`, []);
       saveMacro({ code, label: `${profile.name}: ${action.label} (ch ${channel})`.slice(0, 60), commands });
       setError("");
-      setSaved(`Saved as $${code}. Add it to a song with {midi:$${code}}.`);
+      // The token goes in as a placeholder: its braces would read as one in the message format.
+      const token = `{midi:$${code}}`;
+      setSaved(t`Saved as $${code}. Add it to a song with ${token}.`);
     } catch (e) {
       setSaved("");
       setError(e instanceof Error ? e.message : String(e));
@@ -71,8 +75,8 @@ export function PedalMidiPicker({
   };
   const run = (send: boolean) => {
     try {
-      if (!Number.isFinite(time) || time < 0) throw new Error("Cue time must be zero or more seconds.");
-      if (!profile || !action) throw new Error("Choose a pedal and a named command.");
+      if (!Number.isFinite(time) || time < 0) throw new Error(t`Cue time must be zero or more seconds.`);
+      if (!profile || !action) throw new Error(t`Choose a pedal and a named command.`);
       const commands = actionCommands(action, channel, value, assignedCC === "" ? undefined : Number(assignedCC));
       const messages = commands.map(midiCommand);
       if (send) messages.forEach(onTest);
@@ -86,7 +90,7 @@ export function PedalMidiPicker({
     }
   };
   const exportText = (text: string, name: string) =>
-    void host.song.saveFiles([{ name, bytes: new TextEncoder().encode(text) }], "Export MIDI pedal definition").catch((e) => setError(String(e)));
+    void host.song.saveFiles([{ name, bytes: new TextEncoder().encode(text) }], t`Export MIDI pedal definition`).catch((e) => setError(String(e)));
   const importText = (text: string) => {
     try {
       const p = library.importProfile(text);
@@ -99,7 +103,7 @@ export function PedalMidiPicker({
   };
   const saveNamedCommand = () => {
     try {
-      if (!customName.trim() || !customLabel.trim() || !customSource.trim()) throw new Error("Enter the pedal name, command label and manual reference.");
+      if (!customName.trim() || !customLabel.trim() || !customSource.trim()) throw new Error(t`Enter the pedal name, command label and manual reference.`);
       const slug = (s: string) =>
         s
           .toLowerCase()
@@ -108,7 +112,7 @@ export function PedalMidiPicker({
           .slice(0, 65);
       const id = "custom-" + slug(customName),
         actionId = "action-" + slug(customLabel);
-      if (!slug(customName) || !slug(customLabel)) throw new Error("Use at least one letter or number in each name.");
+      if (!slug(customName) || !slug(customLabel)) throw new Error(t`Use at least one letter or number in each name.`);
       const command = `${customType} $channel ${customNumber}${customType === "cc" ? ` ${customValue}` : ""}`;
       const existing = library.profiles.find((p) => p.id === id);
       const next = {
@@ -116,7 +120,7 @@ export function PedalMidiPicker({
         id,
         name: customName.trim(),
         source: customSource.trim(),
-        notes: existing?.notes ?? "Configure the pedal receive channel and verify this custom command against its manual.",
+        notes: existing?.notes ?? t`Configure the pedal receive channel and verify this custom command against its manual.`,
         actions: [...(existing?.actions.filter((a) => a.id !== actionId) ?? []), { id: actionId, label: customLabel.trim(), commands: [command] }],
       };
       const saved = library.importProfile(JSON.stringify(next));
@@ -129,12 +133,12 @@ export function PedalMidiPicker({
     }
   };
   return (
-    <div className="space-y-3" aria-label="Named pedal commands">
+    <div className="space-y-3" aria-label={t`Named pedal commands`}>
       <div className="flex flex-wrap items-center gap-3">
         <label>
-          Pedal{" "}
+          <Trans>Pedal{" "}</Trans>
           <select
-            aria-label="MIDI pedal"
+            aria-label={t`MIDI pedal`}
             className={field}
             value={pedal}
             onChange={(e) => {
@@ -147,7 +151,7 @@ export function PedalMidiPicker({
               setError("");
             }}
           >
-            <option value="">Choose a pedal…</option>
+            <option value=""><Trans>Choose a pedal…</Trans></option>
             {profiles.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -158,9 +162,9 @@ export function PedalMidiPicker({
         {profile && (
           <>
             <label>
-              MIDI channel{" "}
+              <Trans>MIDI channel{" "}</Trans>
               <select
-                aria-label="Pedal MIDI channel"
+                aria-label={t`Pedal MIDI channel`}
                 className={field}
                 value={channel}
                 onChange={(e) => {
@@ -179,7 +183,7 @@ export function PedalMidiPicker({
               </select>
             </label>
             <span className="text-xs text-silkscreen-3">
-              Match this to the pedal’s receive channel. Choices apply to new cues; existing cues keep their saved channel and values.
+              <Trans>Match this to the pedal’s receive channel. Choices apply to new cues; existing cues keep their saved channel and values.</Trans>
             </span>
           </>
         )}
@@ -187,36 +191,36 @@ export function PedalMidiPicker({
       {profile && (
         <>
           <details>
-            <summary className="cursor-pointer text-sm">Pedal setup and MIDI mapping</summary>
+            <summary className="cursor-pointer text-sm"><Trans>Pedal setup and MIDI mapping</Trans></summary>
             <p className="py-2 text-sm text-silkscreen-3 whitespace-pre-wrap">{profile.notes}</p>
           </details>
           <div className="flex flex-wrap items-center gap-3">
             <input
-              aria-label="Find pedal command"
+              aria-label={t`Find pedal command`}
               className={field}
-              placeholder="Find memory, bypass, loop…"
+              placeholder={t`Find memory, bypass, loop…`}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
             <label>
-              Command{" "}
-              <select aria-label="Pedal command preset" className={field + " max-w-full"} value={actionId} onChange={(e) => chooseAction(e.target.value)}>
-                <option value="">Choose a command…</option>
+              <Trans>Command{" "}</Trans>
+              <select aria-label={t`Pedal command preset`} className={field + " max-w-full"} value={actionId} onChange={(e) => chooseAction(e.target.value)}>
+                <option value=""><Trans>Choose a command…</Trans></option>
                 {profile.actions
                   .filter((a) => a.id === actionId || a.label.toLowerCase().includes(query.toLowerCase()))
                   .map((a) => (
                     <option key={a.id} value={a.id}>
                       {a.label}
-                      {a.assignment ? " · assign CC" : ""}
+                      {a.assignment ? t` · assign CC` : ""}
                     </option>
                   ))}
               </select>
             </label>
             {action?.assignment && (
               <label>
-                Assigned CC{" "}
+                <Trans>Assigned CC{" "}</Trans>
                 <input
-                  aria-label="Assigned pedal CC"
+                  aria-label={t`Assigned pedal CC`}
                   className={field + " w-20"}
                   type="number"
                   min="1"
@@ -241,7 +245,7 @@ export function PedalMidiPicker({
               <label>
                 {action.value.label}{" "}
                 <input
-                  aria-label="Pedal command value"
+                  aria-label={t`Pedal command value`}
                   className={field + " w-24"}
                   type="number"
                   min={action.value.min}
@@ -252,13 +256,13 @@ export function PedalMidiPicker({
               </label>
             )}
             <Button disabled={!action} onClick={() => run(false)}>
-              Add pedal command
+              <Trans>Add pedal command</Trans>
             </Button>
             <Button variant="outline" disabled={!action || !canTest} onClick={() => run(true)}>
-              Send pedal command now
+              <Trans>Send pedal command now</Trans>
             </Button>
             <Button variant="outline" disabled={!action} onClick={saveAsMacro}>
-              Save as macro
+              <Trans>Save as macro</Trans>
             </Button>
           </div>
           {saved && (
@@ -267,49 +271,49 @@ export function PedalMidiPicker({
             </p>
           )}
           {action?.description && <p className="text-sm text-silkscreen-3">{action.description}</p>}
-          <HelpNote label="Reference">
+          <HelpNote label={t`Reference`}>
             <p>
-              Reference: {profile.id.startsWith("openmidi-") ? "OpenMIDI community data (Apache-2.0)" : profile.source}. Verify your pedal’s assignments and
-              firmware before a performance.
+              <Trans>Reference:</Trans> {profile.id.startsWith("openmidi-") ? t`OpenMIDI community data (Apache-2.0)` : profile.source}<Trans>. Verify your pedal’s assignments and
+              firmware before a performance.</Trans>
             </p>
           </HelpNote>
         </>
       )}
       <OpenMidiBrowser onImport={(profile) => importText(JSON.stringify(profile))} />
       <details>
-        <summary className="cursor-pointer text-sm">Add or share pedal definitions</summary>
+        <summary className="cursor-pointer text-sm"><Trans>Add or share pedal definitions</Trans></summary>
         <div className="mt-3 space-y-3">
-          <h4 className="font-semibold">Create a custom pedal command</h4>
+          <h4 className="font-semibold"><Trans>Create a custom pedal command</Trans></h4>
           <div className="flex flex-wrap items-center gap-3 text-sm">
             <input
-              aria-label="Custom pedal name"
+              aria-label={t`Custom pedal name`}
               className={field}
-              placeholder="Pedal name"
+              placeholder={t`Pedal name`}
               value={customName}
               onChange={(e) => setCustomName(e.target.value)}
             />
             <input
-              aria-label="Custom command label"
+              aria-label={t`Custom command label`}
               className={field}
-              placeholder="e.g. Enable chorus"
+              placeholder={t`e.g. Enable chorus`}
               value={customLabel}
               onChange={(e) => setCustomLabel(e.target.value)}
             />
             <input
-              aria-label="Custom command reference"
+              aria-label={t`Custom command reference`}
               className={field}
-              placeholder="Manual / page / firmware"
+              placeholder={t`Manual / page / firmware`}
               value={customSource}
               onChange={(e) => setCustomSource(e.target.value)}
             />
-            <select aria-label="Custom command type" className={field} value={customType} onChange={(e) => setCustomType(e.target.value)}>
-              <option value="pc">Program Change</option>
-              <option value="cc">Control Change</option>
+            <select aria-label={t`Custom command type`} className={field} value={customType} onChange={(e) => setCustomType(e.target.value)}>
+              <option value="pc"><Trans>Program Change</Trans></option>
+              <option value="cc"><Trans>Control Change</Trans></option>
             </select>
             <label>
-              {customType === "pc" ? "Program" : "CC number"}{" "}
+              {customType === "pc" ? t`Program` : t`CC number`}{" "}
               <input
-                aria-label="Custom command number"
+                aria-label={t`Custom command number`}
                 className={field + " w-20"}
                 type="number"
                 min="0"
@@ -320,9 +324,9 @@ export function PedalMidiPicker({
             </label>
             {customType === "cc" && (
               <label>
-                Value{" "}
+                <Trans>Value{" "}</Trans>
                 <input
-                  aria-label="Custom CC value"
+                  aria-label={t`Custom CC value`}
                   className={field + " w-20"}
                   type="number"
                   min="0"
@@ -332,30 +336,30 @@ export function PedalMidiPicker({
                 />
               </label>
             )}
-            <Button onClick={saveNamedCommand}>Save named custom command</Button>
+            <Button onClick={saveNamedCommand}><Trans>Save named custom command</Trans></Button>
           </div>
           <HelpNote>
             <p>
-              Use numbers from the pedal manual. Reuse the same pedal name to add more commands; the same command label updates that command. Saving a
-              definition does not send MIDI.
+              <Trans>Use numbers from the pedal manual. Reuse the same pedal name to add more commands; the same command label updates that command. Saving a
+              definition does not send MIDI.</Trans>
             </p>
             <p>
-              Import a version 1 JSON profile, or edit the template below and save it. Profiles and channel/CC assignments stay on this computer; exported song
-              charts retain the actual MIDI commands and labels.
+              <Trans>Import a version 1 JSON profile, or edit the template below and save it. Profiles and channel/CC assignments stay on this computer; exported song
+              charts retain the actual MIDI commands and labels.</Trans>
             </p>
           </HelpNote>
           <div className="flex flex-wrap gap-3">
             <label className="cursor-pointer underline">
-              Import pedal JSON
+              <Trans>Import pedal JSON</Trans>
               <input
-                aria-label="Import pedal JSON"
+                aria-label={t`Import pedal JSON`}
                 type="file"
                 accept=".json,application/json"
                 hidden
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    if (file.size > 500000) setError("Pedal definition is too large (maximum 500 KB).");
+                    if (file.size > 500000) setError(t`Pedal definition is too large (maximum 500 KB).`);
                     else
                       void file
                         .text()
@@ -367,21 +371,21 @@ export function PedalMidiPicker({
               />
             </label>
             <Button variant="outline" onClick={() => exportText(JSON.stringify(CUSTOM_PEDAL_TEMPLATE, null, 2), "midi-pedal-template.json")}>
-              Download template
+              <Trans>Download template</Trans>
             </Button>
             {profile && (
               <Button variant="outline" onClick={() => exportText(JSON.stringify(profile, null, 2), profile.id + ".json")}>
-                Export selected pedal
+                <Trans>Export selected pedal</Trans>
               </Button>
             )}
           </div>
           <textarea
-            aria-label="Custom pedal definition"
+            aria-label={t`Custom pedal definition`}
             className={field + " min-h-56 w-full font-mono text-xs"}
             value={definition}
             onChange={(e) => setDefinition(e.target.value)}
           />
-          <Button onClick={() => importText(definition)}>Save custom pedal</Button>
+          <Button onClick={() => importText(definition)}><Trans>Save custom pedal</Trans></Button>
         </div>
       </details>
       {error && (

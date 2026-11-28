@@ -3,12 +3,13 @@ import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import { lingui } from "@lingui/vite-plugin";
 import { pdfjsAssets } from "./scripts/pdfjs-assets";
 
 export default defineConfig({
   root: resolve("src/renderer"),
   resolve: { alias: { "@": resolve("src/renderer/src"), "@shared": resolve("src/shared") } },
-  plugins: [react(), tailwindcss(), pdfjsAssets()],
+  plugins: [react(), lingui({ macroTransform: true }), tailwindcss(), pdfjsAssets()],
   worker: { format: 'es' },
   server: { port: 5790, strictPort: true },
   // onnxruntime-web (Song stem splitter worker) ships a ready ESM bundle; pre-bundling it on first use reloads the page.

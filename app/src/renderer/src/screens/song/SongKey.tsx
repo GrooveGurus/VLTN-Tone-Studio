@@ -5,6 +5,8 @@ import { readOptions, setSetting } from "@/song/performance/settings";
 import { generatedTrackKeysIn, isCurrent, songAudioId } from "@/song/analysis/song-analysis";
 import { storedAnalysis } from "./use-song-analysis";
 import { HelpNote } from "@/components/ui/help-note";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 interface KeySettings {
   songKey: string;
@@ -95,7 +97,7 @@ export function SongKey({
       worker.onerror = () => {
         if (active) {
           setBusy(false);
-          setError("Key analysis could not finish. You can choose the key manually.");
+          setError(t`Key analysis could not finish. You can choose the key manually.`);
           worker?.terminate();
         }
       };
@@ -120,7 +122,7 @@ export function SongKey({
         JSON.stringify({ ...readOptions(storageKey, {}), songKey: override, detectedKey: estimate, keyAudioSource: analysisSource }),
       );
     } catch {
-      setError("Could not save the song key.");
+      setError(t`Could not save the song key.`);
     }
   }, [storageKey, override, estimate, analysisSource]);
   const sectionLines = useMemo(() => sectionKeyLines(storageKey, original, stems), [storageKey, original, stems]);
@@ -132,17 +134,17 @@ export function SongKey({
   const root = name ? KEY_NAMES.indexOf(name.split(" ")[0]) : -1;
   const displayed = root < 0 ? "" : `${KEY_NAMES[(((root + shift) % 12) + 12) % 12]} ${name!.split(" ")[1]}`;
   return (
-    <section aria-label="Song key" className="flex flex-wrap items-center gap-3 rounded-lg border border-seam px-3 py-2 text-sm">
-      <strong>Song key: {name ? `${name}${flavour}` : busy ? "Analysing…" : "Unknown"}</strong>
+    <section aria-label={t`Song key`} className="flex flex-wrap items-center gap-3 rounded-lg border border-seam px-3 py-2 text-sm">
+      <strong><Trans>Song key:</Trans> {name ? `${name}${flavour}` : busy ? t`Analysing…` : t`Unknown`}</strong>
       <label>
-        Key override{" "}
+        <Trans>Key override{" "}</Trans>
         <select
-          aria-label="Song key override"
+          aria-label={t`Song key override`}
           className="rounded border border-seam bg-background p-2"
           value={override}
           onChange={(e) => setOverride(e.target.value)}
         >
-          <option value="">Automatic estimate</option>
+          <option value=""><Trans>Automatic estimate</Trans></option>
           {SONG_KEYS.map((key) => (
             <option key={key}>{key}</option>
           ))}
@@ -150,27 +152,27 @@ export function SongKey({
       </label>
       {name && shift !== 0 && (
         <span>
-          Displayed chords: {displayed} ({shift > 0 ? "+" : ""}
-          {shift} semitones)
+          <Trans>Displayed chords: {displayed} (</Trans>{shift > 0 ? "+" : ""}
+          <Trans>{shift} semitones)</Trans>
         </span>
       )}
       <span role="status" className="text-silkscreen-3">
         {busy
-          ? `Analysing ${analysisSource}…`
+          ? t`Analysing ${analysisSource}…`
           : estimate
-            ? `Estimated ${estimate.name} from ${analysisSource} · ${
-                estimate.confidence === "strong" ? "clearer match" : "tentative match"
-              }${estimate.alternatives.length ? ` · alternatives: ${estimate.alternatives.join(", ")}` : ""}`
+            ? t`Estimated ${estimate.name} from ${analysisSource} · ${
+                estimate.confidence === "strong" ? t`clearer match` : t`tentative match`
+              }${estimate.alternatives.length ? t` · alternatives: ${estimate.alternatives.join(", ")}` : ""}`
             : input
-              ? `No reliable major/minor key found in ${analysisSource}.`
-              : "Open audio or split the song to analyse its key."}
+              ? t`No reliable major/minor key found in ${analysisSource}.`
+              : t`Open audio or split the song to analyse its key.`}
       </span>
-      {sectionLines.length > 0 && <p className="w-full text-sm">Section keys: {sectionLines.join(" · ")}</p>}
+      {sectionLines.length > 0 && <p className="w-full text-sm"><Trans>Section keys: {sectionLines.join(" · ")}</Trans></p>}
       <div className="w-full">
         <HelpNote>
           <p>
-            Guitar is preferred, then piano, other, bass, vocals or the original mix. This estimates the recording’s overall major/minor key; relative keys,
-            modes and key changes can be ambiguous. A manual choice is saved with the song. Key and chord transposition do not change audio or MIDI.
+            <Trans>Guitar is preferred, then piano, other, bass, vocals or the original mix. This estimates the recording’s overall major/minor key; relative keys,
+            modes and key changes can be ambiguous. A manual choice is saved with the song. Key and chord transposition do not change audio or MIDI.</Trans>
           </p>
         </HelpNote>
       </div>

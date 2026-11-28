@@ -17,6 +17,8 @@ import { MidiClickSettingsView, useMidiClick } from "./MidiClickSettings";
 import { ClockOverDuration, PositionSlider } from "./PlaybackDisplay";
 import { BeatIndicator } from "./BeatIndicator";
 import { HelpNote } from "@/components/ui/help-note";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const field = "rounded border border-seam bg-transparent p-2";
 
@@ -45,7 +47,7 @@ export function BpmField({ bpm, disabled, onBpm }: { bpm: number; disabled: bool
     <input
       className={field + " w-20"}
       aria-label="BPM"
-      title="Set the recording’s BPM while stopped. Audio speed and cue timestamps stay unchanged."
+      title={t`Set the recording’s BPM while stopped. Audio speed and cue timestamps stay unchanged.`}
       type="number"
       min="30"
       max="300"
@@ -138,19 +140,19 @@ export function PerformanceTransport({
   return (
     <>
       {queued && (
-        <div aria-label="Playlist transport" className="flex flex-wrap items-center gap-3 rounded border border-seam p-3">
+        <div aria-label={t`Playlist transport`} className="flex flex-wrap items-center gap-3 rounded border border-seam p-3">
           <strong>{library.index.songs.find((s) => s.id === source?.libraryId)?.title}</strong>
           <span>
             {library.position + 1} / {library.queue.length}
           </span>
           <Button variant="outline" disabled={library.busy || library.position <= 0} onClick={() => session.skip(-1)}>
-            Previous song
+            <Trans>Previous song</Trans>
           </Button>
           <Button variant="outline" disabled={library.busy || library.position + 1 >= library.queue.length} onClick={() => session.skip(1)}>
-            Next song
+            <Trans>Next song</Trans>
           </Button>
           <label className="flex items-center gap-2">
-            Crossfade (s)
+            <Trans>Crossfade (s)</Trans>
             <input
               type="number"
               min={0}
@@ -168,10 +170,10 @@ export function PerformanceTransport({
           <Button
             variant="outline"
             disabled={!playing || !library.preparedNext()}
-            title="Starts the next song now and fades this one out over the crossfade length. Needs the next song loaded."
+            title={t`Starts the next song now and fades this one out over the crossfade length. Needs the next song loaded.`}
             onClick={() => session.crossfadeNext()}
           >
-            Crossfade to next
+            <Trans>Crossfade to next</Trans>
           </Button>
           <Button
             variant="outline"
@@ -180,21 +182,21 @@ export function PerformanceTransport({
               library.pausePlaylist();
             }}
           >
-            Stop playlist
+            <Trans>Stop playlist</Trans>
           </Button>
           <span>
             {library.busy
-              ? "Loading next song..."
+              ? t`Loading next song...`
               : !library.playlistPlaying
-                ? "Playlist paused"
+                ? t`Playlist paused`
                 : waitingForPlay
-                  ? "Playlist waiting for Play"
-                  : "Playlist playing"}{" "}
-            · Next: {library.index.songs.find((s) => s.id === library.queue[library.position + 1])?.title ?? "End of set"}
+                  ? t`Playlist waiting for Play`
+                  : t`Playlist playing`}<Trans>{" "}
+            · Next:</Trans> {library.index.songs.find((s) => s.id === library.queue[library.position + 1])?.title ?? t`End of set`}
           </span>
           <div className="w-full">
             <HelpNote>
-              <p>Songs advance automatically while the playlist is playing. MIDI output stays armed for this set while the same device remains connected.</p>
+              <p><Trans>Songs advance automatically while the playlist is playing. MIDI output stays armed for this set while the same device remains connected.</Trans></p>
             </HelpNote>
           </div>
         </div>
@@ -204,7 +206,7 @@ export function PerformanceTransport({
           {library.error}
         </p>
       )}
-      {queued && library.notice === "Playlist finished." && <p role="status">Playlist finished.</p>}
+      {queued && library.notice === "Playlist finished." && <p role="status"><Trans>Playlist finished.</Trans></p>}
       <SongPreparationStatus session={session} />
       <div className="flex flex-wrap items-center gap-3">
         <PreparePedalsButton session={session} />
@@ -212,21 +214,21 @@ export function PerformanceTransport({
           disabled={!player || !!parseError || library.busy}
           onClick={() => (playing ? session.pause() : starting ? session.cancelStart() : session.startPlayback())}
         >
-          {playing ? "Pause" : starting ? "Cancel start" : queued && (library.queue.length > 1 || !!library.playingSet) ? "Play playlist" : "Play song"}
+          {playing ? t`Pause` : starting ? t`Cancel start` : queued && (library.queue.length > 1 || !!library.playingSet) ? t`Play playlist` : t`Play song`}
         </Button>
         <Button variant="outline" disabled={!player || stage} onClick={() => void session.seek(0)}>
-          Rewind
+          <Trans>Rewind</Trans>
         </Button>
         <ClockOverDuration duration={duration} />
-        <PositionSlider label="Song position" duration={duration} onSeek={(value) => void session.seek(value)} />
-        {!source && <span>Open a song in Stems to perform.</span>}
+        <PositionSlider label={t`Song position`} duration={duration} onSeek={(value) => void session.seek(value)} />
+        {!source && <span><Trans>Open a song in Stems to perform.</Trans></span>}
         <div className="ml-auto flex flex-wrap items-center gap-3 text-sm">
           <label>
-            Song BPM <BpmField bpm={bpm} disabled={playing} onBpm={onBpm} />
+            <Trans>Song BPM</Trans> <BpmField bpm={bpm} disabled={playing} onBpm={onBpm} />
           </label>
           {onDetect && (
-            <Button variant="outline" disabled={detectDisabled} title="Detect the tempo from the audio" onClick={onDetect}>
-              {detecting ? "Detecting…" : "Detect"}
+            <Button variant="outline" disabled={detectDisabled} title={t`Detect the tempo from the audio`} onClick={onDetect}>
+              {detecting ? t`Detecting…` : t`Detect`}
             </Button>
           )}
           {beatHint && (
@@ -234,25 +236,25 @@ export function PerformanceTransport({
               <Button
                 variant="outline"
                 disabled={detectDisabled || playing}
-                title={`Find the beat again from ${beatHint.bpm} BPM, so the click lines up with the recording`}
+                title={t`Find the beat again from ${beatHint.bpm} BPM, so the click lines up with the recording`}
                 onClick={() => beatHint.onFind(keepExact)}
               >
-                Find the beat at {beatHint.bpm} BPM
+                <Trans>Find the beat at {beatHint.bpm} BPM</Trans>
               </Button>
               <label className="flex items-center gap-1.5 text-xs">
                 <Checkbox checked={keepExact} onCheckedChange={(value) => setKeepExact(value === true)} />
-                Keep exactly {beatHint.bpm}
+                <Trans>Keep exactly {beatHint.bpm}</Trans>
               </label>
             </>
           )}
-          <Button variant="outline" disabled={playing} title="Tap the tempo (T). Sets the song BPM while stopped." onClick={onTap}>
-            Tap tempo
+          <Button variant="outline" disabled={playing} title={t`Tap the tempo (T). Sets the song BPM while stopped.`} onClick={onTap}>
+            <Trans>Tap tempo</Trans>
           </Button>
           <BeatIndicator bpm={bpm} beats={metronome.beats} firstBeat={metronome.firstBeat} />
           <label>
-            Metronome{" "}
+            <Trans>Metronome{" "}</Trans>
             <select
-              aria-label="Metronome mode"
+              aria-label={t`Metronome mode`}
               className={field}
               value={metronome.metronome}
               onChange={(e) => {
@@ -267,63 +269,63 @@ export function PerformanceTransport({
             </select>
           </label>
           <label>
-            Sound{" "}
+            <Trans>Sound{" "}</Trans>
             <select
-              aria-label="Metronome sound"
+              aria-label={t`Metronome sound`}
               className={field}
               value={metronome.soundOwn.sound}
               onChange={(e) => {
                 if (e.target.value === "" || isClickSound(e.target.value)) metronome.onSoundOwn({ ...metronome.soundOwn, sound: e.target.value });
               }}
             >
-              <option value="">Default ({soundLabel(metronome.soundDefaults.sound)})</option>
+              <option value=""><Trans>Default ({soundLabel(metronome.soundDefaults.sound)})</Trans></option>
               <ClickSoundOptions />
             </select>
           </label>
-          <Button type="button" size="sm" variant="outline" aria-label="Listen to the metronome sound" disabled={playing || !player} onClick={() => void player?.previewClicks("metronome")}>
-            Listen
+          <Button type="button" size="sm" variant="outline" aria-label={t`Listen to the metronome sound`} disabled={playing || !player} onClick={() => void player?.previewClicks("metronome")}>
+            <Trans>Listen</Trans>
           </Button>
           <span>
-            Count-in{" "}
+            <Trans>Count-in{" "}</Trans>
             <select
-              aria-label="Count-in bars"
+              aria-label={t`Count-in bars`}
               className={field}
               disabled={playing}
               value={metronome.lead.countInBars}
               onChange={(e) => metronome.onLead("countInBars", e.target.value === "" ? "" : limit("countInBars", e.target.value))}
             >
-              <option value="">Default ({bars(metronome.leadDefaults.countInBars)})</option>
-              <option value={0}>Off</option>
-              <option value={1}>1 bar</option>
-              <option value={2}>2 bars</option>
+              <option value=""><Trans>Default ({bars(metronome.leadDefaults.countInBars)})</Trans></option>
+              <option value={0}><Trans>Off</Trans></option>
+              <option value={1}><Trans>1 bar</Trans></option>
+              <option value={2}><Trans>2 bars</Trans></option>
             </select>
           </span>
           <label>
-            <span className="sr-only">Count-in sound</span>
+            <Trans><span className="sr-only">Count-in sound</span></Trans>
             <select
-              aria-label="Count-in sound"
+              aria-label={t`Count-in sound`}
               className={field}
               value={metronome.soundOwn.countInSound}
               onChange={(e) => {
                 if (e.target.value === "" || isCountInSound(e.target.value)) metronome.onSoundOwn({ ...metronome.soundOwn, countInSound: e.target.value });
               }}
             >
-              <option value="">Default ({metronome.soundDefaults.countInSound === "same" ? "same as metronome" : soundLabel(metronome.soundDefaults.countInSound)})</option>
-              <option value="same">Same as metronome</option>
+              <option value=""><Trans>Default (</Trans>{metronome.soundDefaults.countInSound === "same" ? t`same as metronome` : soundLabel(metronome.soundDefaults.countInSound)})</option>
+              <option value="same"><Trans>Same as metronome</Trans></option>
               <ClickSoundOptions />
             </select>
           </label>
-          <Button type="button" size="sm" variant="outline" aria-label="Listen to the count-in sound" disabled={playing || !player} onClick={() => void player?.previewClicks("countIn")}>
-            Listen
+          <Button type="button" size="sm" variant="outline" aria-label={t`Listen to the count-in sound`} disabled={playing || !player} onClick={() => void player?.previewClicks("countIn")}>
+            <Trans>Listen</Trans>
           </Button>
           <details className="relative">
-            <summary className="cursor-pointer">Metronome settings</summary>
+            <summary className="cursor-pointer"><Trans>Metronome settings</Trans></summary>
             <div className="absolute right-0 z-20 mt-2 w-72 space-y-3 rounded-xl border border-seam bg-background p-4 shadow-xl">
-              <p>Follows song playback. The count-in, pre-roll and start delay are saved for each song.</p>
+              <p><Trans>Follows song playback. The count-in, pre-roll and start delay are saved for each song.</Trans></p>
               <label className="block">
-                First beat (seconds){" "}
+                <Trans>First beat (seconds){" "}</Trans>
                 <input
-                  aria-label="First beat (seconds)"
+                  aria-label={t`First beat (seconds)`}
                   className={field + " w-24"}
                   type="number"
                   min="0"
@@ -337,43 +339,43 @@ export function PerformanceTransport({
                 />
               </label>
               <Button variant="outline" disabled={!player || playing} onClick={() => onFirstBeat(Math.round(Math.max(0, player?.position ?? 0) * 1000) / 1000)}>
-                Set first beat here
+                <Trans>Set first beat here</Trans>
               </Button>
               <Button variant="outline" disabled={playing || firstBeat === 0} onClick={() => onFirstBeat(0)}>
-                Reset first beat
+                <Trans>Reset first beat</Trans>
               </Button>
               <HelpNote>
-                <p>While stopped, seek to the first downbeat and set it here. Clicks begin there; song audio and MIDI cue timestamps stay unchanged.</p>
+                <p><Trans>While stopped, seek to the first downbeat and set it here. Clicks begin there; song audio and MIDI cue timestamps stay unchanged.</Trans></p>
               </HelpNote>
               <label className="block">
-                Beats{" "}
-                <select aria-label="Beats" className={field} value={metronome.beats} onChange={(e) => metronome.onBeats(Number(e.target.value))}>
+                <Trans>Beats{" "}</Trans>
+                <select aria-label={t`Beats`} className={field} value={metronome.beats} onChange={(e) => metronome.onBeats(Number(e.target.value))}>
                   {[2, 3, 4, 5, 6, 7].map((n) => (
                     <option key={n}>{n}</option>
                   ))}
                 </select>
               </label>
               <div className="space-y-2 rounded border border-seam p-2">
-                <p className="font-semibold">This song (empty uses the default)</p>
+                <p className="font-semibold"><Trans>This song (empty uses the default)</Trans></p>
                 <label className="block">
-                  Count-in{" "}
+                  <Trans>Count-in{" "}</Trans>
                   <select
-                    aria-label="Count-in"
+                    aria-label={t`Count-in`}
                     className={field}
                     disabled={playing}
                     value={metronome.lead.countInBars}
                     onChange={(e) => metronome.onLead("countInBars", e.target.value === "" ? "" : limit("countInBars", e.target.value))}
                   >
-                    <option value="">Default ({bars(metronome.leadDefaults.countInBars)})</option>
-                    <option value={0}>Off</option>
-                    <option value={1}>1 bar</option>
-                    <option value={2}>2 bars</option>
+                    <option value=""><Trans>Default ({bars(metronome.leadDefaults.countInBars)})</Trans></option>
+                    <option value={0}><Trans>Off</Trans></option>
+                    <option value={1}><Trans>1 bar</Trans></option>
+                    <option value={2}><Trans>2 bars</Trans></option>
                   </select>
                 </label>
                 <label className="block">
-                  Pre-roll (beats){" "}
+                  <Trans>Pre-roll (beats){" "}</Trans>
                   <input
-                    aria-label="Pre-roll (beats)"
+                    aria-label={t`Pre-roll (beats)`}
                     className={field + " w-20"}
                     type="number"
                     min="0"
@@ -386,9 +388,9 @@ export function PerformanceTransport({
                   />
                 </label>
                 <label className="block">
-                  Start delay (seconds){" "}
+                  <Trans>Start delay (seconds){" "}</Trans>
                   <input
-                    aria-label="Start delay (seconds)"
+                    aria-label={t`Start delay (seconds)`}
                     className={field + " w-20"}
                     type="number"
                     min="0"
@@ -401,26 +403,26 @@ export function PerformanceTransport({
                 </label>
               </div>
               <div className="space-y-2 rounded border border-seam p-2">
-                <p className="font-semibold">Defaults for songs without their own</p>
+                <p className="font-semibold"><Trans>Defaults for songs without their own</Trans></p>
                 <label className="block">
-                  Default count-in{" "}
+                  <Trans>Default count-in{" "}</Trans>
                   <select
-                    aria-label="Default count-in"
+                    aria-label={t`Default count-in`}
                     className={field}
                     value={metronome.leadDefaults.countInBars}
                     onChange={(e) => metronome.onLeadDefault("countInBars", limit("countInBars", e.target.value))}
                   >
-                    <option value={0}>Off</option>
-                    <option value={1}>1 bar</option>
-                    <option value={2}>2 bars</option>
+                    <option value={0}><Trans>Off</Trans></option>
+                    <option value={1}><Trans>1 bar</Trans></option>
+                    <option value={2}><Trans>2 bars</Trans></option>
                   </select>
                 </label>
                 <ClickSampleSettings />
                 <MidiClickSettingsView midi={midiClick} />
                 <label className="block">
-                  Default sound{" "}
+                  <Trans>Default sound{" "}</Trans>
                   <select
-                    aria-label="Default metronome sound"
+                    aria-label={t`Default metronome sound`}
                     className={field}
                     value={metronome.soundDefaults.sound}
                     onChange={(e) => {
@@ -431,23 +433,23 @@ export function PerformanceTransport({
                   </select>
                 </label>
                 <label className="block">
-                  Default count-in sound{" "}
+                  <Trans>Default count-in sound{" "}</Trans>
                   <select
-                    aria-label="Default count-in sound"
+                    aria-label={t`Default count-in sound`}
                     className={field}
                     value={metronome.soundDefaults.countInSound}
                     onChange={(e) => {
                       if (isCountInSound(e.target.value)) metronome.onSoundDefaults({ ...metronome.soundDefaults, countInSound: e.target.value });
                     }}
                   >
-                    <option value="same">Same as metronome</option>
+                    <option value="same"><Trans>Same as metronome</Trans></option>
                     <ClickSoundOptions />
                   </select>
                 </label>
                 <label className="block">
-                  Default pre-roll (beats){" "}
+                  <Trans>Default pre-roll (beats){" "}</Trans>
                   <input
-                    aria-label="Default pre-roll (beats)"
+                    aria-label={t`Default pre-roll (beats)`}
                     className={field + " w-20"}
                     type="number"
                     min="0"
@@ -458,9 +460,9 @@ export function PerformanceTransport({
                   />
                 </label>
                 <label className="block">
-                  Default start delay (seconds){" "}
+                  <Trans>Default start delay (seconds){" "}</Trans>
                   <input
-                    aria-label="Default start delay (seconds)"
+                    aria-label={t`Default start delay (seconds)`}
                     className={field + " w-20"}
                     type="number"
                     min="0"
@@ -472,9 +474,9 @@ export function PerformanceTransport({
                 </label>
               </div>
               <label className="block">
-                Metronome volume{" "}
+                <Trans>Metronome volume{" "}</Trans>
                 <input
-                  aria-label="Metronome volume"
+                  aria-label={t`Metronome volume`}
                   type="range"
                   min="0"
                   max="1"
@@ -484,19 +486,19 @@ export function PerformanceTransport({
                 />
               </label>
               <HelpNote>
-                <p>Set BPM to match the recording. Beat one is at the start of the audio; this does not detect tempo or stretch audio.</p>
+                <p><Trans>Set BPM to match the recording. Beat one is at the start of the audio; this does not detect tempo or stretch audio.</Trans></p>
               </HelpNote>
             </div>
           </details>
           <label>
             <input
               type="checkbox"
-              aria-label="MIDI Clock (24 PPQN)"
+              aria-label={t`MIDI Clock (24 PPQN)`}
               disabled={tempoOnStart || timecodeOn}
               checked={clock}
               onChange={(e) => session.setClock(e.target.checked)}
-            />{" "}
-            Send MIDI Clock
+            /><Trans>{" "}
+            Send MIDI Clock</Trans>
           </label>
         </div>
       </div>

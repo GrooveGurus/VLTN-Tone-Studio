@@ -18,6 +18,8 @@ import type { BlockSnapshot } from "./history";
 import { ampCab, groupsOf, groupOf } from "./order";
 import { useRig } from "./rig-store";
 import { isUserSnapTone, slotToneName, snapToneIndex } from "./snaptone";
+import { t as lt } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const CATEGORY: Record<BlockCode, string> = {
   NR: "Noise gate",
@@ -84,17 +86,17 @@ export function tilesFor(block: number, device: DeviceKey, snapTones: SlotName[]
       const user = isUserSnapTone(n, snapTone);
       // The GP-5 family names an empty slot "Empty"; the GP-200 family flags it
       const empty = user && (isGp5Family(device) ? slot?.name === "Empty" : slot?.kind === "empty");
-      const sub = user ? (empty ? "Empty user slot" : "User slot") : "Factory slot";
+      const sub = user ? (empty ? lt`Empty user slot` : "User slot") : "Factory slot";
       const name = slotToneName(n, snapTones, device);
       return { model: m, title: name ? `${n} ${name}` : snapToneLabel(device, n), sub, empty, capture: true };
     }
     if (isUserIrFxid(m.fxid)) {
       const n = m.fxid - userIr.fxidBase;
       const name = userIRs?.find((s) => s.slot === n)?.name;
-      return { model: m, title: name && !/^User IR \d+$/.test(name) ? `IR ${n + 1} ${name}` : m.title, sub: "User IR slot", ir: true };
+      return { model: m, title: name && !/^User IR \d+$/.test(name) ? `IR ${n + 1} ${name}` : m.title, sub: lt`User IR slot`, ir: true };
     }
     // A guest of the GrooveGurus mod says where it comes from
-    if (m.guest) return { model: m, title: m.title, sub: `Guest from ${m.guest.from}` };
+    if (m.guest) return { model: m, title: m.title, sub: lt`Guest from ${m.guest.from}` };
     // GP-200 models carry only their block's category: nothing to add under the title
     return { model: m, title: m.title, sub: m.origin ?? (isGp5Family(device) ? m.type : "") };
   });
@@ -104,14 +106,14 @@ function tabsFor(code: BlockCode, tiles: Tile[], snapTone: SlotTables): { value:
   const [first, last] = snapTone.userRange;
   if (code === "NS")
     return [
-      { value: "user", label: `User ${first}–${last}` },
-      { value: "factory", label: `Factory 0–${first - 1}` },
-      { value: "fav", label: "Favorites" },
+      { value: "user", label: lt`User ${first}–${last}` },
+      { value: "factory", label: lt`Factory 0–${first - 1}` },
+      { value: "fav", label: lt`Favorites` },
     ];
-  if (code === "CAB") return [{ value: "all", label: "All" }, { value: "factory", label: "Factory cabs" }, { value: "User IR", label: "User IRs" }, { value: "fav", label: "Favorites" }];
+  if (code === "CAB") return [{ value: "all", label: lt`All` }, { value: "factory", label: lt`Factory cabs` }, { value: "User IR", label: lt`User IRs` }, { value: "fav", label: lt`Favorites` }];
   const types = [...new Set(tiles.map((t) => t.model.type))];
-  const captures = tiles.some((t) => t.capture) ? [{ value: "snaptone", label: "SnapTones" }] : [];
-  return [{ value: "all", label: "All" }, ...(types.length > 1 ? types.map((t) => ({ value: t, label: t })) : []), ...captures, { value: "fav", label: "Favorites" }];
+  const captures = tiles.some((t) => t.capture) ? [{ value: "snaptone", label: lt`SnapTones` }] : [];
+  return [{ value: "all", label: lt`All` }, ...(types.length > 1 ? types.map((t) => ({ value: t, label: t })) : []), ...captures, { value: "fav", label: lt`Favorites` }];
 }
 
 function inTab(tab: string, t: Tile, favs: number[], snapTone: SlotTables): boolean {
@@ -192,8 +194,8 @@ function PickerPanel({ blockIndex, highlight, initialTab }: { blockIndex: number
   useEffect(() => {
     if (!connected) return;
     const d = useDevice.getState();
-    if (holdsCaptures && !d.snapTones) d.readSnapTones().catch((e) => notifyError("Couldn't read SnapTone slots", e, () => void useDevice.getState().readSnapTones()));
-    if (code === "CAB" && !d.userIRs) d.readUserIRs().catch((e) => notifyError("Couldn't read User IR slots", e, () => void useDevice.getState().readUserIRs()));
+    if (holdsCaptures && !d.snapTones) d.readSnapTones().catch((e) => notifyError(lt`Couldn't read SnapTone slots`, e, () => void useDevice.getState().readSnapTones()));
+    if (code === "CAB" && !d.userIRs) d.readUserIRs().catch((e) => notifyError(lt`Couldn't read User IR slots`, e, () => void useDevice.getState().readUserIRs()));
   }, [code, connected, holdsCaptures]);
 
   const q = query.trim().toLowerCase();
@@ -236,7 +238,7 @@ function PickerPanel({ blockIndex, highlight, initialTab }: { blockIndex: number
   const keep = async () => {
     await settle();
     const now = useDevice.getState().preset?.blocks[blockIndex];
-    if (now) recordBlock(`Change ${code} model`, original, snapshot(now));
+    if (now) recordBlock(lt`Change ${code} model`, original, snapshot(now));
     close();
   };
   const revert = async () => {
@@ -244,7 +246,7 @@ function PickerPanel({ blockIndex, highlight, initialTab }: { blockIndex: number
     try {
       await applyBlock(original);
     } catch (e) {
-      notifyError(`Couldn't put ${originalTitle} back`, e);
+      notifyError(lt`Couldn't put ${originalTitle} back`, e);
     }
     close();
   };
@@ -295,10 +297,10 @@ function PickerPanel({ blockIndex, highlight, initialTab }: { blockIndex: number
   const focusTile = tiles.find((t) => t.model.fxid === focusFx);
   const favOn = favs.includes(focusFx);
   const noun = nounOf(preset.device, code);
-  const title = `Choose ${article(noun)} ${noun}`;
+  const title = lt`Choose ${article(noun)} ${noun}`;
   const userSlots = snapTone.userRange[1] - snapTone.userRange[0] + 1;
   const count =
-    code === "NS" ? `NS, ${tiles.filter((t) => isUserSnapTone(snapToneIndex(t.model.fxid), snapTone) && !t.empty).length} of ${userSlots} user slots used` : `${code}, ${tiles.length} models`;
+    code === "NS" ? lt`NS, ${tiles.filter((t) => isUserSnapTone(snapToneIndex(t.model.fxid), snapTone) && !t.empty).length} of ${userSlots} user slots used` : `${code}, ${tiles.length} models`;
 
   return (
     <div
@@ -314,7 +316,7 @@ function PickerPanel({ blockIndex, highlight, initialTab }: { blockIndex: number
           <span className="text-sm text-silkscreen-3 max-[1320px]:hidden">{count}</span>
         </div>
         <Tabs value={tab} onValueChange={setTab} className="min-w-0 shrink overflow-x-auto [scrollbar-width:none]">
-          <TabsList aria-label="Model types">
+          <TabsList aria-label={lt`Model types`}>
             {tabs.map((t) => (
               <TabsTrigger key={t.value} value={t.value}>
                 {t.value === "fav" && <StarIcon className="size-3" aria-hidden />}
@@ -326,7 +328,7 @@ function PickerPanel({ blockIndex, highlight, initialTab }: { blockIndex: number
         {code === "NS" && (
           <Button variant="outline" size="sm" className="shrink-0" onClick={() => void revert().then(() => useNav.getState().go("tones"))}>
             <ExternalLinkIcon className="size-3.5" aria-hidden />
-            Browse TONE3000 captures
+            <Trans>Browse TONE3000 captures</Trans>
           </Button>
         )}
         <InputGroup className={cn("ml-auto h-8 min-w-[150px] shrink", code === "NS" ? "w-[200px]" : "w-[260px]")}>
@@ -334,19 +336,19 @@ function PickerPanel({ blockIndex, highlight, initialTab }: { blockIndex: number
             <SearchIcon className="size-3.5" aria-hidden />
           </InputGroupAddon>
           <InputGroupInput
-            aria-label="Search models"
-            placeholder={code === "NS" ? "Find a SnapTone" : gp5 ? "Find a model or the gear it models" : "Find a model"}
+            aria-label={lt`Search models`}
+            placeholder={code === "NS" ? lt`Find a SnapTone` : gp5 ? lt`Find a model or the gear it models` : lt`Find a model`}
             value={query}
             onChange={(e) => setQuery(e.currentTarget.value)}
           />
         </InputGroup>
-        <Button variant="ghost" size="icon" aria-label="Close and revert" onClick={() => void revert()}>
+        <Button variant="ghost" size="icon" aria-label={lt`Close and revert`} onClick={() => void revert()}>
           <XIcon aria-hidden />
         </Button>
       </div>
       <div className="grid min-h-0 flex-1 grid-cols-[210px_1fr]">
         <div className="flex min-h-0 flex-col border-r border-seam">
-          <nav aria-label="Blocks" className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-2.5 pt-3 pb-2">
+          <nav aria-label={lt`Blocks`} className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-2.5 pt-3 pb-2">
             {cats.map((b) => {
               const c = preset.blocks[b].code;
               const enabled = inGroup.includes(b);
@@ -372,13 +374,13 @@ function PickerPanel({ blockIndex, highlight, initialTab }: { blockIndex: number
           {/* outside the scrolling list, so it stays readable when the list has to scroll (short windows) */}
           <p className="mx-4 mb-3 shrink-0 text-xs text-pretty text-silkscreen-4">
             {code === "NS"
-              ? "SnapTones live in slots on the pedal. Add new ones in Tones."
+              ? lt`SnapTones live in slots on the pedal. Add new ones in Tones.`
               : gp5
-                ? `Each ${pedal} block holds one kind of effect, so ${article(noun)} ${noun} can only go in ${code}.`
-                : `Each ${pedal} block has its own list of models. These are the ones ${code} can hold.`}
+                ? lt`Each ${pedal} block holds one kind of effect, so ${article(noun)} ${noun} can only go in ${code}.`
+                : lt`Each ${pedal} block has its own list of models. These are the ones ${code} can hold.`}
           </p>
         </div>
-        <div ref={gridRef} role="listbox" aria-label={`${categoryOf(preset.device, code)} models`} className="grid min-h-0 auto-rows-max grid-cols-[repeat(auto-fill,minmax(118px,1fr))] content-start gap-2.5 overflow-auto px-4 py-3.5">
+        <div ref={gridRef} role="listbox" aria-label={lt`${categoryOf(preset.device, code)} models`} className="grid min-h-0 auto-rows-max grid-cols-[repeat(auto-fill,minmax(118px,1fr))] content-start gap-2.5 overflow-auto px-4 py-3.5">
           {visible.map((t) => {
             const current = t.model.fxid === original.fxid;
             const live = t.model.fxid === playing && auditioning;
@@ -400,9 +402,9 @@ function PickerPanel({ blockIndex, highlight, initialTab }: { blockIndex: number
                   t.empty && "opacity-60",
                 )}
               >
-                {live && <em className="absolute top-2 left-2 text-xs font-bold tracking-wide text-led-on uppercase not-italic">Playing now</em>}
-                {current && <CheckIcon className="absolute top-2 right-2 size-3.5" aria-label="Current model" />}
-                {!current && favs.includes(t.model.fxid) && <StarIcon className="absolute top-2 right-2 size-3 fill-current text-silkscreen-3" aria-label="Favorite" />}
+                {live && <em className="absolute top-2 left-2 text-xs font-bold tracking-wide text-led-on uppercase not-italic"><Trans>Playing now</Trans></em>}
+                {current && <CheckIcon className="absolute top-2 right-2 size-3.5" aria-label={lt`Current model`} />}
+                {!current && favs.includes(t.model.fxid) && <StarIcon className="absolute top-2 right-2 size-3 fill-current text-silkscreen-3" aria-label={lt`Favorite`} />}
                 <Thumb code={code} block={block} model={t.model} device={preset.device} name={t.capture ? t.title.replace(/^\d+ /, "") : undefined} title={t.title} />
                 <b className="text-sm font-semibold">{t.title}</b>
                 <span className="text-xs leading-tight text-silkscreen-3">{t.sub}</span>
@@ -412,10 +414,10 @@ function PickerPanel({ blockIndex, highlight, initialTab }: { blockIndex: number
           {!visible.length && (
             <p className="col-span-full py-10 text-center text-sm text-silkscreen-3">
               {tab === "fav"
-                ? "No favorites here yet. Select a model and press F, or use the star button below."
+                ? lt`No favorites here yet. Select a model and press F, or use the star button below.`
                 : gp5
-                  ? "Nothing matches. Try the model or the gear it is based on."
-                  : "Nothing matches. Try another model name."}
+                  ? lt`Nothing matches. Try the model or the gear it is based on.`
+                  : lt`Nothing matches. Try another model name.`}
             </p>
           )}
         </div>
@@ -425,30 +427,30 @@ function PickerPanel({ blockIndex, highlight, initialTab }: { blockIndex: number
           <span className={cn("size-[7px] flex-none rounded-full", error ? "bg-led-fault" : auditioning ? "bg-led-on" : "bg-led-off")} />
           <span className="truncate">
             {error
-              ? `Couldn't switch the model: ${error}`
+              ? lt`Couldn't switch the model: ${error}`
               : !connected
-                ? `Connect the ${pedal} to audition models on the pedal.`
+                ? lt`Connect the ${pedal} to audition models on the pedal.`
                 : auditioning
-                  ? `Auditioning ${playingTile?.title ?? "a model"} on the pedal. ${originalTitle} comes back if you press Esc.`
-                  : "Click a model or use the arrow keys to hear it on the pedal."}
+                  ? lt`Auditioning ${playingTile?.title ?? lt`a model`} on the pedal. ${originalTitle} comes back if you press Esc.`
+                  : lt`Click a model or use the arrow keys to hear it on the pedal.`}
           </span>
         </span>
         <span className="grow" />
         <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-silkscreen-3 max-[1320px]:hidden">
           <Kbd>←</Kbd>
-          <Kbd>→</Kbd> audition <Kbd>Enter</Kbd> keep <Kbd>Esc</Kbd> revert
+          <Kbd>→</Kbd> <Trans>audition</Trans> <Kbd><Trans>Enter</Trans></Kbd> <Trans>keep</Trans> <Kbd><Trans>Esc</Trans></Kbd> <Trans>revert</Trans>
         </span>
         {focusTile && (
           <Button variant="ghost" size="sm" aria-pressed={favOn} onClick={() => toggleFav(focusFx)}>
             <StarIcon className={cn("size-3.5", favOn && "fill-current")} aria-hidden />
-            {favOn ? "Favorite" : "Add to favorites"}
+            {favOn ? lt`Favorite` : lt`Add to favorites`}
           </Button>
         )}
         <Button variant="ghost" size="sm" onClick={() => void revert()}>
-          Revert
+          <Trans>Revert</Trans>
         </Button>
         <Button size="sm" disabled={!connected} onClick={() => void keep()}>
-          {auditioning ? `Keep ${playingTile?.title ?? "model"}` : "Done"}
+          {auditioning ? lt`Keep ${playingTile?.title ?? lt`model`}` : lt`Done`}
         </Button>
       </div>
     </div>

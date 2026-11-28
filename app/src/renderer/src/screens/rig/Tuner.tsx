@@ -7,6 +7,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { cn } from "@/lib/utils";
 import { isPedalInput, listInputs, type AudioInput } from "@/song/tonematch/recorder";
 import { detectPitch, noteOf, type Note } from "./tuner-pitch";
+import { t as lt } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** A tuning fork, drawn like the lucide icons (the set has none). */
 function TuningForkIcon(props: SVGProps<SVGSVGElement>) {
@@ -30,18 +32,18 @@ export function Tuner() {
     <>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="outline" aria-label="Tuner" onClick={() => setOpen(true)} className="max-[1320px]:w-[34px] max-[1320px]:px-0">
+          <Button variant="outline" aria-label={lt`Tuner`} onClick={() => setOpen(true)} className="max-[1320px]:w-[34px] max-[1320px]:px-0">
             <TuningForkIcon aria-hidden />
-            <span className="max-[1320px]:hidden">Tuner</span>
+            <Trans><span className="max-[1320px]:hidden">Tuner</span></Trans>
           </Button>
         </TooltipTrigger>
-        <TooltipContent className="min-[1321px]:hidden">Tuner</TooltipContent>
+        <TooltipContent className="min-[1321px]:hidden"><Trans>Tuner</Trans></TooltipContent>
       </Tooltip>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Tuner</DialogTitle>
-            <DialogDescription>Plays nothing; listens to the input you pick and shows the note.</DialogDescription>
+            <DialogTitle><Trans>Tuner</Trans></DialogTitle>
+            <DialogDescription><Trans>Plays nothing; listens to the input you pick and shows the note.</Trans></DialogDescription>
           </DialogHeader>
           {open && <TunerBody />}
         </DialogContent>
@@ -134,32 +136,32 @@ function TunerBody() {
     <div className="flex flex-col items-center gap-4">
       <div className="flex h-24 flex-col items-center justify-center" aria-live="polite">
         <span className={cn("text-6xl font-bold tabular-nums", note ? (inTune ? "text-led-ok" : "text-silkscreen") : "text-silkscreen-4")}>{note?.name ?? "–"}</span>
-        <span className="text-sm text-silkscreen-3 tabular-nums">{note ? `${note.hz.toFixed(1)} Hz` : "Play a string"}</span>
+        <span className="text-sm text-silkscreen-3 tabular-nums">{note ? lt`${note.hz.toFixed(1)} Hz` : lt`Play a string`}</span>
       </div>
-      <div className="relative h-2 w-full rounded-full bg-faceplate-raised" role="meter" aria-label="Cents off" aria-valuemin={-50} aria-valuemax={50} aria-valuenow={note?.cents ?? 0}>
+      <div className="relative h-2 w-full rounded-full bg-faceplate-raised" role="meter" aria-label={lt`Cents off`} aria-valuemin={-50} aria-valuemax={50} aria-valuenow={note?.cents ?? 0}>
         <span className="absolute top-[-4px] left-1/2 h-4 w-px bg-silkscreen-3" aria-hidden />
         {note && <span className={cn("absolute top-[-3px] size-3.5 -translate-x-1/2 rounded-full", inTune ? "bg-led-ok" : "bg-led-warn")} style={{ left: `${50 + note.cents}%` }} />}
       </div>
-      <span className="text-sm text-silkscreen-2 tabular-nums">{note ? (inTune ? "In tune" : `${note.cents > 0 ? "+" : ""}${note.cents} cents, ${note.cents > 0 ? "too high" : "too low"}`) : ""}</span>
+      <span className="text-sm text-silkscreen-2 tabular-nums">{note ? (inTune ? lt`In tune` : lt`${note.cents > 0 ? "+" : ""}${note.cents} cents, ${note.cents > 0 ? lt`too high` : lt`too low`}`) : ""}</span>
       {canMute && (
         <label className="flex w-full items-center justify-between gap-3 text-sm text-silkscreen-2">
-          <span>
+          <Trans><span>
             Mute the pedal
             <span className="block text-xs text-silkscreen-3">Sets Out to 0 while you tune and puts it back when you close the tuner.</span>
-          </span>
-          <Switch checked={muted} onCheckedChange={mute} aria-label="Mute the pedal while tuning" />
+          </span></Trans>
+          <Switch checked={muted} onCheckedChange={mute} aria-label={lt`Mute the pedal while tuning`} />
         </label>
       )}
       {error ? (
         <p className="text-sm text-led-fault">{error}</p>
       ) : (
         <select
-          aria-label="Audio input"
+          aria-label={lt`Audio input`}
           className="h-8 w-full rounded-md border border-border bg-faceplate px-2 text-sm"
           value={deviceId ?? ""}
           onChange={(e) => setDeviceId(e.target.value)}
         >
-          {inputs.length === 0 && <option value="">No audio input found</option>}
+          {inputs.length === 0 && <option value=""><Trans>No audio input found</Trans></option>}
           {inputs.map((i) => (
             <option key={i.deviceId} value={i.deviceId}>
               {i.label}

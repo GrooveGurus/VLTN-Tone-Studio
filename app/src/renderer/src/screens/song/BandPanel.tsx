@@ -66,6 +66,8 @@ import { RenderedPartRow, type PendingLineUp } from "./RenderedPartRow";
 import { decodeAudioFile } from "@/song/decode";
 import { MAX_IMPORT_SECONDS } from "@/song/import/import-tracks";
 import { checkRenderedLength, firstOnsetSeconds, fitToLength, lineUpOffer, shiftAudio, type LineUp } from "@/song/band/rendered";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** The Band panel's inputs from the Performance screen: the song's chart, chords, sections and metronome. */
 export interface BandPanelProps {
@@ -116,8 +118,8 @@ interface PendingRendered {
 }
 /** The title of the prompt before Generate replaces rendered audio. */
 function replaceTitle(kinds: readonly RenderedKind[]): string {
-  if (kinds.length === 1) return `Replace your rendered ${kinds[0]} with new generated ${kinds[0]}?`;
-  return "Replace your rendered drums and bass with new generated parts?";
+  if (kinds.length === 1) return t`Replace your rendered ${kinds[0]} with new generated ${kinds[0]}?`;
+  return t`Replace your rendered drums and bass with new generated parts?`;
 }
 /** The step the bass tone takes after the render, while it is read and rendered through the capture. */
 const BASS_TONE_TEXT = "Bass tone…";
@@ -174,15 +176,15 @@ export function BandPanelButton({ sections, partChoices }: BandPanelButtonProps)
   const updating = useBandRefreshStatus((s) => (s.key === performanceKey(source) ? s.message : ""));
   const status = bandEntryStatus(partKeysOf(tracks ?? {}, stems), partChoices, missing, sections);
   return (
-    <section aria-label="Band parts" className="flex flex-wrap items-center gap-3 rounded-lg border border-seam px-3 py-2 text-sm">
+    <section aria-label={t`Band parts`} className="flex flex-wrap items-center gap-3 rounded-lg border border-seam px-3 py-2 text-sm">
       <Drum className="size-5 shrink-0 text-silkscreen-3" aria-hidden />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <p className="text-muted-foreground">Make drum and bass parts that follow this song, and choose what plays.</p>
+        <p className="text-muted-foreground"><Trans>Make drum and bass parts that follow this song, and choose what plays.</Trans></p>
         {status && <p>{status}.</p>}
-        {updating && <p role="status">Updating generated parts: {updating}</p>}
+        {updating && <p role="status"><Trans>Updating generated parts: {updating}</Trans></p>}
       </div>
       <Button variant="secondary" size="sm" onClick={() => show(true)}>
-        {generated ? "Drums & bass…" : "Generate drums & bass…"}
+        {generated ? t`Drums & bass…` : t`Generate drums & bass…`}
       </Button>
     </section>
   );
@@ -388,11 +390,11 @@ function BandBody({
   /** Finds the beat in the song's audio. The drums stem is read when present, else the pitched stems, else the mix. */
   const findBeat = async () => {
     const current = useSong.getState().source;
-    if (!current) return setNotices(["Load a song before finding the beat."]);
+    if (!current) return setNotices([t`Load a song before finding the beat.`]);
     setNotices([]);
-    setWork("Finding the beat…");
+    setWork(t`Finding the beat…`);
     setFinding(true);
-    await attempt("Finding the beat was cancelled.", async () => {
+    await attempt(t`Finding the beat was cancelled.`, async () => {
       const found: BeatGridJob = startBeatGrid({
         sources: beatSources(selectWholeSongStems(useSong.getState()), current.audio),
         sampleRate: current.audio.sampleRate,
@@ -403,7 +405,7 @@ function BandBody({
       });
       job.current = found;
       const next = await found.done;
-      if (next.beats.length === 0) setNotices(["No beat was found in this song. Use fixed BPM, or set the tempo by hand."]);
+      if (next.beats.length === 0) setNotices([t`No beat was found in this song. Use fixed BPM, or set the tempo by hand.`]);
       else applyGrid(next);
     });
   };
@@ -434,12 +436,12 @@ function BandBody({
   const generate = async (requested: BandSettings, only?: RenderedKind) => {
     const using: BandSettings = only ? { ...requested, parts: { drums: only === "drums", bass: only === "bass" } } : requested;
     const current = useSong.getState().source;
-    if (!current) return setNotices(["Load a song before generating parts."]);
-    if (!grid) return setNotices(["Find the beat first, so the parts have a grid to follow."]);
-    if (!using.parts.drums && !using.parts.bass) return setNotices(["Turn on drums or bass first."]);
+    if (!current) return setNotices([t`Load a song before generating parts.`]);
+    if (!grid) return setNotices([t`Find the beat first, so the parts have a grid to follow.`]);
+    if (!using.parts.drums && !using.parts.bass) return setNotices([t`Turn on drums or bass first.`]);
     let succeeded = false;
     const startedInputs = generationInputs(requested);
-    await attempt("Generating the parts was cancelled. The tracks were not changed.", async () => {
+    await attempt(t`Generating the parts was cancelled. The tracks were not changed.`, async () => {
       const input = {
         grid,
         cues,
@@ -465,10 +467,10 @@ function BandBody({
         } catch (error) {
           notes.push(error instanceof Error ? error.message : String(error));
         }
-        if (found === null) return setNotices(["Generating the parts was cancelled. The tracks were not changed."]);
+        if (found === null) return setNotices([t`Generating the parts was cancelled. The tracks were not changed.`]);
         if (found.length) request = bandRequest({ ...input, chords: found });
         if (!request.harmony.some((entry) => entry.chord)) {
-          notes.push("No chords were found in the chart or the audio, so the bass will rest. Add chords to the chart, then generate again.");
+          notes.push(t`No chords were found in the chart or the audio, so the bass will rest. Add chords to the chart, then generate again.`);
         }
       }
       setNotices(notes);
@@ -515,7 +517,7 @@ function BandBody({
         const switched = (["drums", "bass"] as const).filter((kind) => using.parts[kind] && result[kind] && partChoices[kind] === "original");
         for (const kind of switched) patch[kind] = "generated";
         if (Object.keys(patch).length) onPartChoice(patch);
-        if (switched.length) notes.push(`Now playing the generated ${switched.join(" and ")}. Switch back under What plays.`);
+        if (switched.length) notes.push(t`Now playing the generated ${switched.join(" and ")}. Switch back under What plays.`);
       }
       setNotices([...notes, ...applied]);
       setDone(applied.length === 0);
@@ -564,8 +566,8 @@ function BandBody({
   refreshNow.current = async () => {
     if (automaticPromise.current) return automaticPromise.current;
     if (!source || !generated || (appliedInputs.current === musicalInputs)) return;
-    if (playingNow.current) throw new Error("Generated parts are waiting to update when playback stops.");
-    if (busy) throw new Error("The band parts are still updating. Wait for the update to finish.");
+    if (playingNow.current) throw new Error(t`Generated parts are waiting to update when playback stops.`);
+    if (busy) throw new Error(t`The band parts are still updating. Wait for the update to finish.`);
     const kinds = RENDERED_KINDS.filter((kind) => settings.parts[kind] && !settings.rendered[kind]);
     if (!kinds.length) {
       if (!settings.parts.drums && !settings.parts.bass) {
@@ -581,7 +583,7 @@ function BandBody({
     const run = (async () => {
       const protectsRendered = RENDERED_KINDS.some((kind) => settings.parts[kind] && settings.rendered[kind]);
       const ok = protectsRendered ? await generate(settings, kinds[0]) : await generate(settings);
-      if (!ok) throw new Error("Automatic band update could not finish. Play will use the existing parts; open Drums & bass to try again.");
+      if (!ok) throw new Error(t`Automatic band update could not finish. Play will use the existing parts; open Drums & bass to try again.`);
     })();
     automaticPromise.current = run;
     try {
@@ -603,7 +605,7 @@ function BandBody({
     const timer = setTimeout(() => {
       void refreshNow.current().catch((error) => {
         failedInputs.current = musicalInputs;
-        setNotices([`${String(error.message ?? error)} Play will use the existing parts.`]);
+        setNotices([t`${String(error.message ?? error)} Play will use the existing parts.`]);
       });
     }, 400);
     return () => clearTimeout(timer);
@@ -629,7 +631,7 @@ function BandBody({
     if (partChoices[kind] === "original") {
       const patch: Partial<PartChoices> = kind === "drums" ? { drums: "generated" } : { bass: "generated" };
       onPartChoice(patch);
-      rendering.push(`Now playing your rendered ${kind}. Switch back under What plays.`);
+      rendering.push(t`Now playing your rendered ${kind}. Switch back under What plays.`);
     }
     setNotices(rendering);
   };
@@ -637,15 +639,15 @@ function BandBody({
   /** Reads a file the performer picked as the part's rendered audio: checks its length, then applies it or offers the line-up. */
   const importRendered = async (kind: RenderedKind, file: File) => {
     const current = useSong.getState().source;
-    if (!current) return setNotices(["Load a song before using a rendered part."]);
+    if (!current) return setNotices([t`Load a song before using a rendered part.`]);
     if (playingNow.current) return setNotices([PLAYING_TEXT]);
     setNotices([]);
-    setWork(`Reading ${file.name}…`);
+    setWork(t`Reading ${file.name}…`);
     try {
       const decoded = await decodeAudioFile(file, MAX_IMPORT_SECONDS);
       const frames = current.audio.channels[0].length;
       const check = checkRenderedLength(file.name, decoded.channels[0].length / decoded.sampleRate, frames / current.audio.sampleRate);
-      if (!check.accepted) return setNotices([check.notice ?? `${file.name} was not used.`]);
+      if (!check.accepted) return setNotices([check.notice ?? t`${file.name} was not used.`]);
       const notices = check.notice ? [check.notice] : [];
       const firstNote = settingsRef.current.firstNote[kind] ?? null;
       const line = lineUpOffer(firstOnsetSeconds(decoded), firstNote);
@@ -655,7 +657,7 @@ function BandBody({
         return setNotices(notices);
       }
       if (line) notices.push(line.text);
-      else notices.push("No generated part to line up with, so the file is used as it is.");
+      else notices.push(t`No generated part to line up with, so the file is used as it is.`);
       applyRendered(kind, file.name, fitToLength(decoded, frames), notices);
     } catch (error) {
       setNotices([error instanceof Error ? error.message : String(error)]);
@@ -679,12 +681,12 @@ function BandBody({
    */
   const previewWith = async (from: number, bars: number, using: BandSettings, label: string) => {
     const current = useSong.getState().source;
-    if (!current) return setNotices(["Load a song before previewing."]);
-    if (!grid) return setNotices(["Find the beat first, so the preview has a grid to follow."]);
-    if (!using.parts.drums && !using.parts.bass) return setNotices(["Turn on drums or bass to preview them."]);
+    if (!current) return setNotices([t`Load a song before previewing.`]);
+    if (!grid) return setNotices([t`Find the beat first, so the preview has a grid to follow.`]);
+    if (!using.parts.drums && !using.parts.bass) return setNotices([t`Turn on drums or bass to preview them.`]);
     setNotices([]);
-    setWork("Rendering the preview…");
-    await attempt("Rendering the preview was cancelled.", async () => {
+    setWork(t`Rendering the preview…`);
+    await attempt(t`Rendering the preview was cancelled.`, async () => {
       const request = bandRequest({
         grid,
         cues,
@@ -746,10 +748,10 @@ function BandBody({
     if (!grid) return;
     const bars = index >= 0 ? sectionPreviewBars(grid, rowSections, index, length, songEnd) : length === "whole" ? PLAYHEAD_BARS : length;
     const where = index >= 0 ? rows[index].name : "the playhead";
-    return previewWith(index >= 0 ? rows[index].plan.start : getPosition(), bars, settings, `Previewing ${where} (${bars} ${bars === 1 ? "bar" : "bars"})…`);
+    return previewWith(index >= 0 ? rows[index].plan.start : getPosition(), bars, settings, t`Previewing ${where} (${bars} ${bars === 1 ? t`bar` : t`bars`})…`);
   };
   /** Plays about two bars around a bass note being edited, with the choice in place. The choice is not saved. */
-  const listen = (from: number, overrides: BassOverride[]) => previewWith(from, 2, { ...settings, bassOverrides: overrides }, "Previewing the bass notes…");
+  const listen = (from: number, overrides: BassOverride[]) => previewWith(from, 2, { ...settings, bassOverrides: overrides }, t`Previewing the bass notes…`);
 
   /**
    * Saves the last Generate's notes as a standard MIDI file named after the song. Drums are on channel 10 and bass on channel 1, the
@@ -757,7 +759,7 @@ function BandBody({
    */
   const exportMidi = async () => {
     if (!lastNotes || !grid) return;
-    const title = (source?.name ?? "").replace(/\.[^.]+$/, "").replace(/[\\/:*?"<>|]/g, "-") || "Song";
+    const title = (source?.name ?? "").replace(/\.[^.]+$/, "").replace(/[\\/:*?"<>|]/g, "-") || t`Song`;
     const bytes = encodeSmf(
       [
         { name: GENERATED_PART_NAMES.drums, channel: 9, notes: lastNotes.drums },
@@ -766,7 +768,7 @@ function BandBody({
       grid,
     );
     try {
-      await host.song.saveFiles([{ name: `${title} - band.mid`, bytes }], "Export band MIDI");
+      await host.song.saveFiles([{ name: `${title} - band.mid`, bytes }], t`Export band MIDI`);
     } catch (error) {
       setNotices([error instanceof Error ? error.message : String(error)]);
     }
@@ -789,7 +791,7 @@ function BandBody({
 
   const usesFixed = () => {
     const current = useSong.getState().source;
-    if (!current) return setNotices(["Load a song before using a fixed tempo."]);
+    if (!current) return setNotices([t`Load a song before using a fixed tempo.`]);
     setNotices([]);
     applyGrid(fixedBeatGrid(bpm, firstBeat, beats, songEnd));
   };
@@ -797,9 +799,9 @@ function BandBody({
   const setTo = () => {
     if (!grid?.steady) return;
     const tempo = Math.round(grid.steady.bpm * 100) / 100;
-    if (tempo < 30 || tempo > 300) return setNotices(["The tempo is outside the metronome's range of 30 to 300 BPM."]);
+    if (tempo < 30 || tempo > 300) return setNotices([t`The tempo is outside the metronome's range of 30 to 300 BPM.`]);
     onMetronome(tempo, Math.round(Math.max(0, grid.steady.firstBeat) * 1000) / 1000);
-    setNotices(["The metronome now runs at this tempo."]);
+    setNotices([t`The metronome now runs at this tempo.`]);
   };
 
   const partLine = (kind: PartKind) => presenceLine(kind, missing?.[kind] ?? "unknown", missing?.absentSections[kind] ?? [], sections);
@@ -807,24 +809,24 @@ function BandBody({
   return (
     <DialogContent className="flex max-h-[90vh] min-w-0 flex-col gap-4 overflow-hidden sm:max-w-4xl">
       <DialogHeader>
-        <DialogTitle>Band</DialogTitle>
+        <DialogTitle><Trans>Band</Trans></DialogTitle>
         <DialogDescription>
-          Generated parts update automatically after musical changes while playback is stopped. Generate also makes new parts on demand.
+          <Trans>Generated parts update automatically after musical changes while playback is stopped. Generate also makes new parts on demand.</Trans>
         </DialogDescription>
       </DialogHeader>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-5 overflow-y-auto text-sm">
-        <section aria-label="Band status" className="flex flex-col gap-1 rounded-lg border border-seam px-3 py-2">
+        <section aria-label={t`Band status`} className="flex flex-col gap-1 rounded-lg border border-seam px-3 py-2">
           <p>{partLine("drums")}</p>
           <p>{partLine("bass")}</p>
-          {(missing?.drums === "present" || missing?.bass === "present") && <p>You can still generate your own and switch between them under What plays.</p>}
-          <p>{generated ? "Generated drum and bass tracks are in the mixer." : "No generated parts yet."}</p>
-          {outOfDate && <p className="text-led-warn">Parts out of date. Updating automatically when playback stops.</p>}
+          {(missing?.drums === "present" || missing?.bass === "present") && <p><Trans>You can still generate your own and switch between them under What plays.</Trans></p>}
+          <p>{generated ? t`Generated drum and bass tracks are in the mixer.` : t`No generated parts yet.`}</p>
+          {outOfDate && <p className="text-led-warn"><Trans>Parts out of date. Updating automatically when playback stops.</Trans></p>}
         </section>
 
         {source !== null && <PartChoiceRows choices={partChoices} keys={partKeys} disabled={busy} onChange={onPartChoice} />}
 
         {source !== null && (
-          <section aria-label="Rendered parts" className="flex flex-col gap-3">
+          <section aria-label={t`Rendered parts`} className="flex flex-col gap-3">
             {RENDERED_KINDS.map((kind) => (
               <RenderedPartRow
                 key={kind}
@@ -868,8 +870,8 @@ function BandBody({
 
         <BandSettingsForm settings={settings} followSources={followSources} onChange={change} onStyle={changeStyle} songSeconds={songEnd} />
 
-        <section aria-label="Sections" className="flex flex-col gap-2">
-          <h3 className="font-semibold">Sections</h3>
+        <section aria-label={t`Sections`} className="flex flex-col gap-2">
+          <h3 className="font-semibold"><Trans>Sections</Trans></h3>
           <BandSections
             rows={rows}
             disabled={blocked}
@@ -882,10 +884,10 @@ function BandBody({
           />
         </section>
 
-        <p className="text-silkscreen-3">Render it with your own instruments, then use it here.</p>
+        <p className="text-silkscreen-3"><Trans>Render it with your own instruments, then use it here.</Trans></p>
       </div>
 
-      <footer aria-label="Band actions" className="flex shrink-0 flex-col gap-2 border-t border-seam pt-3 text-sm">
+      <footer aria-label={t`Band actions`} className="flex shrink-0 flex-col gap-2 border-t border-seam pt-3 text-sm">
         {source === null && (
           <p role="note" className="text-led-warn">
             {NO_SONG_TEXT}
@@ -908,16 +910,16 @@ function BandBody({
                 job.current?.cancel();
               }}
             >
-              Cancel
+              <Trans>Cancel</Trans>
             </Button>
           </div>
         )}
         {previewing && !work && <p role="status">{previewing}</p>}
         {done && !work && (
           <div className="flex flex-wrap items-center gap-2" role="status">
-            <span>Done. Drums and bass are in the mixer.</span>
+            <Trans><span>Done. Drums and bass are in the mixer.</span></Trans>
             <Button size="sm" variant="outline" onClick={() => show(false)}>
-              Close
+              <Trans>Close</Trans>
             </Button>
             {onPlayFrom && (
               <Button
@@ -927,7 +929,7 @@ function BandBody({
                   onPlayFrom(selected !== null ? rows[selected].plan.start : 0);
                 }}
               >
-                {selected !== null ? `Play from ${rows[selected].name}` : "Play from the start"}
+                {selected !== null ? t`Play from ${rows[selected].name}` : t`Play from the start`}
               </Button>
             )}
           </div>
@@ -941,16 +943,16 @@ function BandBody({
         )}
         <div className="flex flex-wrap items-center gap-2">
           <Button disabled={blocked || !grid} onClick={() => generateOrAsk(settings)}>
-            Generate
+            <Trans>Generate</Trans>
           </Button>
           <Button variant="outline" disabled={blocked || !grid} onClick={tryAnother}>
-            Try another
+            <Trans>Try another</Trans>
           </Button>
           <Button variant="outline" disabled={blocked || !grid} onClick={() => (previewing ? stopPreview.current?.() : void preview())}>
-            {previewing ? "Stop preview" : "Preview"}
+            {previewing ? t`Stop preview` : t`Preview`}
           </Button>
           <Select value={target} onValueChange={setPreviewAt} disabled={blocked || previewing !== null}>
-            <SelectTrigger aria-label="Preview section" className="h-9 w-auto min-w-32">
+            <SelectTrigger aria-label={t`Preview section`} className="h-9 w-auto min-w-32">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -959,24 +961,24 @@ function BandBody({
                   {name}
                 </SelectItem>
               ))}
-              <SelectItem value={PLAYHEAD}>From the playhead</SelectItem>
+              <SelectItem value={PLAYHEAD}><Trans>From the playhead</Trans></SelectItem>
             </SelectContent>
           </Select>
           <Select value={previewLength} onValueChange={(value) => setPreviewLength(value as "whole" | "4" | "8")} disabled={blocked || previewing !== null}>
-            <SelectTrigger aria-label="Preview length" className="h-9 w-auto min-w-28">
+            <SelectTrigger aria-label={t`Preview length`} className="h-9 w-auto min-w-28">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="whole">Whole section</SelectItem>
-              <SelectItem value="4">4 bars</SelectItem>
-              <SelectItem value="8">8 bars</SelectItem>
+              <SelectItem value="whole"><Trans>Whole section</Trans></SelectItem>
+              <SelectItem value="4"><Trans>4 bars</Trans></SelectItem>
+              <SelectItem value="8"><Trans>8 bars</Trans></SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" disabled={blocked || !generated} onClick={() => setConfirmRemove(true)}>
-            Remove generated parts
+            <Trans>Remove generated parts</Trans>
           </Button>
           <Button variant="outline" disabled={playing || lastNotes === null} onClick={() => void exportMidi()}>
-            Export MIDI…
+            <Trans>Export MIDI…</Trans>
           </Button>
 
         </div>
@@ -988,10 +990,10 @@ function BandBody({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{replaceTitle(confirmReplace?.kinds ?? [])}</AlertDialogTitle>
-            <AlertDialogDescription>The rendered audio in the song is replaced. Your file is not changed, and you can use it again.</AlertDialogDescription>
+            <AlertDialogDescription><Trans>The rendered audio in the song is replaced. Your file is not changed, and you can use it again.</Trans></AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Keep my rendered part</AlertDialogCancel>
+            <AlertDialogCancel><Trans>Keep my rendered part</Trans></AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 const run = confirmReplace?.run;
@@ -999,7 +1001,7 @@ function BandBody({
                 run?.();
               }}
             >
-              Replace
+              <Trans>Replace</Trans>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1008,12 +1010,12 @@ function BandBody({
       <AlertDialog open={confirmRemove} onOpenChange={setConfirmRemove}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove the generated parts?</AlertDialogTitle>
-            <AlertDialogDescription>The generated drum and bass tracks are removed from the song. Your own tracks are kept.</AlertDialogDescription>
+            <AlertDialogTitle><Trans>Remove the generated parts?</Trans></AlertDialogTitle>
+            <AlertDialogDescription><Trans>The generated drum and bass tracks are removed from the song. Your own tracks are kept.</Trans></AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Keep them</AlertDialogCancel>
-            <AlertDialogAction onClick={removeParts}>Remove</AlertDialogAction>
+            <AlertDialogCancel><Trans>Keep them</Trans></AlertDialogCancel>
+            <AlertDialogAction onClick={removeParts}><Trans>Remove</Trans></AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -1042,7 +1044,7 @@ function pendingLineUp(
 }
 
 function stageText(stage: BandStage): string {
-  if (stage === "loading") return "Loading the drum and bass samples…";
-  if (stage === "generating") return "Writing the notes…";
-  return "Rendering the parts…";
+  if (stage === "loading") return t`Loading the drum and bass samples…`;
+  if (stage === "generating") return t`Writing the notes…`;
+  return t`Rendering the parts…`;
 }

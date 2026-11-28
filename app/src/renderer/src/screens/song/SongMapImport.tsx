@@ -16,6 +16,8 @@ import { planSongMap, type SavedSong, type SongMapPart, type SongMapPlan } from 
 import { songBrief, type BriefInput } from "@/song/songmap/brief";
 import { parseSongMap } from "@/song/songmap/songmap";
 import { useSongMapUndo } from "@/song/songmap/undo";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 type SettingSuffix = (typeof SETTING_SUFFIXES)[number];
 /** A song map larger than this is not a song map. A map is a few kilobytes. */
@@ -119,7 +121,7 @@ export function SongMapImport({
   const choice = picked ?? (plan ? defaultChoice(plan) : []);
   const notes = readOptions<{ songMapNotes?: unknown }>(songKey, {}).songMapNotes;
   const notesText = typeof notes === "string" ? notes : "";
-  const refusal = !libraryId ? "Save the song to import a song map." : playing ? "Stop the song to import." : "";
+  const refusal = !libraryId ? t`Save the song to import a song map.` : playing ? t`Stop the song to import.` : "";
 
   const readText = (value: string) => {
     setText(value);
@@ -129,7 +131,7 @@ export function SongMapImport({
   const readFile = async (file: File | undefined) => {
     if (!file) return;
     if (file.size > MAX_IMPORT_BYTES) {
-      setProblem("That file is larger than 1 MB, so it is not a song map.");
+      setProblem(t`That file is larger than 1 MB, so it is not a song map.`);
       return;
     }
     readText(await file.text());
@@ -157,7 +159,7 @@ export function SongMapImport({
       setStatus("");
       setOpen(false);
     } catch (error) {
-      setProblem(`The song map could not be saved: ${error instanceof Error ? error.message : String(error)}`);
+      setProblem(t`The song map could not be saved: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
   const undoApply = async () => {
@@ -166,9 +168,9 @@ export function SongMapImport({
       writeEntries(songKey, settingEntries(undo.before));
       await saveAndReload(libraryId);
       useSongMapUndo.getState().clear();
-      setStatus("Song map undone.");
+      setStatus(t`Song map undone.`);
     } catch (error) {
-      setProblem(`The song map could not be undone: ${error instanceof Error ? error.message : String(error)}`);
+      setProblem(t`The song map could not be undone: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
   const hasAudio = durationSeconds > 0;
@@ -176,56 +178,56 @@ export function SongMapImport({
   const exportBrief = async () => {
     try {
       const bytes = new TextEncoder().encode(songBrief(briefInputOf(songKey, title, durationSeconds)));
-      await host.song.saveFiles([{ name: briefFileName(title), bytes }], "Export song brief");
+      await host.song.saveFiles([{ name: briefFileName(title), bytes }], t`Export song brief`);
       setProblem("");
     } catch (error) {
-      setProblem(`The song brief could not be saved: ${error instanceof Error ? error.message : String(error)}`);
+      setProblem(t`The song brief could not be saved: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
   const copyBrief = async () => {
     try {
       await navigator.clipboard.writeText(songBrief(briefInputOf(songKey, title, durationSeconds)));
       setProblem("");
-      setStatus("Song brief copied.");
+      setStatus(t`Song brief copied.`);
     } catch (error) {
-      setProblem(`The song brief could not be copied: ${error instanceof Error ? error.message : String(error)}`);
+      setProblem(t`The song brief could not be copied: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
   const showUndo = undo?.songKey === songKey;
   // The line after Apply comes from the stored record, so it survives the reload; "undone" and errors are this card's own.
-  const shownStatus = status || (showUndo && undo ? `Song map applied: ${undo.applied}.` : "");
+  const shownStatus = status || (showUndo && undo ? t`Song map applied: ${undo.applied}.` : "");
 
   return (
     <SettingsCard
-      title="Song map"
+      title={t`Song map`}
       storageKey="song-map"
-      summary="Import a song map from an assistant: tempo, key, sections, drums and bass, bass notes, chart and notes."
+      summary={t`Import a song map from an assistant: tempo, key, sections, drums and bass, bass notes, chart and notes.`}
       actions={
         <>
           <Button variant="outline" size="sm" disabled={!!refusal} title={refusal || undefined} onClick={() => fileInput.current?.click()}>
-            Import song map…
+            <Trans>Import song map…</Trans>
           </Button>
           <Button variant="outline" size="sm" disabled={!!refusal} title={refusal || undefined} onClick={openPaste}>
-            Paste…
+            <Trans>Paste…</Trans>
           </Button>
           <Button
             variant="outline"
             size="sm"
             disabled={!hasAudio}
-            title={hasAudio ? undefined : "Load a song with audio to export its brief."}
+            title={hasAudio ? undefined : t`Load a song with audio to export its brief.`}
             onClick={() => void exportBrief()}
           >
-            Export song brief…
+            <Trans>Export song brief…</Trans>
           </Button>
           <Button variant="outline" size="sm" disabled={!hasAudio} onClick={() => void copyBrief()}>
-            Copy brief
+            <Trans>Copy brief</Trans>
           </Button>
         </>
       }
     >
       <input
         ref={fileInput}
-        aria-label="Choose a song map file"
+        aria-label={t`Choose a song map file`}
         type="file"
         accept=".md,.txt"
         hidden
@@ -236,9 +238,9 @@ export function SongMapImport({
       />
       {notesText && (
         <p className="text-xs">
-          From the song map: {notesText.length > NOTES_SHOWN ? `${notesText.slice(0, NOTES_SHOWN)}…` : notesText}
+          <Trans>From the song map:</Trans> {notesText.length > NOTES_SHOWN ? `${notesText.slice(0, NOTES_SHOWN)}…` : notesText}
           {notesText.length > NOTES_SHOWN && (
-            <HelpNote label="Full notes">
+            <HelpNote label={t`Full notes`}>
               <p className="whitespace-pre-line">{notesText}</p>
             </HelpNote>
           )}
@@ -249,7 +251,7 @@ export function SongMapImport({
           <span>{shownStatus}</span>
           {showUndo && (
             <Button variant="outline" size="sm" disabled={playing} onClick={() => void undoApply()}>
-              Undo
+              <Trans>Undo</Trans>
             </Button>
           )}
         </p>
@@ -262,36 +264,38 @@ export function SongMapImport({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle>Import a song map</DialogTitle>
-            <DialogDescription>Choose the parts to apply. Nothing changes until you press Apply.</DialogDescription>
+            <DialogTitle><Trans>Import a song map</Trans></DialogTitle>
+            <DialogDescription><Trans>Choose the parts to apply. Nothing changes until you press Apply.</Trans></DialogDescription>
           </DialogHeader>
           <textarea
-            aria-label="Song map text"
+            aria-label={t`Song map text`}
             className="min-h-40 w-full rounded border border-seam bg-background p-2 font-mono text-sm"
-            placeholder={"---\nsongmap: 1\n---"}
+            placeholder={t`---
+songmap: 1
+---`}
             value={text}
             onChange={(event) => readText(event.target.value)}
           />
           {result && result.problems.length > 0 && (
-            <ul aria-label="Problems in the song map" className="list-disc space-y-1 pl-5 text-xs text-amber-300">
+            <ul aria-label={t`Problems in the song map`} className="list-disc space-y-1 pl-5 text-xs text-amber-300">
               {result.problems.map((item) => (
-                <li key={`${item.line}-${item.message}`}>Skipped: {item.message}</li>
+                <li key={`${item.line}-${item.message}`}><Trans>Skipped: {item.message}</Trans></li>
               ))}
             </ul>
           )}
           {result && !result.map && (
             <p role="alert" className="text-sm text-red-400">
-              This is not a song map of this version, so nothing can be applied.
+              <Trans>This is not a song map of this version, so nothing can be applied.</Trans>
             </p>
           )}
           {plan && plan.parts.length === 0 && (
             <p className="text-sm text-silkscreen-3" role="status">
-              This song map matches the song. There is nothing to change.
+              <Trans>This song map matches the song. There is nothing to change.</Trans>
             </p>
           )}
           {plan && plan.parts.length > 0 && (
             <fieldset className="space-y-2">
-              <legend className="font-semibold">What will change</legend>
+              <legend className="font-semibold"><Trans>What will change</Trans></legend>
               {plan.parts.map((part) => (
                 <label key={part.part} className="flex items-start gap-2 text-sm">
                   <Checkbox className="mt-0.5" checked={choice.includes(part.part)} onCheckedChange={(value) => toggle(part.part, value === true)} />
@@ -311,10 +315,10 @@ export function SongMapImport({
           {refusal && <p className="text-xs text-amber-300">{refusal}</p>}
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              <Trans>Cancel</Trans>
             </Button>
             <Button disabled={!plan || choice.length === 0 || !!refusal} onClick={() => void apply()}>
-              Apply
+              <Trans>Apply</Trans>
             </Button>
           </DialogFooter>
         </DialogContent>

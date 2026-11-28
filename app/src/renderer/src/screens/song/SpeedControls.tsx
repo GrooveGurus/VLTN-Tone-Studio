@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { debouncedCommit } from "@/song/performance/debounced-commit";
 import { effectiveBpm } from "@/song/performance/speed";
 import { useSession, type PerformanceSession } from "@/song/performance/session";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const field = "rounded border border-seam bg-transparent p-2";
 
@@ -59,12 +61,12 @@ export function SpeedControls({ session, bpm }: { session: PerformanceSession; b
     session.setSpeed({ rate: Number(e.currentTarget.value) / 100 });
   };
   return (
-    <div aria-label="Speed and pitch" className="flex flex-wrap items-center gap-3">
-      <h2 className="font-semibold">Speed & pitch</h2>
+    <div aria-label={t`Speed and pitch`} className="flex flex-wrap items-center gap-3">
+      <h2 className="font-semibold"><Trans>Speed & pitch</Trans></h2>
       <label className="flex items-center gap-2">
-        Speed
+        <Trans>Speed</Trans>
         <input
-          aria-label="Speed"
+          aria-label={t`Speed`}
           className="w-40"
           type="range"
           min="50"
@@ -78,25 +80,25 @@ export function SpeedControls({ session, bpm }: { session: PerformanceSession; b
       </label>
       <span className="w-12 tabular-nums">{percent}%</span>
       <Button variant="outline" size="sm" disabled={speed.rate === 1} onClick={() => session.setSpeed({ rate: 1 })}>
-        Reset speed
+        <Trans>Reset speed</Trans>
       </Button>
       <label>
-        Pitch{" "}
-        <NumberField label="Pitch semitones" value={speed.semitones} min={-6} max={6} onCommit={setSemitones} />
+        <Trans>Pitch{" "}</Trans>
+        <NumberField label={t`Pitch semitones`} value={speed.semitones} min={-6} max={6} onCommit={setSemitones} />
       </label>
       <label>
-        Fine tune{" "}
-        <NumberField label="Pitch cents" value={speed.cents} min={-50} max={50} onCommit={setCents} />{" "}
-        cents
+        <Trans>Fine tune{" "}</Trans>
+        <NumberField label={t`Pitch cents`} value={speed.cents} min={-50} max={50} onCommit={setCents} /><Trans>{" "}
+        cents</Trans>
       </label>
       <label className="flex items-center gap-2">
-        <input type="checkbox" aria-label="Apply pitch to chords" checked={speed.applyToChords} onChange={(e) => session.setSpeed({ applyToChords: e.target.checked })} />
-        Apply pitch to chords
+        <input type="checkbox" aria-label={t`Apply pitch to chords`} checked={speed.applyToChords} onChange={(e) => session.setSpeed({ applyToChords: e.target.checked })} />
+        <Trans>Apply pitch to chords</Trans>
       </label>
-      <span className="text-sm tabular-nums text-silkscreen-3">Plays at {Math.round(effectiveBpm(bpm, speed.rate))} BPM</span>
+      <Trans><span className="text-sm tabular-nums text-silkscreen-3">Plays at {Math.round(effectiveBpm(bpm, speed.rate))} BPM</span></Trans>
       {rendering && (
         <span role="status" className="text-sm text-silkscreen-3">
-          Rendering… {rendering.done} of {rendering.total} tracks
+          <Trans>Rendering… {rendering.done} of {rendering.total} tracks</Trans>
         </span>
       )}
     </div>

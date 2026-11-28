@@ -6,6 +6,8 @@ import { subscribeAudience } from "./audience-source";
 import { AudiencePdf } from "./AudiencePdf";
 import { rotationStyle } from "./layout";
 import { useAudienceState } from "./use-audience-state";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * The audience display (spec 43): the page the second window shows. It has no controls and no store of its own. It draws the latest model,
@@ -20,7 +22,7 @@ export function AudienceView() {
     return (
       <Screen rotation={model.rotation}>
         <div className="flex h-full items-center justify-center">
-          <p className="text-[9vmin] font-semibold tracking-wide text-silkscreen-3">VLTN Tone Studio</p>
+          <p className="text-[9vmin] font-semibold tracking-wide text-silkscreen-3"><Trans>VLTN Tone Studio</Trans></p>
         </div>
       </Screen>
     );
@@ -60,7 +62,7 @@ function useLineIndex(model: AudienceModel | null, clock: AudienceClock | null):
 /** The black frame that every screen sits on. The screen is always dark, so the room stays dark around a projector. */
 function Screen({ rotation = 0, children }: { rotation?: AudienceModel["rotation"]; children?: ReactNode }) {
   return (
-    <main aria-label="Audience display" className="fixed inset-0 overflow-hidden bg-black text-white">
+    <main aria-label={t`Audience display`} className="fixed inset-0 overflow-hidden bg-black text-white">
       <div style={rotationStyle(rotation)} className="bg-black">
         {children}
       </div>
@@ -96,7 +98,7 @@ function TimedLyrics({ model, index }: { model: AudienceModel; index: number }) 
 function ChordRow({ chords, size }: { chords: string[]; size: string }) {
   return (
     <div
-      aria-label="Chords"
+      aria-label={t`Chords`}
       className="mb-[3vh] flex flex-wrap justify-center gap-x-[4vw] font-semibold text-sky-300"
       style={{ fontSize: `calc(${size} * 0.6)` }}
     >
@@ -128,7 +130,7 @@ function Footer({ model }: { model: AudienceModel }) {
   return (
     <div className="absolute inset-x-[4%] bottom-[3vh] flex items-end justify-between gap-[3vw] text-[2.6vh] text-white/50">
       <span className="truncate">{model.title}</span>
-      {model.nextTitle && <span className="truncate">Next: {model.nextTitle}</span>}
+      {model.nextTitle && <span className="truncate"><Trans>Next: {model.nextTitle}</Trans></span>}
     </div>
   );
 }

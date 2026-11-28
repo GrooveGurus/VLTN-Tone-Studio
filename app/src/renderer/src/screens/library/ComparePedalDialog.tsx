@@ -16,6 +16,8 @@ import type { BackupEntry } from "@/state/device-types";
 import type { CollectionInfo } from "@shared/host/files";
 import { classifySlots, type SlotComparison } from "@/screens/device/compare";
 import { CompareList } from "@/screens/device/CompareList";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 interface Result {
   source: BackupEntry[];
@@ -48,16 +50,16 @@ export function ComparePedalDialog({ collection, onOpenChange }: { collection: C
   async function compare(c: CollectionInfo) {
     const d = useDevice.getState();
     if (d.status !== "connected" || !d.device) {
-      setError("Connect the pedal to compare this backup with it.");
+      setError(t`Connect the pedal to compare this backup with it.`);
       return;
     }
     if (c.device && c.device !== d.device) {
-      setError(`This backup is from a ${pedalName(c.device)}, and the connected pedal is a ${pedalName(d.device)}. Compare with a backup of the same model.`);
+      setError(t`This backup is from a ${pedalName(c.device)}, and the connected pedal is a ${pedalName(d.device)}. Compare with a backup of the same model.`);
       return;
     }
     if (d.unsavedChanges > 0) {
       const changes = `${d.unsavedChanges} unsaved ${d.unsavedChanges === 1 ? "change" : "changes"}`;
-      setError(`The Rig has ${changes}. Save or discard them first. Reading the pedal would drop them.`);
+      setError(t`The Rig has ${changes}. Save or discard them first. Reading the pedal would drop them.`);
       return;
     }
     setReading(true);
@@ -79,9 +81,9 @@ export function ComparePedalDialog({ collection, onOpenChange }: { collection: C
     <AlertDialog open onOpenChange={(open) => !reading && onOpenChange(open)}>
       <AlertDialogContent className="sm:max-w-[560px]">
         <AlertDialogHeader>
-          <AlertDialogTitle>Compare {collection.title} with the pedal</AlertDialogTitle>
+          <AlertDialogTitle><Trans>Compare {collection.title} with the pedal</Trans></AlertDialogTitle>
           <AlertDialogDescription>
-            Each slot of this backup against what the pedal holds now. Nothing is written. {reading ? (busy?.label ?? "Reading the pedal") : ""}
+            <Trans>Each slot of this backup against what the pedal holds now. Nothing is written.</Trans> {reading ? (busy?.label ?? t`Reading the pedal`) : ""}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -94,7 +96,7 @@ export function ComparePedalDialog({ collection, onOpenChange }: { collection: C
         {result && device && <CompareList rows={result.rows} source={result.source} pedal={result.pedal} device={device} slotLabel={slotLabel} />}
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={reading}>Close</AlertDialogCancel>
+          <AlertDialogCancel disabled={reading}><Trans>Close</Trans></AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

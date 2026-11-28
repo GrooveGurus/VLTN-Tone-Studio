@@ -15,6 +15,8 @@ import { useDevice, usePedalName, useProfile } from "@/state/device";
 import { readSlots, runSend, updateDraft, writeSnapTone, type SendState } from "./store";
 import { CabIrPicker } from "./CabIrPicker";
 import { Step, StepError, UseOnGp5, kb, type StepStatus } from "./SendSteps";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * Send a NAM capture to the pedal as a SnapTone: download, check, convert in the app, write the chosen user slot
@@ -59,29 +61,29 @@ export function SnapToneSteps({ send, model, noCabIr }: { send: SendState; model
   const slot = send.proposedSlot;
   const occupant = slot === null ? null : snapTones?.find((s) => s.slot === slot);
   const replacing = occupant && !isEmptySlot(occupant) ? occupant.name : null;
-  const slotText = slot === null ? "a user slot" : snapToneLabel(profile.key, slot);
-  const writeLabel = replacing ? `Replace ${replacing} in ${slotText}` : `Write to ${slotText}`;
+  const slotText = slot === null ? t`a user slot` : snapToneLabel(profile.key, slot);
+  const writeLabel = replacing ? t`Replace ${replacing} in ${slotText}` : t`Write to ${slotText}`;
   const linkedText = send.linkedSlot === null ? "" : snapToneLabel(profile.key, send.linkedSlot);
   const canEdit = phase === "idle" || phase === "ready" || (phase === "error" && step !== 3);
   // The cab IR goes into the conversion: choosing another after it ran drops the SnapTone and starts over (updateDraft).
   const canPickIr = phase === "idle" || phase === "ready" || phase === "error";
   const canWrite = connected && slot !== null && !busy;
-  const modelLabel = model ? `${model.name}, ${ARCH_LABEL(model)}` : "the model";
+  const modelLabel = model ? `${model.name}, ${ARCH_LABEL(model)}` : t`the model`;
 
   return (
     <ol ref={listRef} className="flex flex-col">
-      <Step n={1} status={status(1)} title={step > 1 || phase === "linked" ? `Downloaded ${modelLabel}` : `Download ${modelLabel}`}>
+      <Step n={1} status={status(1)} title={step > 1 || phase === "linked" ? t`Downloaded ${modelLabel}` : t`Download ${modelLabel}`}>
         {phase === "running" && step === 1 && (
           <>
-            <span className="text-silkscreen-3">{send.total ? `${kb(send.received)} of ${kb(send.total)}` : send.received ? kb(send.received) : "Starting the download…"}</span>
-            <Progress value={send.total ? (send.received / send.total) * 100 : undefined} className="mt-1 w-56" aria-label="Download progress" />
+            <span className="text-silkscreen-3">{send.total ? t`${kb(send.received)} of ${kb(send.total)}` : send.received ? kb(send.received) : t`Starting the download…`}</span>
+            <Progress value={send.total ? (send.received / send.total) * 100 : undefined} className="mt-1 w-56" aria-label={t`Download progress`} />
           </>
         )}
         {phase === "error" && step === 1 && <StepError error={error} />}
         {canEdit && (
           <span className="mt-1.5 flex flex-wrap items-center gap-2">
             <label className="flex items-center gap-2 text-silkscreen-2">
-              <span>Name on the pedal</span>
+              <Trans><span>Name on the pedal</span></Trans>
               <Input
                 value={send.name}
                 maxLength={10}
@@ -105,37 +107,37 @@ export function SnapToneSteps({ send, model, noCabIr }: { send: SendState; model
           <span className="mt-2 flex flex-col items-start gap-1">
             <Button size="sm" disabled={!send.name || !model || hasSignal === false} onClick={() => void runSend(send.toneId)}>
               {phase === "error" && <RotateCcw data-icon="inline-start" />}
-              {phase === "error" ? "Retry" : replacing && connected ? `Send, replacing ${replacing}` : `Send to the ${pedal}`}
+              {phase === "error" ? t`Retry` : replacing && connected ? t`Send, replacing ${replacing}` : t`Send to the ${pedal}`}
             </Button>
-            {!connected && <span className="text-[11px] text-silkscreen-3">Connect the {pedal} to write it; the conversion runs without it.</span>}
+            {!connected && <span className="text-[11px] text-silkscreen-3"><Trans>Connect the {pedal} to write it; the conversion runs without it.</Trans></span>}
             <TestSignalNotice />
           </span>
         )}
       </Step>
 
-      <Step n={2} status={status(2)} title={send.check ? "Checked the file" : "Check the file"}>
-        {send.check?.reshaped && <span className="text-silkscreen-3">Updated from NAM {send.check.version} to the 0.5.x layout</span>}
+      <Step n={2} status={status(2)} title={send.check ? t`Checked the file` : t`Check the file`}>
+        {send.check?.reshaped && <span className="text-silkscreen-3"><Trans>Updated from NAM {send.check.version} to the 0.5.x layout</Trans></span>}
         {send.check && !send.check.reshaped && (
           <span className="text-silkscreen-3">
-            NAM {send.check.version}, {send.check.arch === "A2" ? `A2 (${send.check.size === "nano" ? "Lite" : "Full"} size)` : `A1 ${send.check.size}`}
+            NAM {send.check.version}, {send.check.arch === "A2" ? t`A2 (${send.check.size === "nano" ? t`Lite` : t`Full`} size)` : `A1 ${send.check.size}`}
           </span>
         )}
-        {!send.check && phase !== "error" && <span className="text-silkscreen-3">Confirm Tone Studio can convert it</span>}
+        {!send.check && phase !== "error" && <span className="text-silkscreen-3"><Trans>Confirm Tone Studio can convert it</Trans></span>}
         {phase === "running" && step === 2 && <Spinner className="mt-1" />}
         {phase === "error" && step === 2 && <StepError error={error} />}
       </Step>
 
-      <Step n={3} status={status(3)} title={send.file ? "Made the SnapTone" : "Make the SnapTone"}>
+      <Step n={3} status={status(3)} title={send.file ? t`Made the SnapTone` : t`Make the SnapTone`}>
         <span className="text-silkscreen-3">
-          Plays the test signal through the capture{send.cabIr ? ` and ${send.cabIr.name}` : ""} and measures it, like Valeton Suite does. Takes about 10 seconds.
+          <Trans>Plays the test signal through the capture</Trans>{send.cabIr ? t` and ${send.cabIr.name}` : ""} <Trans>and measures it, like Valeton Suite does. Takes about 10 seconds.</Trans>
         </span>
-        {phase === "converting" && <Progress value={send.progress * 100} className="mt-1 w-56" aria-label="SnapTone conversion progress" />}
+        {phase === "converting" && <Progress value={send.progress * 100} className="mt-1 w-56" aria-label={t`SnapTone conversion progress`} />}
         {phase === "error" && step === 3 && <StepError error={error} />}
       </Step>
 
-      <Step n={4} status={status(4)} title={phase === "linked" ? `Wrote ${linkedText}` : `Write ${slotText} on the ${pedal}`}>
-        {replacing && phase !== "linked" && <span className="text-silkscreen-2">Replaces {replacing}. A SnapTone can't be read back from the pedal, so keep the original file if you want it again.</span>}
-        {phase === "writing" && <Progress value={send.progress * 100} className="mt-1 w-56" aria-label="SnapTone write progress" />}
+      <Step n={4} status={status(4)} title={phase === "linked" ? t`Wrote ${linkedText}` : t`Write ${slotText} on the ${pedal}`}>
+        {replacing && phase !== "linked" && <span className="text-silkscreen-2"><Trans>Replaces {replacing}. A SnapTone can't be read back from the pedal, so keep the original file if you want it again.</Trans></span>}
+        {phase === "writing" && <Progress value={send.progress * 100} className="mt-1 w-56" aria-label={t`SnapTone write progress`} />}
         {phase === "error" && step === 4 && <StepError error={error} />}
         {send.file && (phase === "ready" || (phase === "error" && step === 4)) && (
           <span className="mt-2 flex flex-col items-start gap-1">
@@ -143,15 +145,15 @@ export function SnapToneSteps({ send, model, noCabIr }: { send: SendState; model
               {phase === "error" && <RotateCcw data-icon="inline-start" />}
               {writeLabel}
             </Button>
-            {!connected && <span className="text-[11px] text-silkscreen-3">Connect the {pedal} to write it.</span>}
-            {connected && slot === null && <span className="text-[11px] text-silkscreen-3">Choose a slot above.</span>}
+            {!connected && <span className="text-[11px] text-silkscreen-3"><Trans>Connect the {pedal} to write it.</Trans></span>}
+            {connected && slot === null && <span className="text-[11px] text-silkscreen-3"><Trans>Choose a slot above.</Trans></span>}
           </span>
         )}
       </Step>
 
-      <Step n={5} status={status(5)} title={phase === "linked" ? `Linked to ${linkedText} on your ${pedal}` : "Link the new SnapTone"}>
+      <Step n={5} status={status(5)} title={phase === "linked" ? t`Linked to ${linkedText} on your ${pedal}` : t`Link the new SnapTone`}>
         {phase !== "linked" && (
-          <span className="text-pretty text-silkscreen-3">The {profile.captureBlock(slot ?? profile.snapTone.userRange[0])} block then shows this tone's image for that slot.</span>
+          <span className="text-pretty text-silkscreen-3"><Trans>The {profile.captureBlock(slot ?? profile.snapTone.userRange[0])} block then shows this tone's image for that slot.</Trans></span>
         )}
         {phase === "linked" && send.linkedSlot !== null && <UseOnGp5 isIr={false} slot={send.linkedSlot} />}
       </Step>
@@ -172,8 +174,8 @@ export function SnapToneSlotPicker({ value, onChange, disabled }: { value: numbe
   };
   return (
     <Select value={value === null ? "" : String(value)} onValueChange={(v) => onChange(Number(v))} disabled={disabled}>
-      <SelectTrigger className="h-8 w-48" aria-label="SnapTone slot on the pedal">
-        <SelectValue placeholder="Choose a slot" />
+      <SelectTrigger className="h-8 w-48" aria-label={t`SnapTone slot on the pedal`}>
+        <SelectValue placeholder={t`Choose a slot`} />
       </SelectTrigger>
       <SelectContent>
         {userSlots.map((slot) => (
@@ -188,8 +190,8 @@ export function SnapToneSlotPicker({ value, onChange, disabled }: { value: numbe
 
 /** Where to find nam_input_wav.wav, for this platform. */
 function signalWhere(): string {
-  if (host.platform === "win32" || host.platform === "darwin") return `In Valeton Suite: ${SIGNAL_IN_SUITE[host.platform]}.`;
-  return `In Valeton Suite: ${SIGNAL_IN_SUITE.win32} on Windows, or ${SIGNAL_IN_SUITE.darwin} on macOS. The Windows installer opens with 7-Zip.`;
+  if (host.platform === "win32" || host.platform === "darwin") return t`In Valeton Suite: ${SIGNAL_IN_SUITE[host.platform]}.`;
+  return t`In Valeton Suite: ${SIGNAL_IN_SUITE.win32} on Windows, or ${SIGNAL_IN_SUITE.darwin} on macOS. The Windows installer opens with 7-Zip.`;
 }
 
 /**
@@ -204,13 +206,13 @@ export function TestSignalNotice() {
   return (
     <span className="mt-1 flex flex-col items-start gap-1">
       <span className="text-pretty text-silkscreen-2">
-        Making a SnapTone needs Valeton's test signal, nam_input_wav.wav. It is Valeton's file, so Tone Studio doesn't include it.{" "}
-        {isElectron ? "Choose it once and Tone Studio keeps a copy." : "Choose it once per visit."}
+        <Trans>Making a SnapTone needs Valeton's test signal, nam_input_wav.wav. It is Valeton's file, so Tone Studio doesn't include it.{" "}</Trans>
+        {isElectron ? t`Choose it once and Tone Studio keeps a copy.` : t`Choose it once per visit.`}
       </span>
       <span className="text-[11px] break-all text-silkscreen-3">{signalWhere()}</span>
       <Button size="sm" variant="outline" disabled={choosing} onClick={() => void chooseTestSignal()}>
         {choosing ? <Spinner data-icon="inline-start" /> : <FileAudio data-icon="inline-start" />}
-        Choose nam_input_wav.wav…
+        <Trans>Choose nam_input_wav.wav…</Trans>
       </Button>
     </span>
   );

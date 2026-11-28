@@ -15,16 +15,18 @@ import { PANEL } from "./parts";
 import { PedalRefineCard } from "./PedalRefineCard";
 import { ProposalCard } from "./ProposalCard";
 import { SnapToneMatchCard } from "./SnapToneMatchCard";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** What the analysis can and can't tell, shown above the results. */
 function Limits() {
   return (
     <p role="note" className="flex items-start gap-2 text-[12px] text-pretty text-silkscreen-3">
       <Info className="mt-0.5 size-3.5 flex-none" aria-hidden />
-      <span>
+      <Trans><span>
         A starting point, not the exact gear: it is estimated from a separated stem of a mixed, mastered song. Doubled or multitracked guitars, several
         guitar parts and the mix's own EQ, compression and reverb all end up in the estimate, and the separation leaves some bleed from other instruments.
-      </span>
+      </span></Trans>
     </p>
   );
 }
@@ -50,20 +52,20 @@ function NeedStems() {
           <EmptyMedia variant="icon">
             <Guitar />
           </EmptyMedia>
-          <EmptyTitle>Tone match needs the guitar stem</EmptyTitle>
+          <EmptyTitle><Trans>Tone match needs the guitar stem</Trans></EmptyTitle>
           <EmptyDescription>
             {noGuitar
-              ? `This split${splitWith ? ` (${splitWith})` : ""} has no guitar stem. Split the song again with a 6-stem model (Standard or Best): Tone Studio then listens to the guitar alone and proposes a ${pedal} preset and a matching cabinet IR.`
+              ? t`This split${splitWith ? ` (${splitWith})` : ""} has no guitar stem. Split the song again with a 6-stem model (Standard or Best): Tone Studio then listens to the guitar alone and proposes a ${pedal} preset and a matching cabinet IR.`
               : source
-                ? `Split the song into stems first. Tone Studio then listens to the guitar alone: its gain, echo, reverb and tone, and proposes a ${pedal} preset and a matching cabinet IR.`
-                : `Open a song in the Stems tab and split it. Tone Studio then listens to the guitar alone and proposes a ${pedal} preset and a matching cabinet IR.`}
+                ? t`Split the song into stems first. Tone Studio then listens to the guitar alone: its gain, echo, reverb and tone, and proposes a ${pedal} preset and a matching cabinet IR.`
+                : t`Open a song in the Stems tab and split it. Tone Studio then listens to the guitar alone and proposes a ${pedal} preset and a matching cabinet IR.`}
           </EmptyDescription>
         </EmptyHeader>
         {source && (
           <EmptyContent className="flex-row justify-center gap-2">
             <Button disabled={working} onClick={split}>
               {working ? <Spinner data-icon="inline-start" /> : <AudioLines data-icon="inline-start" />}
-              {working ? "Splitting…" : hasGuitar ? "Split into stems" : `Split with ${findModel(DEFAULT_MODEL_ID)?.label}`}
+              {working ? t`Splitting…` : hasGuitar ? t`Split into stems` : t`Split with ${findModel(DEFAULT_MODEL_ID)?.label ?? ""}`}
             </Button>
           </EmptyContent>
         )}
@@ -84,13 +86,13 @@ export function ToneMatchPanel() {
     return (
       <div className="grid flex-1 place-items-center p-6">
         <Alert variant="destructive" className="max-w-lg">
-          <AlertTitle>The guitar stem couldn't be analysed</AlertTitle>
+          <AlertTitle><Trans>The guitar stem couldn't be analysed</Trans></AlertTitle>
           <AlertDescription>
             <p>{status.message}</p>
             <div className="mt-3">
               <Button size="sm" onClick={() => void useToneMatch.getState().analyse()}>
                 <RotateCcw data-icon="inline-start" />
-                Try again
+                <Trans>Try again</Trans>
               </Button>
             </div>
           </AlertDescription>
@@ -105,11 +107,11 @@ export function ToneMatchPanel() {
         <div role="status" className={cn(PANEL, "flex w-full max-w-md flex-col gap-3 px-5 py-4")}>
           <div className="flex items-center gap-2.5 text-[13px]">
             <Spinner />
-            <b className="font-semibold">Listening to the guitar stem</b>
+            <Trans><b className="font-semibold">Listening to the guitar stem</b></Trans>
             <span className="ml-auto text-silkscreen-2 tabular-nums">{percent}%</span>
           </div>
-          <Progress value={percent} aria-label="Analysing the guitar stem" />
-          <p className="text-[12px] text-pretty text-silkscreen-3">Gain, echo, reverb and tone, measured on this computer.</p>
+          <Progress value={percent} aria-label={t`Analysing the guitar stem`} />
+          <p className="text-[12px] text-pretty text-silkscreen-3"><Trans>Gain, echo, reverb and tone, measured on this computer.</Trans></p>
         </div>
       </div>
     );

@@ -21,23 +21,25 @@ import {
 } from "@/song/band/arrangement";
 import { captureRenderSeconds, PART_TONE_PRESETS, presetBlocks } from "@/song/band/part-tone";
 import { PartSourceDialog, presetPartSearch, restorePartSearch } from "./PartSourceDialog";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** The track of a band slider, as BandSettingsForm draws them: a lighter track keeps the full length visible at any value. */
 const BAND_TRACK = "bg-white/15";
 
-const ROLE_LABEL: Record<ToneRole, string> = { pedal: "Pedal", preamp: "Preamp", amp: "Amp", cab: "Cab IR", space: "Space IR", outboard: "Outboard" };
+const ROLE_LABEL: Record<ToneRole, string> = { get pedal() { return t`Pedal`; }, get preamp() { return t`Preamp`; }, get amp() { return t`Amp`; }, get cab() { return t`Cab IR`; }, get space() { return t`Space IR`; }, get outboard() { return t`Outboard`; } };
 const ADD_LABEL: Record<ToneRole, string> = {
-  pedal: "Add pedal…",
-  preamp: "Add preamp…",
-  amp: "Add amp…",
-  cab: "Add cab IR…",
-  space: "Add space IR…",
-  outboard: "Add outboard…",
+  get pedal() { return t`Add pedal…`; },
+  get preamp() { return t`Add preamp…`; },
+  get amp() { return t`Add amp…`; },
+  get cab() { return t`Add cab IR…`; },
+  get space() { return t`Add space IR…`; },
+  get outboard() { return t`Add outboard…`; },
 };
 /** The part's name in the headings and notes. */
 const PART_LABEL: Record<TonePart, { title: string; clean: string; plural: string }> = {
-  bass: { title: "Bass tone", clean: "Clean bass", plural: "Bass tones" },
-  drums: { title: "Drum tone", clean: "Clean drums", plural: "Drum tones" },
+  bass: { get title() { return t`Bass tone`; }, get clean() { return t`Clean bass`; }, get plural() { return t`Bass tones`; } },
+  drums: { get title() { return t`Drum tone`; }, get clean() { return t`Clean drums`; }, get plural() { return t`Drum tones`; } },
 };
 
 export interface PartToneChainProps {
@@ -82,14 +84,14 @@ export function PartToneChain({ part, tone, songSeconds, onChange }: PartToneCha
   };
 
   const names = blocks.map((block) => block.file?.name ?? `${ROLE_LABEL[block.role]}, empty`);
-  const summary = blocks.length === 0 ? "Clean, as generated" : names.join(" → ");
+  const summary = blocks.length === 0 ? t`Clean, as generated` : names.join(" → ");
   const captures = blocks.filter((block) => block.on && block.file && block.type === "capture").length;
   const estimate =
     songSeconds <= 0
       ? null
       : captures === 0
-        ? "Only IRs: a few seconds at Generate."
-        : `About ${Math.round(captureRenderSeconds(blocks, songSeconds, chain?.fast ?? false, part === "drums"))} s at Generate for this song.`;
+        ? t`Only IRs: a few seconds at Generate.`
+        : t`About ${Math.round(captureRenderSeconds(blocks, songSeconds, chain?.fast ?? false, part === "drums"))} s at Generate for this song.`;
 
   return (
     <section aria-label={label.title} className="flex flex-col gap-3 sm:col-span-2">
@@ -104,11 +106,11 @@ export function PartToneChain({ part, tone, songSeconds, onChange }: PartToneCha
           </div>
         )}
       </div>
-      {!desktop && <p className="text-silkscreen-3">{label.plural} need the desktop app.</p>}
+      {!desktop && <p className="text-silkscreen-3"><Trans>{label.plural} need the desktop app.</Trans></p>}
 
       {blocks.length === 0 && (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-silkscreen-2">Start from a preset:</span>
+          <Trans><span className="text-silkscreen-2">Start from a preset:</span></Trans>
           {PART_TONE_PRESETS[part].map((preset) => (
             <Button
               key={preset.name}
@@ -124,7 +126,7 @@ export function PartToneChain({ part, tone, songSeconds, onChange }: PartToneCha
       )}
 
       {blocks.length > 0 && (
-        <ol aria-label={`${label.title} blocks`} className="flex flex-col gap-3">
+        <ol aria-label={t`${label.title} blocks`} className="flex flex-col gap-3">
           {blocks.map((block, index) => {
             const label = `${ROLE_LABEL[block.role]} ${index + 1}`;
             return (
@@ -135,35 +137,35 @@ export function PartToneChain({ part, tone, songSeconds, onChange }: PartToneCha
                     {block.file ? (
                       <>
                         {block.file.name}
-                        {block.file.older && <span className="ml-2 text-silkscreen-3">(older capture)</span>}
+                        {block.file.older && <span className="ml-2 text-silkscreen-3"><Trans>(older capture)</Trans></span>}
                       </>
                     ) : (
-                      <span className="text-silkscreen-2">Empty slot</span>
+                      <span className="text-silkscreen-2"><Trans>Empty slot</Trans></span>
                     )}
                   </span>
                   <Button variant="outline" size="sm" disabled={!desktop} onClick={() => open(block.role, index)}>
-                    {block.file ? "Change…" : "Choose…"}
+                    {block.file ? t`Change…` : t`Choose…`}
                   </Button>
                   <label className="flex items-center gap-2">
-                    <Switch aria-label={`${label} on`} checked={block.on} onCheckedChange={(on) => update(index, { on })} />
-                    On
+                    <Switch aria-label={t`${label} on`} checked={block.on} onCheckedChange={(on) => update(index, { on })} />
+                    <Trans>On</Trans>
                   </label>
-                  <Button variant="ghost" size="sm" aria-label={`Move ${label} up`} disabled={index === 0} onClick={() => move(index, -1)}>
-                    Up
+                  <Button variant="ghost" size="sm" aria-label={t`Move ${label} up`} disabled={index === 0} onClick={() => move(index, -1)}>
+                    <Trans>Up</Trans>
                   </Button>
-                  <Button variant="ghost" size="sm" aria-label={`Move ${label} down`} disabled={index === blocks.length - 1} onClick={() => move(index, 1)}>
-                    Down
+                  <Button variant="ghost" size="sm" aria-label={t`Move ${label} down`} disabled={index === blocks.length - 1} onClick={() => move(index, 1)}>
+                    <Trans>Down</Trans>
                   </Button>
-                  <Button variant="ghost" size="sm" aria-label={`Remove ${label}`} onClick={() => remove(index)}>
-                    Remove
+                  <Button variant="ghost" size="sm" aria-label={t`Remove ${label}`} onClick={() => remove(index)}>
+                    <Trans>Remove</Trans>
                   </Button>
                 </div>
                 <div className="grid gap-x-6 gap-y-3 sm:grid-cols-3">
                   <label className="flex items-center gap-3">
-                    In {block.inputDb} dB
+                    <Trans>In {block.inputDb} dB</Trans>
                     <Slider
                       trackClassName={BAND_TRACK}
-                      aria-label={`${label} input`}
+                      aria-label={t`${label} input`}
                       min={BASS_TONE_INPUT_DB[0]}
                       max={BASS_TONE_INPUT_DB[1]}
                       step={1}
@@ -172,10 +174,10 @@ export function PartToneChain({ part, tone, songSeconds, onChange }: PartToneCha
                     />
                   </label>
                   <label className="flex items-center gap-3">
-                    Out {block.outputDb} dB
+                    <Trans>Out {block.outputDb} dB</Trans>
                     <Slider
                       trackClassName={BAND_TRACK}
-                      aria-label={`${label} output`}
+                      aria-label={t`${label} output`}
                       min={BASS_TONE_OUTPUT_DB[0]}
                       max={BASS_TONE_OUTPUT_DB[1]}
                       step={1}
@@ -184,10 +186,10 @@ export function PartToneChain({ part, tone, songSeconds, onChange }: PartToneCha
                     />
                   </label>
                   <label className="flex items-center gap-3">
-                    Mix {Math.round(block.mix * 100)}%
+                    <Trans>Mix {Math.round(block.mix * 100)}%</Trans>
                     <Slider
                       trackClassName={BAND_TRACK}
-                      aria-label={`${label} mix`}
+                      aria-label={t`${label} mix`}
                       min={0}
                       max={100}
                       step={5}
@@ -208,16 +210,16 @@ export function PartToneChain({ part, tone, songSeconds, onChange }: PartToneCha
             {ADD_LABEL[role]}
           </Button>
         ))}
-        {full && <span className="self-center text-silkscreen-3">Six blocks is the most a chain holds.</span>}
+        {full && <span className="self-center text-silkscreen-3"><Trans>Six blocks is the most a chain holds.</Trans></span>}
       </div>
 
       {chain && blocks.length > 0 && (
         <div className="grid gap-x-6 gap-y-3 sm:grid-cols-3">
           <label className="flex items-center gap-3">
-            Chain {Math.round(chain.dryWet * 100)}% wet
+            <Trans>Chain {Math.round(chain.dryWet * 100)}% wet</Trans>
             <Slider
               trackClassName={BAND_TRACK}
-              aria-label={`${label.title} chain mix`}
+              aria-label={t`${label.title} chain mix`}
               min={0}
               max={100}
               step={5}
@@ -226,8 +228,8 @@ export function PartToneChain({ part, tone, songSeconds, onChange }: PartToneCha
             />
           </label>
           <label className="flex items-center gap-2">
-            <Switch aria-label="Fast render" checked={chain.fast} onCheckedChange={(fast) => onChange({ ...chain, fast })} />
-            Fast render (Lite where the file has one)
+            <Switch aria-label={t`Fast render`} checked={chain.fast} onCheckedChange={(fast) => onChange({ ...chain, fast })} />
+            <Trans>Fast render (Lite where the file has one)</Trans>
           </label>
           {estimate && <span className="self-center text-silkscreen-2">{estimate}</span>}
         </div>

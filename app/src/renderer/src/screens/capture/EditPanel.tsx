@@ -19,6 +19,8 @@ import { fmtInt, PANEL, useCaptureTitle, useToneRecord } from "./parts";
 import { ViewingBar } from "./Versions";
 import { useTones } from "@/screens/tones/store";
 import { usePedalNameOrBoth } from "@/state/device";
+import { t as lt } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const NS = "var(--block-ns)";
 
@@ -59,23 +61,23 @@ export function EditPanel({ versionsButton }: { versionsButton: ReactNode }) {
   if (!recipe) return null;
   const isA2 = loaded.info.arch.kind === "A2";
   return (
-    <section aria-label="Edit" className={cn(PANEL, "col-start-1 row-start-2 flex flex-col")}>
+    <section aria-label={lt`Edit`} className={cn(PANEL, "col-start-1 row-start-2 flex flex-col")}>
       <Tabs value={tab} onValueChange={(v) => set({ tab: v as EditTab })} className="min-h-0 flex-1 gap-0">
         <div className="flex items-center gap-3 border-b px-4 py-3">
-          <TabsList aria-label="Edit">
+          <TabsList aria-label={lt`Edit`}>
             <TabsTrigger value="info" aria-keyshortcuts="Control+1">
-              Info
+              <Trans>Info</Trans>
             </TabsTrigger>
             <TabsTrigger value="level" aria-keyshortcuts="Control+2">
-              Level
+              <Trans>Level</Trans>
             </TabsTrigger>
             {isA2 && (
               <TabsTrigger value="size" aria-keyshortcuts="Control+3">
-                Size
+                <Trans>Size</Trans>
               </TabsTrigger>
             )}
             <TabsTrigger value="shape" aria-keyshortcuts="Control+4">
-              Shape before {model}
+              <Trans>Shape before {model}</Trans>
             </TabsTrigger>
           </TabsList>
           {versionsButton}
@@ -110,27 +112,27 @@ function InfoTab({ recipe, info, readOnly, version, architecture }: { recipe: Ca
   const m = recipe.metadata;
   const text = (key: "name" | "modeled_by" | "gear_make" | "gear_model", label: string) => (
     <Field label={label}>
-      {(id) => <Input id={id} value={m[key]} disabled={readOnly} placeholder="Not set" onChange={(e) => setMeta({ [key]: e.target.value }, `meta:${key}`)} />}
+      {(id) => <Input id={id} value={m[key]} disabled={readOnly} placeholder={lt`Not set`} onChange={(e) => setMeta({ [key]: e.target.value }, `meta:${key}`)} />}
     </Field>
   );
   return (
     <>
-      <LosslessNote>Lossless. These change the file's details, not its sound.</LosslessNote>
+      <LosslessNote><Trans>Lossless. These change the file's details, not its sound.</Trans></LosslessNote>
       <div className="grid grid-cols-2 gap-x-4 gap-y-3">
         {text("name", "Name")}
         {text("modeled_by", "Modeled by")}
         {text("gear_make", "Gear make")}
         {text("gear_model", "Gear model")}
-        <Field label="Gear type">
+        <Field label={lt`Gear type`}>
           {(id) => <VocabSelect id={id} value={m.gear_type} options={GEAR_TYPES} disabled={readOnly} onChange={(v) => setMeta({ gear_type: v }, "meta:gear_type")} />}
         </Field>
-        <Field label="Tone type">
+        <Field label={lt`Tone type`}>
           {(id) => <VocabSelect id={id} value={m.tone_type} options={TONE_TYPES} disabled={readOnly} onChange={(v) => setMeta({ tone_type: v }, "meta:tone_type")} />}
         </Field>
-        <Field label="Calibration input" hint="hosts match drive to this">
+        <Field label={lt`Calibration input`} hint={lt`hosts match drive to this`}>
           {(id) => <DbuField id={id} value={m.input_level_dbu} disabled={readOnly} onChange={(v) => setMeta({ input_level_dbu: v }, "meta:in")} />}
         </Field>
-        <Field label="Calibration output">
+        <Field label={lt`Calibration output`}>
           {(id) => <DbuField id={id} value={m.output_level_dbu} disabled={readOnly} onChange={(v) => setMeta({ output_level_dbu: v }, "meta:out")} />}
         </Field>
       </div>
@@ -177,7 +179,7 @@ function VocabSelect({ id, value, options, disabled, onChange }: { id: string; v
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          <SelectItem value={NONE}>Not set</SelectItem>
+          <SelectItem value={NONE}><Trans>Not set</Trans></SelectItem>
           {value && !known && <SelectItem value={value}>{value}</SelectItem>}
           {options.map(([v, label]) => (
             <SelectItem key={v} value={v}>
@@ -203,7 +205,7 @@ function DbuField({ id, value, disabled, onChange }: { id: string; value: number
         inputMode="decimal"
         value={text}
         disabled={disabled}
-        placeholder="Not set"
+        placeholder={lt`Not set`}
         onChange={(e) => {
           const t = e.target.value;
           setText(t);
@@ -215,7 +217,7 @@ function DbuField({ id, value, disabled, onChange }: { id: string; value: number
         }}
       />
       <InputGroupAddon align="inline-end">
-        <InputGroupText>dBu</InputGroupText>
+        <InputGroupText><Trans>dBu</Trans></InputGroupText>
       </InputGroupAddon>
     </InputGroup>
   );
@@ -228,15 +230,15 @@ function LevelTab({ recipe, info, readOnly }: { recipe: CaptureRecipe; info: Nam
   const gain = levelGainDb(recipe, info.loudness);
   const selectId = useId();
   if (!info.levelEditable) {
-    return <p className="text-[12px] text-silkscreen-2">This model's output level can't be changed losslessly (its layout doesn't keep the output scale as the last weight).</p>;
+    return <p className="text-[12px] text-silkscreen-2"><Trans>This model's output level can't be changed losslessly (its layout doesn't keep the output scale as the last weight).</Trans></p>;
   }
   const isA2 = info.arch.kind === "A2";
   return (
     <>
-      <LosslessNote>{isA2 ? "Lossless. Only the output level changes, in both sizes." : "Lossless. Only the output level changes."}</LosslessNote>
+      <LosslessNote>{isA2 ? lt`Lossless. Only the output level changes, in both sizes.` : lt`Lossless. Only the output level changes.`}</LosslessNote>
       <div className="flex flex-wrap items-center gap-6">
         <Dial
-          label="Output trim"
+          label={lt`Output trim`}
           value={recipe.trimDb}
           spec={{ ...TRIM_RANGE, unit: "dB" }}
           size={72}
@@ -246,7 +248,7 @@ function LevelTab({ recipe, info, readOnly }: { recipe: CaptureRecipe; info: Nam
         />
         <div className="flex w-[240px] flex-col gap-1.5">
           <Label htmlFor={selectId} className="text-[11px] font-medium tracking-[0.04em] text-silkscreen-3 uppercase">
-            Match loudness
+            <Trans>Match loudness</Trans>
           </Label>
           <Select
             value={recipe.loudnessTarget === null ? "off" : String(recipe.loudnessTarget)}
@@ -260,26 +262,26 @@ function LevelTab({ recipe, info, readOnly }: { recipe: CaptureRecipe; info: Nam
               <SelectGroup>
                 {LOUDNESS_TARGETS.map((t) => (
                   <SelectItem key={t} value={String(t)}>
-                    {t === -18 ? "−18 dB, like most TONE3000 tones" : fmtDb(t)}
+                    {t === -18 ? lt`−18 dB, like most TONE3000 tones` : fmtDb(t)}
                   </SelectItem>
                 ))}
-                <SelectItem value="off">Off</SelectItem>
+                <SelectItem value="off"><Trans>Off</Trans></SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
-          {info.loudness === null && <span className="text-[11px] text-silkscreen-3">This file doesn't state its loudness, so it can't be matched.</span>}
+          {info.loudness === null && <span className="text-[11px] text-silkscreen-3"><Trans>This file doesn't state its loudness, so it can't be matched.</Trans></span>}
         </div>
         {info.loudness !== null && (
           <dl className="m-0 grid grid-cols-[auto_auto] gap-x-4 gap-y-1.5 text-[12px] text-silkscreen-3">
-            <dt>Original</dt>
+            <dt><Trans>Original</Trans></dt>
             <dd className="m-0 text-right font-semibold text-silkscreen tabular-nums">{fmtDb(info.loudness)}</dd>
-            <dt>After trim</dt>
+            <dt><Trans>After trim</Trans></dt>
             <dd className="m-0 text-right font-semibold text-silkscreen tabular-nums">{fmtDb(info.loudness + gain)}</dd>
           </dl>
         )}
       </div>
       <p className="text-[12px] text-silkscreen-3">
-        Output change {fmtDb(gain)}: the file's output scale is multiplied by {(10 ** (gain / 20)).toFixed(3)}.
+        <Trans>Output change {fmtDb(gain)}: the file's output scale is multiplied by {(10 ** (gain / 20)).toFixed(3)}.</Trans>
       </p>
     </>
   );
@@ -294,18 +296,18 @@ function SizeTab({ recipe, info, readOnly }: { recipe: CaptureRecipe; info: NamI
   const full = info.arch.submodels.find((s) => s.size === "full");
   const lite = info.arch.submodels.find((s) => s.size === "lite");
   if (!full || !lite) {
-    return <p className="text-[12px] text-silkscreen-2">This file holds one size only ({full ? "Full" : "Lite"}, {fmtInt((full ?? lite)!.params)} params), so there's nothing to choose.</p>;
+    return <p className="text-[12px] text-silkscreen-2"><Trans>This file holds one size only (</Trans>{full ? lt`Full` : lt`Lite`}<Trans>, {fmtInt((full ?? lite)!.params)} params), so there's nothing to choose.</Trans></p>;
   }
   const cards = [
-    { value: "both", title: "Both sizes", params: full.params + lite.params, text: "Plug-ins pick Full or Lite. Same as the original file." },
-    { value: "full", title: "Full only", params: full.params, text: "Most accurate. For desktop plug-ins." },
-    { value: "lite", title: "Lite only", params: lite.params, text: "For small hardware that runs A2." },
+    { value: "both", title: lt`Both sizes`, params: full.params + lite.params, text: lt`Plug-ins pick Full or Lite. Same as the original file.` },
+    { value: "full", title: lt`Full only`, params: full.params, text: lt`Most accurate. For desktop plug-ins.` },
+    { value: "lite", title: lt`Lite only`, params: lite.params, text: lt`For small hardware that runs A2.` },
   ];
   return (
     <>
-      <LosslessNote>Lossless. Choose which sizes the exported A2 keeps.</LosslessNote>
+      <LosslessNote><Trans>Lossless. Choose which sizes the exported A2 keeps.</Trans></LosslessNote>
       <RadioGroupPrimitive.Root
-        aria-label="Sizes to export"
+        aria-label={lt`Sizes to export`}
         value={recipe.size}
         disabled={readOnly}
         onValueChange={(v) => edit((r) => ({ ...r, size: v as CaptureRecipe["size"] }))}
@@ -318,14 +320,14 @@ function SizeTab({ recipe, info, readOnly }: { recipe: CaptureRecipe; info: NamI
             className="flex flex-col items-start gap-1 rounded-lg px-3.5 py-3 text-left shadow-[inset_0_0_0_1px_var(--seam-strong)] hover:bg-accent disabled:opacity-60 data-[state=checked]:bg-faceplate-raised data-[state=checked]:shadow-[inset_0_0_0_2px_var(--silkscreen)]"
           >
             <b className="font-semibold">{c.title}</b>
-            <span className="text-[18px] font-semibold text-silkscreen tabular-nums">
+            <Trans><span className="text-[18px] font-semibold text-silkscreen tabular-nums">
               {fmtInt(c.params)} <small className="text-[11px] font-medium text-silkscreen-3">params</small>
-            </span>
+            </span></Trans>
             <span className="text-[11px] text-pretty text-silkscreen-3">{c.text}</span>
           </RadioGroupPrimitive.Item>
         ))}
       </RadioGroupPrimitive.Root>
-      <p className="text-[12px] text-silkscreen-3">The {model} SnapTone is made from the largest size the exported file keeps, like Valeton Suite does.</p>
+      <p className="text-[12px] text-silkscreen-3"><Trans>The {model} SnapTone is made from the largest size the exported file keeps, like Valeton Suite does.</Trans></p>
     </>
   );
 }
@@ -334,15 +336,15 @@ function SizeTab({ recipe, info, readOnly }: { recipe: CaptureRecipe; info: NamI
 
 type DialDef = { key: keyof Shaping; label: string; unit: string; scale?: number };
 const PRE: DialDef[] = [
-  { key: "driveDb", label: "Input drive", unit: "dB" },
-  { key: "lowCutHz", label: "Low cut", unit: "Hz" },
-  { key: "tightPct", label: "Tight", unit: "%" },
+  { key: "driveDb", get label() { return lt`Input drive`; }, unit: "dB" },
+  { key: "lowCutHz", get label() { return lt`Low cut`; }, unit: "Hz" },
+  { key: "tightPct", get label() { return lt`Tight`; }, unit: "%" },
 ];
 const POST: DialDef[] = [
-  { key: "bassDb", label: "Bass", unit: "dB" },
-  { key: "midDb", label: "Mid", unit: "dB" },
-  { key: "trebleDb", label: "Treble", unit: "dB" },
-  { key: "highCutHz", label: "High cut", unit: "kHz", scale: 1000 },
+  { key: "bassDb", get label() { return lt`Bass`; }, unit: "dB" },
+  { key: "midDb", get label() { return lt`Mid`; }, unit: "dB" },
+  { key: "trebleDb", get label() { return lt`Treble`; }, unit: "dB" },
+  { key: "highCutHz", get label() { return lt`High cut`; }, unit: "kHz", scale: 1000 },
 ];
 
 function ShapeTab({ recipe, info, readOnly }: { recipe: CaptureRecipe; info: NamInfo; readOnly: boolean }) {
@@ -374,28 +376,28 @@ function ShapeTab({ recipe, info, readOnly }: { recipe: CaptureRecipe; info: Nam
     <>
       <div className="flex items-center gap-2.5 text-[12px] text-pretty text-silkscreen-2">
         <Badge variant="warn" className="flex-none">
-          Not lossless
+          <Trans>Not lossless</Trans>
         </Badge>
-        Heard in {isA2 ? "A and B" : "A"} and kept with the version for making a {model} version. Your {isA2 ? "A2 " : ""}file stays as captured.
+        <Trans>Heard in</Trans> {isA2 ? lt`A and B` : "A"} <Trans>and kept with the version for making a {model} version. Your</Trans> {isA2 ? "A2 " : ""}<Trans>file stays as captured.</Trans>
       </div>
       <div className="relative flex items-center justify-between gap-2 rounded-lg bg-well px-3 pt-3.5 pb-3 before:absolute before:inset-x-4 before:top-1/2 before:h-0.5 before:bg-cable">
-        <DialGroup title="Before the capture">{PRE.map(dial)}</DialGroup>
+        <DialGroup title={lt`Before the capture`}>{PRE.map(dial)}</DialGroup>
         <div className="relative z-[1] flex flex-col items-center gap-1.5">
           <Capture name={title} image={image} caption={isA2 ? "NAM A2" : "NAM A1"} className="w-[70px]" />
           <span className="flex items-center gap-1.5 text-[11px] text-silkscreen-2">
             <span className="size-2 rounded-full bg-block-ns" aria-hidden />
-            {isA2 ? "A2-Full" : "A1"}
+            {isA2 ? lt`A2-Full` : "A1"}
           </span>
         </div>
-        <DialGroup title="After the capture">{POST.map(dial)}</DialGroup>
+        <DialGroup title={lt`After the capture`}>{POST.map(dial)}</DialGroup>
       </div>
       <ResponseCurve shaping={s} />
       <div className="mt-auto flex items-center gap-3 text-[12px]">
         <Button variant="ghost" size="sm" disabled={readOnly || isFlat(s)} onClick={() => edit((r) => ({ ...r, shaping: { ...FLAT_SHAPING } }))}>
           <RotateCcw className="size-3.5" aria-hidden />
-          Reset shaping
+          <Trans>Reset shaping</Trans>
         </Button>
-        <span className="text-pretty text-silkscreen-3">Shaping never changes the exported {isA2 ? "A2 " : ""}file. It's part of the version's recipe.</span>
+        <span className="text-pretty text-silkscreen-3"><Trans>Shaping never changes the exported</Trans> {isA2 ? "A2 " : ""}<Trans>file. It's part of the version's recipe.</Trans></span>
       </div>
     </>
   );
@@ -429,11 +431,11 @@ function ResponseCurve({ shaping }: { shaping: Shaping }) {
   return (
     <div className="flex min-h-[110px] flex-1 flex-col gap-1.5">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="text-[11px] font-medium tracking-[0.04em] text-silkscreen-3 uppercase">Response of these settings</span>
-        <span className="text-[11px] text-silkscreen-3">Dashed before the capture · solid after</span>
+        <Trans><span className="text-[11px] font-medium tracking-[0.04em] text-silkscreen-3 uppercase">Response of these settings</span>
+        <span className="text-[11px] text-silkscreen-3">Dashed before the capture · solid after</span></Trans>
       </div>
       <div className="relative min-h-20 flex-1 overflow-hidden rounded-lg bg-well">
-        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="absolute inset-0 size-full" role="img" aria-label="Computed frequency response of the shaping settings">
+        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="absolute inset-0 size-full" role="img" aria-label={lt`Computed frequency response of the shaping settings`}>
           {[100, 1000, 10000].map((f) => (
             <line key={f} x1={xOf(f)} x2={xOf(f)} y1={0} y2={H} className="stroke-seam" vectorEffect="non-scaling-stroke" />
           ))}
@@ -452,8 +454,8 @@ function ResponseCurve({ shaping }: { shaping: Shaping }) {
             {label}
           </span>
         ))}
-        <span className="pointer-events-none absolute top-1.5 left-1.5 text-[11px] leading-none text-silkscreen-4">+12 dB</span>
-        <span className="pointer-events-none absolute bottom-1.5 left-1.5 text-[11px] leading-none text-silkscreen-4">−12 dB</span>
+        <Trans><span className="pointer-events-none absolute top-1.5 left-1.5 text-[11px] leading-none text-silkscreen-4">+12 dB</span>
+        <span className="pointer-events-none absolute bottom-1.5 left-1.5 text-[11px] leading-none text-silkscreen-4">−12 dB</span></Trans>
       </div>
     </div>
   );

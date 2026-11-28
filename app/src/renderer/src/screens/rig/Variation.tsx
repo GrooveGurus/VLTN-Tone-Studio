@@ -14,6 +14,8 @@ import type { PresetState } from "@/state/device-types";
 import { useLibrary } from "@/screens/library/store";
 import { applyBlock, editBlock, recordBlock, snapshot } from "./edits";
 import { morphed, randomized } from "./variation-params";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const AMOUNTS = [
   ["Subtle", 0.08],
@@ -46,32 +48,32 @@ export function VariationMenu({ preset, disabled }: { preset: PresetState; disab
         <Tooltip>
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-sm" aria-label="Vary the sound" disabled={disabled}>
+              <Button variant="ghost" size="icon-sm" aria-label={t`Vary the sound`} disabled={disabled}>
                 <ShuffleIcon aria-hidden />
               </Button>
             </DropdownMenuTrigger>
           </TooltipTrigger>
-          <TooltipContent>Randomize or morph</TooltipContent>
+          <TooltipContent><Trans>Randomize or morph</Trans></TooltipContent>
         </Tooltip>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Randomize knobs</DropdownMenuLabel>
+          <DropdownMenuLabel><Trans>Randomize knobs</Trans></DropdownMenuLabel>
           {AMOUNTS.map(([label, amount]) => (
-            <DropdownMenuItem key={label} onSelect={() => void randomizePreset(amount).catch((e) => notifyError("Couldn't randomize", e))}>
+            <DropdownMenuItem key={label} onSelect={() => void randomizePreset(amount).catch((e) => notifyError(t`Couldn't randomize`, e))}>
               {label}
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
           <DropdownMenuItem disabled={!candidates.length} onSelect={() => setPicker(true)}>
-            Morph toward another preset…
+            <Trans>Morph toward another preset…</Trans>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <CommandDialog open={picker} onOpenChange={setPicker} title="Morph toward" description="Pick the preset to blend into this one">
-        <CommandInput placeholder="Find a preset by number or name" />
+      <CommandDialog open={picker} onOpenChange={setPicker} title={t`Morph toward`} description={t`Pick the preset to blend into this one`}>
+        <CommandInput placeholder={t`Find a preset by number or name`} />
         <CommandList className="max-h-[360px]">
-          <CommandEmpty>No preset with a known sound matches</CommandEmpty>
-          <CommandGroup heading="Presets this app has seen">
+          <CommandEmpty><Trans>No preset with a known sound matches</Trans></CommandEmpty>
+          <CommandGroup heading={t`Presets this app has seen`}>
             {candidates.map((n) => (
               <CommandItem
                 key={n.slot}
@@ -81,7 +83,7 @@ export function VariationMenu({ preset, disabled }: { preset: PresetState; disab
                   try {
                     setTarget(toPresetState(n.slot, bodies[n.slot].prst, preset.device));
                   } catch (e) {
-                    notifyError("Couldn't read that preset", e);
+                    notifyError(t`Couldn't read that preset`, e);
                   }
                 }}
               >
@@ -122,7 +124,7 @@ function MorphDialog({ from, to, onClose }: { from: PresetState; to: PresetState
   const keep = () => {
     for (const s of start) {
       const now = dev().preset?.blocks[s.index];
-      if (now) recordBlock(`Morph toward ${to.name.trim()}`, s, snapshot(now));
+      if (now) recordBlock(t`Morph toward ${to.name.trim()}`, s, snapshot(now));
     }
     onClose();
   };
@@ -131,22 +133,22 @@ function MorphDialog({ from, to, onClose }: { from: PresetState; to: PresetState
     <Dialog open onOpenChange={(o) => !o && cancel()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Morph toward {to.name.trim()}</DialogTitle>
+          <DialogTitle><Trans>Morph toward {to.name.trim()}</Trans></DialogTitle>
           <DialogDescription>
-            {blendable ? `${blendable} of ${startBlocks.length} blocks share a model and blend; the others stay as they are.` : "No block uses the same model in both presets, so nothing will change."}
+            {blendable ? t`${blendable} of ${startBlocks.length} blocks share a model and blend; the others stay as they are.` : t`No block uses the same model in both presets, so nothing will change.`}
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-center gap-3 py-2">
-          <span className="text-sm text-silkscreen-3">This</span>
-          <Slider aria-label="Morph amount" min={0} max={100} step={1} value={[amount]} onValueChange={([v]) => move(v)} disabled={!blendable} />
+          <Trans><span className="text-sm text-silkscreen-3">This</span></Trans>
+          <Slider aria-label={t`Morph amount`} min={0} max={100} step={1} value={[amount]} onValueChange={([v]) => move(v)} disabled={!blendable} />
           <span className="text-sm text-silkscreen-3">{to.name.trim()}</span>
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={cancel}>
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
           <Button onClick={keep} disabled={amount === 0}>
-            Keep {amount}%
+            <Trans>Keep {amount}%</Trans>
           </Button>
         </DialogFooter>
       </DialogContent>

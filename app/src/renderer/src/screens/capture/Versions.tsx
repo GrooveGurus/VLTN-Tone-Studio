@@ -18,6 +18,8 @@ import { cn } from "@/lib/utils";
 import { summarize } from "./nam/recipe";
 import { isDirty, recipeOf, useCapture } from "./store";
 import { PANEL } from "./parts";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 function when(iso: string): string {
   const d = new Date(iso);
@@ -41,7 +43,7 @@ function VersionList({ onPicked }: { onPicked?: () => void }) {
     view(n);
     onPicked?.();
   };
-  const onRestore = (n: number) => restore(n).catch((e) => notifyError(`Couldn't restore version ${n}`, e));
+  const onRestore = (n: number) => restore(n).catch((e) => notifyError(t`Couldn't restore version ${n}`, e));
   const workingIs = (n: number) => !dirty && base === n;
 
   const item = (n: number, title: string, time: string, what: string, extra?: React.ReactNode) => {
@@ -62,7 +64,7 @@ function VersionList({ onPicked }: { onPicked?: () => void }) {
             >
               <span className="flex items-center gap-1.5">
                 <span className={cn("font-semibold", n === 0 ? "text-silkscreen-2" : "text-silkscreen")}>{title}</span>
-                {n === 0 && <Lock className="size-3 text-silkscreen-4" aria-label="Locked" />}
+                {n === 0 && <Lock className="size-3 text-silkscreen-4" aria-label={t`Locked`} />}
                 <span className="ml-auto text-[11px] text-silkscreen-4">{time}</span>
               </span>
               <span className="leading-snug text-pretty text-silkscreen-2">{what}</span>
@@ -73,11 +75,11 @@ function VersionList({ onPicked }: { onPicked?: () => void }) {
             <ContextMenuGroup>
               <ContextMenuItem onSelect={() => open(isWorking ? null : n)}>
                 <Eye />
-                Open
+                <Trans>Open</Trans>
               </ContextMenuItem>
               <ContextMenuItem disabled={isWorking} onSelect={() => void onRestore(n)}>
                 <RotateCcw />
-                Restore as version {dirty ? nextN + 1 : nextN}
+                <Trans>Restore as version</Trans> {dirty ? nextN + 1 : nextN}
               </ContextMenuItem>
             </ContextMenuGroup>
             {n > 0 && (
@@ -86,7 +88,7 @@ function VersionList({ onPicked }: { onPicked?: () => void }) {
                 <ContextMenuGroup>
                   <ContextMenuItem variant="destructive" onSelect={() => setConfirmDelete(n)}>
                     <Trash2 />
-                    Delete…
+                    <Trans>Delete…</Trans>
                   </ContextMenuItem>
                 </ContextMenuGroup>
               </>
@@ -112,12 +114,12 @@ function VersionList({ onPicked }: { onPicked?: () => void }) {
                 viewing === null && "bg-lamp-glow shadow-[inset_0_0_0_1px_var(--seam-strong)]",
               )}
             >
-              <span className="flex items-center gap-1.5">
+              <Trans><span className="flex items-center gap-1.5">
                 <span className="font-semibold text-silkscreen">Draft</span>
                 <span className="ml-auto text-[11px] text-silkscreen-4">Not saved</span>
               </span>
               <span className="leading-snug text-pretty text-silkscreen-2">{summarize(recipeOf(loaded, base), recipe)}</span>
-              <span className="text-[11px] text-silkscreen-3">Saving makes it version {nextN}</span>
+              <span className="text-[11px] text-silkscreen-3">Saving makes it version {nextN}</span></Trans>
             </button>
           </li>
         )}
@@ -127,27 +129,27 @@ function VersionList({ onPicked }: { onPicked?: () => void }) {
             `Version ${v.n}`,
             when(v.createdAt),
             v.summary,
-            v.restoredFrom ? <span className="text-[11px] text-silkscreen-3">Restored from version {v.restoredFrom}</span> : undefined,
+            v.restoredFrom ? <span className="text-[11px] text-silkscreen-3"><Trans>Restored from version {v.restoredFrom}</Trans></span> : undefined,
           ),
         )}
-        {item(0, "Original", "", fromTone ? "From TONE3000, never changed" : "As opened, never changed")}
+        {item(0, "Original", "", fromTone ? t`From TONE3000, never changed` : t`As opened, never changed`)}
       </ol>
       <AlertDialog open={confirmDelete !== null} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete version {confirmDelete}?</AlertDialogTitle>
-            <AlertDialogDescription>Its recipe and exported file are removed. The other versions and the original stay as they are.</AlertDialogDescription>
+            <AlertDialogTitle><Trans>Delete version {confirmDelete}?</Trans></AlertDialogTitle>
+            <AlertDialogDescription><Trans>Its recipe and exported file are removed. The other versions and the original stay as they are.</Trans></AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Keep it</AlertDialogCancel>
+            <AlertDialogCancel><Trans>Keep it</Trans></AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               onClick={() => {
                 const n = confirmDelete;
-                if (n !== null) useCapture.getState().deleteVersion(n).catch((e) => notifyError(`Couldn't delete version ${n}`, e));
+                if (n !== null) useCapture.getState().deleteVersion(n).catch((e) => notifyError(t`Couldn't delete version ${n}`, e));
               }}
             >
-              Delete version {confirmDelete}
+              <Trans>Delete version {confirmDelete}</Trans>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -161,10 +163,10 @@ const FOOT = "Each version is a small recipe on top of the original. Nothing is 
 /** Wide windows: the versions column. */
 export function VersionsPanel() {
   return (
-    <aside aria-label="Versions" className={cn(PANEL, "col-start-2 row-start-2 hidden flex-col gap-2.5 px-2.5 pt-3.5 pb-3 min-[1421px]:flex")}>
+    <aside aria-label={t`Versions`} className={cn(PANEL, "col-start-2 row-start-2 hidden flex-col gap-2.5 px-2.5 pt-3.5 pb-3 min-[1421px]:flex")}>
       <h2 className="flex items-center gap-1.5 px-1.5 text-[12px] font-semibold text-silkscreen-2">
         <History className="size-3.5 text-silkscreen-3" aria-hidden />
-        Versions
+        <Trans>Versions</Trans>
       </h2>
       <VersionList />
       <p className="mt-auto border-t px-1.5 pt-2 text-[11px] text-pretty text-silkscreen-3">{FOOT}</p>
@@ -180,7 +182,7 @@ export function VersionsButton() {
     <>
       <Button variant="ghost" size="sm" className="ml-auto min-[1421px]:hidden" aria-expanded={open} onClick={() => setOpen(true)}>
         <History className="size-3.5" aria-hidden />
-        Versions
+        <Trans>Versions</Trans>
         <span className="text-silkscreen-3">{count}</span>
       </Button>
       <Sheet open={open} onOpenChange={setOpen}>
@@ -188,7 +190,7 @@ export function VersionsButton() {
           <SheetHeader className="p-0 px-1.5">
             <SheetTitle className="flex items-center gap-1.5 text-[13px]">
               <History className="size-3.5 text-silkscreen-3" aria-hidden />
-              Versions
+              <Trans>Versions</Trans>
             </SheetTitle>
             <SheetDescription className="text-[11px]">{FOOT}</SheetDescription>
           </SheetHeader>
@@ -208,13 +210,13 @@ export function ViewingBar() {
   return (
     <div className="flex items-center gap-3 border-b bg-lamp-glow px-4 py-2 text-[12px] text-silkscreen-2" role="status">
       <Eye className="size-3.5 flex-none text-silkscreen-3" aria-hidden />
-      <span className="min-w-0 flex-1">Viewing {viewing === 0 ? "the original" : `version ${viewing}`}, read-only.</span>
+      <span className="min-w-0 flex-1"><Trans>Viewing</Trans> {viewing === 0 ? t`the original` : t`version ${viewing}`}<Trans>, read-only.</Trans></span>
       <Button variant="ghost" size="sm" onClick={() => view(null)}>
-        Back to current
+        <Trans>Back to current</Trans>
       </Button>
-      <Button variant="outline" size="sm" onClick={() => restore(viewing).catch((e) => notifyError("Couldn't restore", e))}>
+      <Button variant="outline" size="sm" onClick={() => restore(viewing).catch((e) => notifyError(t`Couldn't restore`, e))}>
         <RotateCcw className="size-3.5" aria-hidden />
-        Restore as version {nextN}
+        <Trans>Restore as version {nextN}</Trans>
       </Button>
     </div>
   );

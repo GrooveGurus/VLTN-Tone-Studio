@@ -15,6 +15,8 @@ import { changeOf, draftOf, isDirty, type PlaylistDraft } from "@/song/playlist-
 import type { Playlist } from "@shared/song-library";
 import { SetEditor } from "./SetEditor";
 import { SmartPlaylistEditor } from "./SmartPlaylistEditor";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const field = "rounded border border-seam bg-transparent p-2";
 
@@ -82,7 +84,7 @@ export function PlaylistsPanel() {
   const save = async (): Promise<boolean> => {
     if (!playlist || !draft || !dirty) return true;
     if (!draft.name.trim() || draft.sets.some((set) => !set.name.trim())) {
-      setProblem(draft.name.trim() ? "Name every set, or remove its heading." : "Name the playlist first.");
+      setProblem(draft.name.trim() ? t`Name every set, or remove its heading.` : t`Name the playlist first.`);
       return false;
     }
     const value = draft;
@@ -99,7 +101,7 @@ export function PlaylistsPanel() {
   };
   return (
     <section
-      aria-label="Playlists"
+      aria-label={t`Playlists`}
       className="space-y-3 rounded border border-seam p-4"
       onKeyDown={(e) => {
         if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s" && dirty) {
@@ -108,11 +110,11 @@ export function PlaylistsPanel() {
         }
       }}
     >
-      <h2 className="font-semibold">Playlists / live sets</h2>
+      <h2 className="font-semibold"><Trans>Playlists / live sets</Trans></h2>
       <div className="flex flex-wrap gap-2">
         <input
-          aria-label="New playlist name"
-          placeholder="New playlist name"
+          aria-label={t`New playlist name`}
+          placeholder={t`New playlist name`}
           className={field}
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -120,19 +122,19 @@ export function PlaylistsPanel() {
             if (e.key === "Enter") create();
           }}
         />
-        <select aria-label="New playlist kind" className={field} value={kind} onChange={(e) => setKind(e.target.value as "static" | "smart")}>
-          <option value="static">Playlist</option>
-          <option value="smart">Smart playlist (by rules)</option>
+        <select aria-label={t`New playlist kind`} className={field} value={kind} onChange={(e) => setKind(e.target.value as "static" | "smart")}>
+          <option value="static"><Trans>Playlist</Trans></option>
+          <option value="smart"><Trans>Smart playlist (by rules)</Trans></option>
         </select>
         <Button disabled={!name.trim() || library.busy} onClick={create}>
-          Create playlist
+          <Trans>Create playlist</Trans>
         </Button>
       </div>
-      <select aria-label="Playlist" className={field + " w-full"} value={selected} onChange={(e) => choose(e.target.value)}>
-        <option value="">Select a playlist…</option>
+      <select aria-label={t`Playlist`} className={field + " w-full"} value={selected} onChange={(e) => choose(e.target.value)}>
+        <option value=""><Trans>Select a playlist…</Trans></option>
         {library.index.playlists.map((p) => (
           <option value={p.id} key={p.id}>
-            {p.name} ({p.smart ? "smart" : p.songs.length})
+            {p.name} ({p.smart ? t`smart` : p.songs.length})
           </option>
         ))}
       </select>
@@ -141,7 +143,7 @@ export function PlaylistsPanel() {
           <div className="flex flex-wrap gap-2">
             {playlist.smart ? (
               <input
-                aria-label="Playlist name"
+                aria-label={t`Playlist name`}
                 key={playlist.id + playlist.name}
                 defaultValue={playlist.name}
                 className={field}
@@ -154,7 +156,7 @@ export function PlaylistsPanel() {
             ) : (
               draft && (
                 <input
-                  aria-label="Playlist name"
+                  aria-label={t`Playlist name`}
                   value={draft.name}
                   className={field}
                   disabled={library.busy}
@@ -163,12 +165,12 @@ export function PlaylistsPanel() {
               )
             )}
             <Button variant="outline" disabled={library.busy} onClick={() => setConfirm("playlist:" + playlist.id)}>
-              Delete playlist…
+              <Trans>Delete playlist…</Trans>
             </Button>
           </div>
           {confirm === "playlist:" + playlist.id && (
             <div>
-              Keep the songs and delete this playlist?{" "}
+              <Trans>Keep the songs and delete this playlist?{" "}</Trans>
               <Button
                 disabled={library.busy}
                 onClick={() => {
@@ -178,10 +180,10 @@ export function PlaylistsPanel() {
                   setConfirm("");
                 }}
               >
-                Confirm delete playlist
+                <Trans>Confirm delete playlist</Trans>
               </Button>
               <Button variant="outline" onClick={() => setConfirm("")}>
-                Keep playlist
+                <Trans>Keep playlist</Trans>
               </Button>
             </div>
           )}
@@ -192,14 +194,14 @@ export function PlaylistsPanel() {
               <>
                 <div className="flex flex-wrap items-center gap-2">
                   <Button disabled={!dirty || library.busy} onClick={() => void save()}>
-                    Save playlist
+                    <Trans>Save playlist</Trans>
                   </Button>
                   <Button variant="outline" disabled={!dirty} onClick={() => setEdits(null)}>
-                    Discard changes
+                    <Trans>Discard changes</Trans>
                   </Button>
-                  <span className="text-sm">{dirty ? "Unsaved changes" : "Saved"}</span>
+                  <span className="text-sm">{dirty ? t`Unsaved changes` : t`Saved`}</span>
                 </div>
-                {changedElsewhere && <p className="text-sm">This playlist was changed elsewhere. Save to keep your version, or Discard to load the new one.</p>}
+                {changedElsewhere && <p className="text-sm"><Trans>This playlist was changed elsewhere. Save to keep your version, or Discard to load the new one.</Trans></p>}
                 {problem && (
                   <p role="alert" className="text-sm text-red-400">
                     {problem}
@@ -214,15 +216,15 @@ export function PlaylistsPanel() {
       <AlertDialog open={!!pending} onOpenChange={(open) => !open && setPending("")}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Save changes to {playlist?.name ?? "this playlist"}?</AlertDialogTitle>
-            <AlertDialogDescription>Your edits have not been saved yet.</AlertDialogDescription>
+            <AlertDialogTitle><Trans>Save changes to</Trans> {playlist?.name ?? t`this playlist`}?</AlertDialogTitle>
+            <AlertDialogDescription><Trans>Your edits have not been saved yet.</Trans></AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel><Trans>Cancel</Trans></AlertDialogCancel>
             <Button variant="outline" onClick={() => void leave("discard")}>
-              Don&apos;t save
+              <Trans>Don&apos;t save</Trans>
             </Button>
-            <AlertDialogAction onClick={() => void leave("save")}>Save</AlertDialogAction>
+            <AlertDialogAction onClick={() => void leave("save")}><Trans>Save</Trans></AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

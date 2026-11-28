@@ -9,6 +9,8 @@ import { ORIGINAL_PARTS, partKeysOf, silencedByChoice, type PartChoices } from "
 import { PRACTICE_KINDS, PRACTICE_LABEL, kindOfTrack, practiceMutedKeys, practiceSet, usePracticeMute, type CountsAs } from "@/song/performance/practice-mute";
 import { STEM_LABEL } from "./stems/StemMixer";
 import type { StemName } from "@/song/types";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * The name a mixer row shows. A split stem uses the Stems tab's name for it, so the two mixers read alike; a generated or imported track
@@ -81,9 +83,9 @@ export function PerformanceMix({
   const silenced = silencedByChoice(partChoices, partKeysOf(tracks, stems));
   const usedGroups = [...new Set(Object.values(groups).flat())].sort((a, b) => a - b);
   return (
-    <div aria-label="Performance mixer" className="flex flex-col gap-3">
+    <div aria-label={t`Performance mixer`} className="flex flex-col gap-3">
       {usedGroups.length > 0 && (
-        <div aria-label="Mute groups" className="flex flex-wrap gap-2 text-sm">
+        <div aria-label={t`Mute groups`} className="flex flex-wrap gap-2 text-sm">
           {usedGroups.map((group) => {
             const members = player.names.filter((name) => groups[name]?.includes(group));
             const active = player.names.every((name) => (members.includes(name) ? !mix[name]?.mute : mix[name]?.mute));
@@ -102,7 +104,7 @@ export function PerformanceMix({
                   })
                 }
               >
-                Group {group}
+                <Trans>Group {group}</Trans>
               </button>
             );
           })}
@@ -113,7 +115,7 @@ export function PerformanceMix({
           {warning}
         </p>
       )}
-      <div aria-label="Mixer rows" className={`${ROW_GRID} items-center gap-y-2`}>
+      <div aria-label={t`Mixer rows`} className={`${ROW_GRID} items-center gap-y-2`}>
         {player.names.map((name) => {
           const entry: StemMix = mix[name] ?? defaultStemMix();
           const info = tracks[name];
@@ -131,7 +133,7 @@ export function PerformanceMix({
                 <label className="flex min-w-0 items-center gap-1.5">
                   <input
                     type="checkbox"
-                    aria-label={`${label(name)} enabled`}
+                    aria-label={t`${label(name)} enabled`}
                     checked={!entry.mute && !byPractice}
                     onChange={(e) => {
                       // Read the input now: an updater runs after React has put a controlled input back, so its value would be stale.
@@ -147,21 +149,21 @@ export function PerformanceMix({
                   />
                   <span className="truncate">{label(name)}</span>
                 </label>
-                {byPractice && <span className="shrink-0 rounded-md border border-led-warn px-1.5 py-0.5 text-xs text-led-warn">Practice</span>}
+                {byPractice && <span className="shrink-0 rounded-md border border-led-warn px-1.5 py-0.5 text-xs text-led-warn"><Trans>Practice</Trans></span>}
                 {info?.kind === "user" && onCountsAs && (
                   <select
-                    aria-label={`${label(name)} counts as`}
+                    aria-label={t`${label(name)} counts as`}
                     className="shrink-0 rounded-md border border-seam bg-transparent px-1 py-0.5 text-xs"
                     value={countsAs[name] ?? "name"}
                     onChange={(e) => onCountsAs(name, e.target.value === "name" ? undefined : (e.target.value as CountsAs))}
                   >
-                    <option value="name">Counts as: by name</option>
+                    <option value="name"><Trans>Counts as: by name</Trans></option>
                     {PRACTICE_KINDS.map((kind) => (
                       <option key={kind} value={kind}>
-                        Counts as: {PRACTICE_LABEL[kind]}
+                        <Trans>Counts as: {PRACTICE_LABEL[kind]}</Trans>
                       </option>
                     ))}
-                    <option value="none">Counts as: none</option>
+                    <option value="none"><Trans>Counts as: none</Trans></option>
                   </select>
                 )}
                 {off && <span className="shrink-0 rounded-md border border-seam px-1.5 py-0.5 text-xs text-silkscreen-3">{off}</span>}
@@ -169,18 +171,18 @@ export function PerformanceMix({
               <label className="flex items-center gap-1">
                 <input
                   type="checkbox"
-                  aria-label={`${label(name)} solo`}
+                  aria-label={t`${label(name)} solo`}
                   checked={entry.solo}
                   onChange={(e) => {
                     const solo = e.target.checked;
                     onMix((m) => setSolo(m, groups, name, solo));
                   }}
                 />
-                Solo
+                <Trans>Solo</Trans>
               </label>
               <div className="flex items-center gap-2">
                 <input
-                  aria-label={`${label(name)} volume`}
+                  aria-label={t`${label(name)} volume`}
                   className="min-w-0 flex-1"
                   type="range"
                   min="0"
@@ -195,7 +197,7 @@ export function PerformanceMix({
                 <span className="w-10 shrink-0 text-right tabular-nums">{Math.round(entry.volume * 100)}%</span>
               </div>
               <input
-                aria-label={`${label(name)} pan`}
+                aria-label={t`${label(name)} pan`}
                 className="w-full"
                 type="range"
                 min="-1"
@@ -210,14 +212,14 @@ export function PerformanceMix({
               <label className="flex items-center gap-1">
                 <input
                   type="checkbox"
-                  aria-label={`${label(name)} follows pitch`}
+                  aria-label={t`${label(name)} follows pitch`}
                   checked={followsPitch(speed, name)}
                   onChange={(e) => session.setSpeed({ followsPitch: { ...speed.followsPitch, [name]: e.target.checked } })}
                 />
-                Follows pitch
+                <Trans>Follows pitch</Trans>
               </label>
               <select
-                aria-label={`${label(name)} bus`}
+                aria-label={t`${label(name)} bus`}
                 className="w-full rounded-md border border-seam bg-transparent px-2 py-1"
                 value={busOf(name)}
                 onChange={(e) => onTrackBus(name, e.target.value as BusName)}
@@ -229,7 +231,7 @@ export function PerformanceMix({
                 ))}
               </select>
               {info?.kind === "user" ? (
-                <fieldset className="flex gap-1" aria-label={`${label(name)} mute groups`}>
+                <fieldset className="flex gap-1" aria-label={t`${label(name)} mute groups`}>
                   {[1, 2, 3, 4, 5, 6].map((group) => {
                     const member = info.muteGroups?.includes(group) ?? false;
                     return (
@@ -237,7 +239,7 @@ export function PerformanceMix({
                         key={group}
                         type="button"
                         aria-pressed={member}
-                        aria-label={`${label(name)} in group ${group}`}
+                        aria-label={t`${label(name)} in group ${group}`}
                         className={`size-6 rounded-md border text-xs ${member ? "border-led-on text-led-on" : "border-seam"}`}
                         onClick={() => {
                           const next = member ? (info.muteGroups ?? []).filter((g) => g !== group) : [...(info.muteGroups ?? []), group].sort((a, b) => a - b);

@@ -12,6 +12,8 @@ import {
 } from "@/song/performance/midi-click";
 import { midiNow, startMidiScheduler } from "@/song/performance/midi-scheduler-client";
 import type { StemPlayer } from "@/song/stems/player";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const field = "rounded border border-seam bg-transparent p-2";
 
@@ -32,7 +34,7 @@ export function useMidiClick(session: PerformanceSession, player: StemPlayer | n
         start: startMidiScheduler,
         now: midiNow,
         timeOrigin: () => performance.timeOrigin,
-        onFault: (message) => showToast({ tone: "fault", title: "MIDI click", body: message }),
+        onFault: (message) => showToast({ tone: "fault", title: t`MIDI click`, body: message }),
       }),
     [],
   );
@@ -60,19 +62,19 @@ export function MidiClickSettingsView({ midi }: { midi: ReturnType<typeof useMid
   const { settings, update, outputs } = midi;
   return (
     <fieldset className="space-y-2">
-      <legend>Send the click as MIDI</legend>
+      <legend><Trans>Send the click as MIDI</Trans></legend>
       <label className="flex items-center gap-2">
-        <Checkbox checked={settings.enabled} onCheckedChange={(value) => update({ enabled: value === true })} aria-label="Send the click as MIDI" />
-        Send the click as MIDI
+        <Checkbox checked={settings.enabled} onCheckedChange={(value) => update({ enabled: value === true })} aria-label={t`Send the click as MIDI`} />
+        <Trans>Send the click as MIDI</Trans>
       </label>
       <p>
-        Plays each metronome and count-in beat as a drum note on a MIDI output, for a drum plugin or module. It never goes to the cue output unless you pick
-        that one here.
+        <Trans>Plays each metronome and count-in beat as a drum note on a MIDI output, for a drum plugin or module. It never goes to the cue output unless you pick
+        that one here.</Trans>
       </p>
       <label className="block">
-        Output{" "}
-        <select aria-label="MIDI click output" className={field} value={settings.portId} onChange={(e) => update({ portId: e.target.value })}>
-          <option value="">None</option>
+        <Trans>Output{" "}</Trans>
+        <select aria-label={t`MIDI click output`} className={field} value={settings.portId} onChange={(e) => update({ portId: e.target.value })}>
+          <option value=""><Trans>None</Trans></option>
           {(outputs ?? []).map((port) => (
             <option key={port.id} value={port.id}>
               {port.name || port.id}
@@ -80,11 +82,11 @@ export function MidiClickSettingsView({ midi }: { midi: ReturnType<typeof useMid
           ))}
         </select>
       </label>
-      {outputs === null && <p className="text-xs">Turn on USB / system MIDI to see the outputs.</p>}
+      {outputs === null && <p className="text-xs"><Trans>Turn on USB / system MIDI to see the outputs.</Trans></p>}
       <label className="block">
-        Channel{" "}
+        <Trans>Channel{" "}</Trans>
         <input
-          aria-label="MIDI click channel"
+          aria-label={t`MIDI click channel`}
           className={field + " w-20"}
           type="number"
           min="1"
@@ -94,9 +96,9 @@ export function MidiClickSettingsView({ midi }: { midi: ReturnType<typeof useMid
         />
       </label>
       <label className="block">
-        Offset (ms){" "}
+        <Trans>Offset (ms){" "}</Trans>
         <input
-          aria-label="MIDI click offset (ms)"
+          aria-label={t`MIDI click offset (ms)`}
           className={field + " w-24"}
           type="number"
           min={-MIDI_CLICK_OFFSET_LIMIT}
@@ -106,8 +108,8 @@ export function MidiClickSettingsView({ midi }: { midi: ReturnType<typeof useMid
         />
       </label>
       <label className="flex items-center gap-2">
-        <Checkbox checked={settings.alsoPlay} onCheckedChange={(value) => update({ alsoPlay: value !== false })} aria-label="Also play the click here" />
-        Also play the click here
+        <Checkbox checked={settings.alsoPlay} onCheckedChange={(value) => update({ alsoPlay: value !== false })} aria-label={t`Also play the click here`} />
+        <Trans>Also play the click here</Trans>
       </label>
     </fieldset>
   );

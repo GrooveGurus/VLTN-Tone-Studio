@@ -6,6 +6,7 @@ import { slotLabel } from "@/state/device-model";
 import { REPLACED_ID } from "@shared/host/files";
 import { slotsToRead, type NativeOp, type Step } from "./plans";
 import { emptyName, isEmptyName, useLibrary } from "./store";
+import { t } from "@lingui/core/macro";
 
 /** Current preset of a slot: the saved body of the active slot, otherwise a read (the GP-50 export read leaves the active preset alone). */
 export async function readSlot(slot: number): Promise<Uint8Array> {
@@ -55,14 +56,14 @@ export async function readAndBackUp(job: {
   const toRead = backUp ? [...new Set([...job.sources, ...replaced])].sort((a, b) => a - b) : job.sources;
   for (const [i, slot] of toRead.entries()) {
     if (job.read.has(slot)) continue;
-    job.onStatus?.(`Reading slot ${slotLabel(device, slot)}`, i, toRead.length);
+    job.onStatus?.(t`Reading slot ${slotLabel(device, slot)}`, i, toRead.length);
     job.read.set(slot, await readSlot(slot));
   }
   if (backUp) {
-    job.onStatus?.("Saving the replaced slots", toRead.length, toRead.length);
+    job.onStatus?.(t`Saving the replaced slots`, toRead.length, toRead.length);
     await host.files.addPresets(
       REPLACED_ID,
-      replaced.map((slot) => ({ name: nameOf(slot), prst: job.read.get(slot)!, slot, source: `Slot ${slotLabel(device, slot)} on ${job.pedal}` })),
+      replaced.map((slot) => ({ name: nameOf(slot), prst: job.read.get(slot)!, slot, source: t`Slot ${slotLabel(device, slot)} on ${job.pedal}` })),
     );
   }
   return { replaced, toRead, backedUp: job.backedUp || backUp };
@@ -90,7 +91,7 @@ export async function runNative(run: NativeRun): Promise<number[]> {
   run.backedUp = job.backedUp;
   const { replaced, toRead } = job;
   const total = toRead.length + 1;
-  run.onStatus?.(`The ${run.pedal} is changing ${run.steps.length === 1 ? "the slot" : `${run.steps.length} slots`}`, toRead.length / total);
+  run.onStatus?.(t`The ${run.pedal} is changing ${run.steps.length === 1 ? t`the slot` : t`${run.steps.length} slots`}`, toRead.length / total);
   await runOp(run.op);
   noteResult(run.steps, run.read);
   run.onStatus?.("Done", 1);

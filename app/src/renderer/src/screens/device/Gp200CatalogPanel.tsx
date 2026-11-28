@@ -5,6 +5,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { host, isElectron } from "@/host";
 import { useGp200Catalog } from "@/gp200/app/catalog-store";
 import { ALGORITHM_XML, XML_IN_EDITOR } from "@shared/host/gp200-catalog";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const BLOCK_NAMES: Readonly<Record<string, string>> = {
   PRE: "pre effects",
@@ -41,11 +43,11 @@ export function Gp200CatalogPanel() {
     <section aria-labelledby="g2c-title" className="flex min-w-0 flex-col gap-4 rounded-lg bg-card px-5 pt-4 pb-5 shadow-[0_0_0_1px_var(--seam)]">
       <div>
         <h2 id="g2c-title" className="text-[15px] font-[650] text-balance">
-          GP-200 effect list
+          <Trans>GP-200 effect list</Trans>
         </h2>
         <p className="mt-0.5 text-sm text-pretty text-silkscreen-3">
-          Tone Studio comes with the GP-200's effect names and knob ranges, taken from GP200 Studio. For units, Auto CAB Match and exact menu values, import
-          the {ALGORITHM_XML} from Valeton's GP-200 editor. Tone Studio keeps it on this computer; nothing is uploaded.
+          <Trans>Tone Studio comes with the GP-200's effect names and knob ranges, taken from GP200 Studio. For units, Auto CAB Match and exact menu values, import
+          the {ALGORITHM_XML} from Valeton's GP-200 editor. Tone Studio keeps it on this computer; nothing is uploaded.</Trans>
         </p>
       </div>
 
@@ -54,16 +56,16 @@ export function Gp200CatalogPanel() {
           {!loaded || loading ? (
             <div className="flex items-center gap-2 text-sm text-silkscreen-2">
               <Spinner aria-hidden />
-              Reading the effect list…
+              <Trans>Reading the effect list…</Trans>
             </div>
           ) : (
             <>
-              <div className="text-lg leading-tight font-semibold">{counts.uniqueModels} effects ready</div>
+              <div className="text-lg leading-tight font-semibold"><Trans>{counts.uniqueModels} effects ready</Trans></div>
               <div className="text-sm text-silkscreen-3">
-                {counts.controls} knobs and switches,{" "}
-                {imported ? `imported ${new Date(savedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : "built in"}
+                <Trans>{counts.controls} knobs and switches,{" "}</Trans>
+                {imported ? t`imported ${new Date(savedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : t`built in`}
               </div>
-              {source && <div className="mt-0.5 truncate text-xs text-silkscreen-3" title={source}>From {source}</div>}
+              {source && <div className="mt-0.5 truncate text-xs text-silkscreen-3" title={source}><Trans>From {source}</Trans></div>}
             </>
           )}
         </div>
@@ -71,12 +73,12 @@ export function Gp200CatalogPanel() {
           {isElectron && (
             <Button variant="secondary" disabled={loading} onClick={act("findAutomatically")}>
               <FileSearch aria-hidden />
-              Find automatically
+              <Trans>Find automatically</Trans>
             </Button>
           )}
           <Button variant="secondary" disabled={loading} onClick={act("chooseFile")}>
             <FolderOpen aria-hidden />
-            Choose file…
+            <Trans>Choose file…</Trans>
           </Button>
         </div>
       </div>
@@ -97,11 +99,11 @@ export function Gp200CatalogPanel() {
       </dl>
 
       <div className="flex items-start justify-between gap-4">
-        <p className="text-sm text-pretty text-silkscreen-3">Where the editor keeps it: {where}.</p>
+        <p className="text-sm text-pretty text-silkscreen-3"><Trans>Where the editor keeps it: {where}.</Trans></p>
         {imported && (
           <Button variant="ghost" size="sm" disabled={loading} onClick={act("remove")}>
             <Trash2 aria-hidden />
-            Use the built-in list
+            <Trans>Use the built-in list</Trans>
           </Button>
         )}
       </div>

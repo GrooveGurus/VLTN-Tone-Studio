@@ -38,6 +38,8 @@ import { ComparePedalDialog } from "./ComparePedalDialog";
 import { useLibrary } from "./store";
 import { matchesQuery, metaKey, useMeta, useTags } from "./tags";
 import { formatDay, hasFiles, SLOTS_MIME, LOCAL_MIME, startDrag, endDrag } from "./dnd";
+import { t as lt } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const ICONS = { backup: ArchiveIcon, imported: ImportIcon, replaced: HistoryIcon, collection: ListMusicIcon } as const;
 
@@ -48,14 +50,14 @@ function subtitle(c: CollectionInfo): string {
       const time = new Date(c.createdAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
       const amount = all ? `all ${c.count} slots` : `${c.count} ${c.count === 1 ? "slot" : "slots"}`;
       const when = `${formatDay(c.createdAt)} ${time}, ${amount}`;
-      return c.pinned ? `Pinned · ${when}` : when;
+      return c.pinned ? lt`Pinned · ${when}` : when;
     }
     case "imported":
-      return ".prst files you added";
+      return lt`.prst files you added`;
     case "replaced":
-      return "Saved before a write";
+      return lt`Saved before a write`;
     default:
-      return "Collection";
+      return lt`Collection`;
   }
 }
 
@@ -90,40 +92,40 @@ export function LocalPane() {
 
   return (
     <aside
-      aria-label="On this computer"
+      aria-label={lt`On this computer`}
       className={cn("flex min-h-0 flex-col gap-3 rounded-xl pt-1", fileOver && "bg-lamp-glow shadow-[inset_0_0_0_1.5px_var(--lamp)]")}
       onDragOver={onDragOver}
       onDragLeave={(e) => !e.currentTarget.contains(e.relatedTarget as Node | null) && setFileOver(false)}
       onDrop={onDrop}
     >
       <div className="flex min-h-8 items-center gap-1 pl-2.5">
-        <h2 className="mr-auto text-[15px] font-[650] whitespace-nowrap text-silkscreen">On this computer</h2>
+        <h2 className="mr-auto text-[15px] font-[650] whitespace-nowrap text-silkscreen"><Trans>On this computer</Trans></h2>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="sm" onClick={() => void actions.importFiles()}>
               <ImportIcon data-icon="inline-start" />
-              Import
+              <Trans>Import</Trans>
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Import .prst files, or drop them anywhere on this panel</TooltipContent>
+          <TooltipContent><Trans>Import .prst files, or drop them anywhere on this panel</Trans></TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon-sm" aria-label="New collection" onClick={() => actions.collectionDialog({ kind: "new" })}>
+            <Button variant="ghost" size="icon-sm" aria-label={lt`New collection`} onClick={() => actions.collectionDialog({ kind: "new" })}>
               <FolderPlusIcon />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>New collection</TooltipContent>
+          <TooltipContent><Trans>New collection</Trans></TooltipContent>
         </Tooltip>
       </div>
 
-      <ul className="flex max-h-[38%] min-h-0 shrink-0 flex-col gap-0.5 overflow-auto" aria-label="Collections">
+      <ul className="flex max-h-[38%] min-h-0 shrink-0 flex-col gap-0.5 overflow-auto" aria-label={lt`Collections`}>
         {!loaded && <Skeleton className="mx-2.5 h-10" />}
-        {backups.length > 0 && <li className="px-2.5 pb-0.5 text-xs font-medium tracking-[0.04em] text-silkscreen-3 uppercase">Backups</li>}
+        {backups.length > 0 && <li className="px-2.5 pb-0.5 text-xs font-medium tracking-[0.04em] text-silkscreen-3 uppercase"><Trans>Backups</Trans></li>}
         {backups.map((c) => (
           <CollectionItem key={c.id} c={c} current={c.id === currentId} />
         ))}
-        {others.length > 0 && <li className="mt-2 px-2.5 pb-0.5 text-xs font-medium tracking-[0.04em] text-silkscreen-3 uppercase">Collections</li>}
+        {others.length > 0 && <li className="mt-2 px-2.5 pb-0.5 text-xs font-medium tracking-[0.04em] text-silkscreen-3 uppercase"><Trans>Collections</Trans></li>}
         {others.map((c) => (
           <CollectionItem key={c.id} c={c} current={c.id === currentId} />
         ))}
@@ -143,12 +145,12 @@ function CollectionItem({ c, current }: { c: CollectionInfo; current: boolean })
 
   const [comparing, setComparing] = useState(false);
   const refreshCollections = useLibrary((s) => s.refreshCollections);
-  const reveal = () => host.files.revealCollection(c.id).catch((e) => notifyError("Couldn't show the folder", e));
+  const reveal = () => host.files.revealCollection(c.id).catch((e) => notifyError(lt`Couldn't show the folder`, e));
   const togglePin = () =>
     host.files
       .setBackupPinned(c.id, !c.pinned)
       .then(() => refreshCollections())
-      .catch((e) => notifyError("Couldn't change the pin", e));
+      .catch((e) => notifyError(lt`Couldn't change the pin`, e));
 
   return (
     <li>
@@ -191,28 +193,28 @@ function CollectionItem({ c, current }: { c: CollectionInfo; current: boolean })
             {host.kind === "electron" && (
               <ContextMenuItem onSelect={() => void reveal()}>
                 <FolderOpenIcon />
-                Reveal in folder
+                <Trans>Reveal in folder</Trans>
               </ContextMenuItem>
             )}
             {c.kind === "collection" && (
               <ContextMenuItem onSelect={() => actions.collectionDialog({ kind: "rename", collection: c })}>
                 <PencilIcon />
-                Rename
+                <Trans>Rename</Trans>
               </ContextMenuItem>
             )}
             {c.kind === "backup" && (
               <>
                 <ContextMenuItem onSelect={() => setComparing(true)}>
                   <GitCompareArrowsIcon />
-                  Compare with pedal
+                  <Trans>Compare with pedal</Trans>
                 </ContextMenuItem>
                 <ContextMenuItem onSelect={() => void togglePin()}>
                   {c.pinned ? <PinOffIcon /> : <PinIcon />}
-                  {c.pinned ? "Unpin backup" : "Pin backup"}
+                  {c.pinned ? lt`Unpin backup` : lt`Pin backup`}
                 </ContextMenuItem>
               </>
             )}
-            {c.kind !== "collection" && host.kind !== "electron" && <ContextMenuItem disabled>{c.kind === "backup" ? "Backups are read-only" : "Built-in collection"}</ContextMenuItem>}
+            {c.kind !== "collection" && host.kind !== "electron" && <ContextMenuItem disabled>{c.kind === "backup" ? lt`Backups are read-only` : lt`Built-in collection`}</ContextMenuItem>}
           </ContextMenuGroup>
           {c.kind === "collection" && (
             <>
@@ -220,7 +222,7 @@ function CollectionItem({ c, current }: { c: CollectionInfo; current: boolean })
               <ContextMenuGroup>
                 <ContextMenuItem variant="destructive" onSelect={() => actions.collectionDialog({ kind: "delete", collection: c })}>
                   <Trash2Icon />
-                  Delete
+                  <Trans>Delete</Trans>
                 </ContextMenuItem>
               </ContextMenuGroup>
             </>
@@ -264,13 +266,13 @@ function PresetList() {
       <div className="flex min-h-0 flex-1 flex-col border-t border-border pt-3">
         <Empty className="flex-1 justify-start pt-10 md:pt-10">
           <EmptyHeader>
-            <EmptyTitle>Nothing on this computer yet</EmptyTitle>
-            <EmptyDescription>Back up the {pedal}, or import .prst files you downloaded.</EmptyDescription>
+            <EmptyTitle><Trans>Nothing on this computer yet</Trans></EmptyTitle>
+            <EmptyDescription><Trans>Back up the {pedal}, or import .prst files you downloaded.</Trans></EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <Button variant="outline" onClick={() => void actions.importFiles()}>
               <ImportIcon data-icon="inline-start" />
-              Import
+              <Trans>Import</Trans>
             </Button>
           </EmptyContent>
         </Empty>
@@ -285,8 +287,8 @@ function PresetList() {
           <SearchIcon />
         </InputGroupAddon>
         <InputGroupInput
-          placeholder={current.kind === "backup" ? "Filter this backup" : `Filter ${current.title.toLowerCase()}: name, tag, model, stars:4`}
-          aria-label={`Filter ${current.title}`}
+          placeholder={current.kind === "backup" ? lt`Filter this backup` : lt`Filter ${current.title.toLowerCase()}: name, tag, model, stars:4`}
+          aria-label={lt`Filter ${current.title}`}
           value={query}
           onChange={(e) => useLibrary.setState({ localQuery: e.target.value })}
         />
@@ -302,22 +304,22 @@ function PresetList() {
         {!loading && !presets.length && (
           <Empty className="flex-1 p-4">
             <EmptyHeader>
-              <EmptyTitle>No presets here yet</EmptyTitle>
-              <EmptyDescription>Drag slots from the {pedal} list, or import .prst files.</EmptyDescription>
+              <EmptyTitle><Trans>No presets here yet</Trans></EmptyTitle>
+              <EmptyDescription><Trans>Drag slots from the {pedal} list, or import .prst files.</Trans></EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               <Button variant="outline" size="sm" onClick={() => void actions.importFiles()}>
                 <ImportIcon data-icon="inline-start" />
-                Import
+                <Trans>Import</Trans>
               </Button>
             </EmptyContent>
           </Empty>
         )}
         {presets.length > 0 && !visible.length && (
           <p className="px-2 py-3 text-sm text-silkscreen-3">
-            No presets match “{query}”.{" "}
+            <Trans>No presets match “{query}”.{" "}</Trans>
             <button type="button" className="text-silkscreen underline underline-offset-2" onClick={() => useLibrary.setState({ localQuery: "" })}>
-              Clear filter
+              <Trans>Clear filter</Trans>
             </button>
           </p>
         )}
@@ -381,7 +383,7 @@ function PresetCard({ p, collection }: { p: LocalPreset; collection: CollectionI
           </span>
           {(meta.stars > 0 || meta.tags.length > 0) && (
             <span className="flex min-w-0 items-center gap-2 text-xs text-silkscreen-3">
-              {meta.stars > 0 && <span aria-label={`${meta.stars} stars`}>{"★".repeat(meta.stars)}</span>}
+              {meta.stars > 0 && <span aria-label={lt`${meta.stars} stars`}>{"★".repeat(meta.stars)}</span>}
               <span className="truncate">{meta.tags.map((t) => `#${t}`).join(" ")}</span>
             </span>
           )}
@@ -394,7 +396,7 @@ function PresetCard({ p, collection }: { p: LocalPreset; collection: CollectionI
           {!s && (
             <span className="flex items-start gap-1.5 text-xs text-led-fault">
               <InfoIcon className="mt-px size-3 shrink-0" aria-hidden />
-              This file can't be read as a preset.
+              <Trans>This file can't be read as a preset.</Trans>
             </span>
           )}
         </button>
@@ -403,16 +405,16 @@ function PresetCard({ p, collection }: { p: LocalPreset; collection: CollectionI
         <ContextMenuGroup>
           <ContextMenuItem disabled={!connected || !s} onSelect={() => actions.writeLocal(p)}>
             <ArrowDownToLineIcon />
-            {connected ? (p.slot !== null && collection.kind === "backup" ? `Restore to slot ${slotLabel(collection.device, p.slot)}…` : "Write to slot…") : `Write to slot (needs the ${pedal})`}
+            {connected ? (p.slot !== null && collection.kind === "backup" ? lt`Restore to slot ${slotLabel(collection.device, p.slot)}…` : lt`Write to slot…`) : lt`Write to slot (needs the ${pedal})`}
           </ContextMenuItem>
           <ContextMenuItem onSelect={() => void actions.exportLocal([p])}>
             <DownloadIcon />
-            Export .prst
+            <Trans>Export .prst</Trans>
           </ContextMenuItem>
           <ContextMenuSub>
             <ContextMenuSubTrigger>
               <FolderPlusIcon />
-              Add to collection
+              <Trans>Add to collection</Trans>
             </ContextMenuSubTrigger>
             <ContextMenuSubContent>
               <ContextMenuGroup>
@@ -421,7 +423,7 @@ function PresetCard({ p, collection }: { p: LocalPreset; collection: CollectionI
                     {c.title}
                   </ContextMenuItem>
                 ))}
-                <ContextMenuItem onSelect={() => actions.collectionDialog({ kind: "new", then: (c) => void actions.addLocalToCollection([p], c.id) })}>New collection…</ContextMenuItem>
+                <ContextMenuItem onSelect={() => actions.collectionDialog({ kind: "new", then: (c) => void actions.addLocalToCollection([p], c.id) })}><Trans>New collection…</Trans></ContextMenuItem>
               </ContextMenuGroup>
             </ContextMenuSubContent>
           </ContextMenuSub>
@@ -432,7 +434,7 @@ function PresetCard({ p, collection }: { p: LocalPreset; collection: CollectionI
             <ContextMenuGroup>
               <ContextMenuItem variant="destructive" onSelect={() => void actions.removeLocal(p)}>
                 <Trash2Icon />
-                Remove from {collection.title}
+                <Trans>Remove from {collection.title}</Trans>
               </ContextMenuItem>
             </ContextMenuGroup>
           </>

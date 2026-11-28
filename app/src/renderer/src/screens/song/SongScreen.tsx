@@ -17,6 +17,8 @@ import { SongLibraryPanel } from "./SongLibraryPanel";
 import { PerformancePanel } from "./PerformancePanel";
 import { SaveBeforeLeaving, SaveIndicator } from "./SaveIndicator";
 import { useSongTab, type SongTab } from "./tab";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Decode `file`; the Stems tab then offers the model and quality choice before the split. */
 export async function openSong(file: File): Promise<void> {
@@ -32,7 +34,7 @@ function openSongFiles(files: OpenFile[]) {
   const f = files[0];
   if (!f) return;
   if (f.file) void openSong(f.file);
-  else notifyError(`Couldn't open ${f.name}`, new Error("Drop the file onto the Song screen, or choose it with Open a song."));
+  else notifyError(t`Couldn't open ${f.name}`, new Error(t`Drop the file onto the Song screen, or choose it with Open a song.`));
 }
 
 /**
@@ -74,24 +76,24 @@ export function SongScreen() {
       <SaveBeforeLeaving />
       <Tabs value={tab} onValueChange={(v) => setTab(v as SongTab)} className="flex min-h-0 flex-1 flex-col gap-3.5">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-x-6 pt-5 pb-1">
-          <h1 className="col-start-1 row-start-1 text-[32px] leading-[1.1] font-bold tracking-[-0.02em] text-balance">Song</h1>
+          <h1 className="col-start-1 row-start-1 text-[32px] leading-[1.1] font-bold tracking-[-0.02em] text-balance"><Trans>Song</Trans></h1>
           <div className="col-start-1 row-start-2 mt-1.5 flex min-w-0 items-center gap-3">
             <p className="truncate text-[12px] text-silkscreen-3">
-              {songHeadline(source, saved, `Split a song into stems on this computer, then find a ${pedal} tone for its guitar.`)}
+              {songHeadline(source, saved, t`Split a song into stems on this computer, then find a ${pedal} tone for its guitar.`)}
             </p>
             <SaveIndicator />
           </div>
           <div className="col-start-2 row-span-2 row-start-1 flex items-center gap-3">
-            <TabsList aria-label="Song">
-              <TabsTrigger value="songs">Songs & playlists</TabsTrigger>
-              <TabsTrigger value="stems">Stems</TabsTrigger>
-              <TabsTrigger value="tone">Tone match</TabsTrigger>
-              <TabsTrigger value="performance">Performance</TabsTrigger>
+            <TabsList aria-label={t`Song`}>
+              <TabsTrigger value="songs"><Trans>Songs & playlists</Trans></TabsTrigger>
+              <TabsTrigger value="stems"><Trans>Stems</Trans></TabsTrigger>
+              <TabsTrigger value="tone"><Trans>Tone match</Trans></TabsTrigger>
+              <TabsTrigger value="performance"><Trans>Performance</Trans></TabsTrigger>
             </TabsList>
             {source && (
               <Button variant="outline" onClick={pick}>
                 <FileUp data-icon="inline-start" />
-                Open another song…
+                <Trans>Open another song…</Trans>
               </Button>
             )}
           </div>

@@ -17,6 +17,8 @@ import { SLOT_NAME_MAX } from "@/gp200/lib/session.mjs";
 import { closeFlow, closeLinkChoice, closeRename, closeSplash, continueFromSplash, irSlotLabel, linkSlot, loadAccount, loadAllCounts, loadTab, readSlots, renameSlot, slotLabel, takePickedTone, useTones } from "./store";
 import { ToneImage } from "./ToneImage";
 import { irOccupant, irSummary, ReplaceIrNote, UserIrSlotPicker, useIrWriteBlocker } from "./UserIrParts";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** TONE3000 partnership splash, before the first sign-in from any entry point. */
 export function SplashDialog() {
@@ -29,34 +31,34 @@ export function SplashDialog() {
           <DialogTitle className="flex items-center gap-3 text-[15px]">
             <span className="flex items-center gap-2 font-semibold">
               <Cable className="size-4" aria-hidden />
-              VLTN Tone Studio
+              <Trans>VLTN Tone Studio</Trans>
             </span>
-            <span className="text-silkscreen-3" aria-label="and">
+            <span className="text-silkscreen-3" aria-label={t`and`}>
               ×
             </span>
             <span className="text-[12px] font-extrabold tracking-[0.02em] text-silkscreen">TONE3000</span>
           </DialogTitle>
           <DialogDescription className="text-[13px] leading-[1.5] text-pretty text-silkscreen-2">
-            VLTN Tone Studio has partnered with TONE3000 to give you access to a massive library of Neural Amp Modeler (NAM) captures and IRs of real analog gear, created by a
-            global community of musicians.
+            <Trans>VLTN Tone Studio has partnered with TONE3000 to give you access to a massive library of Neural Amp Modeler (NAM) captures and IRs of real analog gear, created by a
+            global community of musicians.</Trans>
           </DialogDescription>
         </DialogHeader>
         <ul className="flex flex-col gap-2.5 text-[12px] text-silkscreen-2">
           <li className="flex gap-2.5">
             <LogIn className="size-4 flex-none text-silkscreen-3" aria-hidden />
-            Sign in on TONE3000 with your email and a 6-digit code.
+            <Trans>Sign in on TONE3000 with your email and a 6-digit code.</Trans>
           </li>
           <li className="flex gap-2.5">
             <Filter className="size-4 flex-none text-silkscreen-3" aria-hidden />
-            NAM A1 and A2 captures both work: Tone Studio turns them into {model} SnapTones.
+            <Trans>NAM A1 and A2 captures both work: Tone Studio turns them into {model} SnapTones.</Trans>
           </li>
         </ul>
         <DialogFooter>
           <Button variant="ghost" onClick={closeSplash}>
-            Not now
+            <Trans>Not now</Trans>
           </Button>
           <Button onClick={continueFromSplash} autoFocus>
-            Continue
+            <Trans>Continue</Trans>
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -123,7 +125,7 @@ export function FlowDialog() {
     };
   }, [open, req, el]);
 
-  const title = !req?.prompt || req.prompt === "load_tone" ? "Sign in to TONE3000" : req.format === "ir" ? "Browse TONE3000 IRs" : "Browse TONE3000";
+  const title = !req?.prompt || req.prompt === "load_tone" ? t`Sign in to TONE3000` : req.format === "ir" ? t`Browse TONE3000 IRs` : t`Browse TONE3000`;
   return (
     <Dialog open={open} onOpenChange={(o) => !o && closeFlow()}>
       <DialogContent
@@ -135,7 +137,7 @@ export function FlowDialog() {
         <DialogHeader className="flex-row items-center gap-3 border-b border-border py-2 pr-2 pl-5">
           <span className="text-[12px] font-extrabold tracking-[0.02em] text-silkscreen">TONE3000</span>
           <DialogTitle className="grow text-[13px] font-semibold text-silkscreen-2">{title}</DialogTitle>
-          <Button variant="ghost" size="icon-sm" aria-label="Close TONE3000" onClick={closeFlow}>
+          <Button variant="ghost" size="icon-sm" aria-label={t`Close TONE3000`} onClick={closeFlow}>
             <X />
           </Button>
         </DialogHeader>
@@ -148,11 +150,11 @@ export function FlowDialog() {
                     {error}
                   </p>
                   <Button variant="outline" onClick={closeFlow}>
-                    Close
+                    <Trans>Close</Trans>
                   </Button>
                 </div>
               ) : (
-                <Spinner aria-label="Loading TONE3000" />
+                <Spinner aria-label={t`Loading TONE3000`} />
               )}
             </div>
           )}
@@ -176,7 +178,7 @@ export function LinkDialog() {
     try {
       await linkSlot(toneId, choice.kind, choice.slot);
     } catch (e) {
-      notifyError("Couldn't link the slot", e);
+      notifyError(t`Couldn't link the slot`, e);
     } finally {
       setBusy(false);
     }
@@ -184,14 +186,14 @@ export function LinkDialog() {
 
   const list = choice ? Object.values(records).filter((r) => (choice.kind === "snaptone" ? r.format === "nam" : r.format === "ir")) : [];
   const slotName = choice ? ((choice.kind === "snaptone" ? snapTones : userIRs)?.find((s) => s.slot === choice.slot)?.name ?? "") : "";
-  const title = choice ? `Link ${slotLabel(choice.kind, choice.slot)} ${slotName} to a TONE3000 tone` : "";
+  const title = choice ? t`Link ${slotLabel(choice.kind, choice.slot)} ${slotName} to a TONE3000 tone` : "";
 
   return (
     <Dialog open={choice !== null} onOpenChange={(o) => !o && closeLinkChoice()}>
       <DialogContent className="max-w-[520px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>Pick the downloaded tone this slot holds. Linking only adds a note in Tone Studio; nothing changes on the pedal.</DialogDescription>
+          <DialogDescription><Trans>Pick the downloaded tone this slot holds. Linking only adds a note in Tone Studio; nothing changes on the pedal.</Trans></DialogDescription>
         </DialogHeader>
         <ul className="flex max-h-80 flex-col gap-1 overflow-auto">
           {list.map((r) => (
@@ -213,7 +215,7 @@ export function LinkDialog() {
         </ul>
         <DialogFooter>
           <Button variant="ghost" onClick={closeLinkChoice}>
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -253,7 +255,7 @@ export function RenameSlotDialog() {
     try {
       await renameSlot(choice.kind, choice.slot, next);
     } catch (e) {
-      notifyError("Couldn't rename the slot", e);
+      notifyError(t`Couldn't rename the slot`, e);
     } finally {
       setBusy(false);
     }
@@ -264,8 +266,8 @@ export function RenameSlotDialog() {
     <Dialog open={choice !== null} onOpenChange={(o) => !o && !busy && closeRename()}>
       <DialogContent className="max-w-[420px]">
         <DialogHeader>
-          <DialogTitle>Rename {label}</DialogTitle>
-          <DialogDescription>Changes only the name the pedal shows, up to {SLOT_NAME_MAX} characters. The sound and the presets that use it stay as they are.</DialogDescription>
+          <DialogTitle><Trans>Rename {label}</Trans></DialogTitle>
+          <DialogDescription><Trans>Changes only the name the pedal shows, up to {SLOT_NAME_MAX} characters. The sound and the presets that use it stay as they are.</Trans></DialogDescription>
         </DialogHeader>
         <form
           className="flex items-center gap-2"
@@ -274,18 +276,18 @@ export function RenameSlotDialog() {
             void rename();
           }}
         >
-          <Input autoFocus aria-label={`New name for ${label}`} value={name} maxLength={SLOT_NAME_MAX} disabled={busy} onChange={(e) => setName(slotRenameText(e.target.value))} />
+          <Input autoFocus aria-label={t`New name for ${label}`} value={name} maxLength={SLOT_NAME_MAX} disabled={busy} onChange={(e) => setName(slotRenameText(e.target.value))} />
           <span className="flex-none text-[12px] text-silkscreen-3">
             {name.length}/{SLOT_NAME_MAX}
           </span>
         </form>
         <DialogFooter>
           <Button variant="ghost" disabled={busy} onClick={closeRename}>
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
           <Button disabled={!ready} onClick={() => void rename()}>
             {busy ? <Spinner /> : null}
-            Rename
+            <Trans>Rename</Trans>
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -297,7 +299,7 @@ export function RenameSlotDialog() {
 async function readOpenFile(file: OpenFile): Promise<Uint8Array> {
   if (file.file) return new Uint8Array(await file.file.arrayBuffer());
   if (file.path) return host.tones.readLocalIr(file.path);
-  throw new Error(`Couldn't read ${file.name}.`);
+  throw new Error(t`Couldn't read ${file.name}.`);
 }
 
 /**
@@ -350,7 +352,7 @@ export function LocalIrDialog({ file, onClose }: { file: OpenFile | null; onClos
     setProgress(0);
     try {
       const stored = await useDevice.getState().uploadUserIr(slot, name, ir.data, { onProgress: setProgress });
-      notifySuccess(`Wrote ${irSlotLabel(slot)} on your ${pedalName(useDevice.getState().device)}`, `${file.name} is in the slot as ${stored}.`);
+      notifySuccess(t`Wrote ${irSlotLabel(slot)} on your ${pedalName(useDevice.getState().device)}`, t`${file.name} is in the slot as ${stored}.`);
       onClose();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -359,26 +361,26 @@ export function LocalIrDialog({ file, onClose }: { file: OpenFile | null; onClos
     }
   };
 
-  const slotText = slot === null ? "a User IR slot" : irSlotLabel(slot);
+  const slotText = slot === null ? t`a User IR slot` : irSlotLabel(slot);
   return (
     <Dialog open={file !== null} onOpenChange={(o) => !o && !writing && onClose()}>
       <DialogContent className="max-w-[480px]">
         <DialogHeader>
-          <DialogTitle>Write {file?.name} to a User IR slot</DialogTitle>
-          <DialogDescription>Tone Studio converts the WAV for the {pedal} and writes it over USB. Nothing changes on the pedal until you press Write.</DialogDescription>
+          <DialogTitle><Trans>Write {file?.name} to a User IR slot</Trans></DialogTitle>
+          <DialogDescription><Trans>Tone Studio converts the WAV for the {pedal} and writes it over USB. Nothing changes on the pedal until you press Write.</Trans></DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3 text-[12px]">
-          {ir ? <p className="text-pretty text-silkscreen-3">{irSummary(ir)}</p> : !error && <Spinner aria-label="Checking the file" />}
+          {ir ? <p className="text-pretty text-silkscreen-3">{irSummary(ir)}</p> : !error && <Spinner aria-label={t`Checking the file`} />}
           <div className="flex flex-wrap items-center gap-2">
             <label className="flex items-center gap-2 text-silkscreen-2">
-              Name on the pedal
+              <Trans>Name on the pedal</Trans>
               <Input value={name} maxLength={10} disabled={writing} onChange={(e) => setName(sanitizeSlotName(e.target.value.toUpperCase()))} className="h-8 w-36" />
             </label>
             <span className="text-[11px] text-silkscreen-3">{name.length}/10</span>
             <UserIrSlotPicker value={slot} onChange={setSlot} disabled={writing} />
           </div>
           {replacing && !writing && <ReplaceIrNote name={replacing} />}
-          {writing && <Progress value={progress * 100} className="w-56" aria-label="User IR write progress" />}
+          {writing && <Progress value={progress * 100} className="w-56" aria-label={t`User IR write progress`} />}
           {error && (
             <p role="alert" className="text-pretty text-led-fault">
               {error}
@@ -388,11 +390,11 @@ export function LocalIrDialog({ file, onClose }: { file: OpenFile | null; onClos
         </div>
         <DialogFooter>
           <Button variant="ghost" disabled={writing} onClick={onClose}>
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
           <Button disabled={!ir || !name || writing || blocker !== null} onClick={() => void write()}>
             {writing && <Spinner data-icon="inline-start" />}
-            {replacing ? `Replace ${replacing} in ${slotText}` : `Write to ${slotText}`}
+            {replacing ? t`Replace ${replacing} in ${slotText}` : t`Write to ${slotText}`}
           </Button>
         </DialogFooter>
       </DialogContent>

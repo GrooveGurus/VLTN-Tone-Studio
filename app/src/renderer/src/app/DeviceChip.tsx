@@ -5,6 +5,7 @@ import { connectionView } from "@/screens/device/guidance";
 import { useDevice, useProfile } from "@/state/device";
 import { attachedDevice, pedalName } from "@/state/device-model";
 import { useNav } from "@/state/nav";
+import { t } from "@lingui/core/macro";
 
 const LED = { on: "bg-led-on", off: "bg-led-off", warn: "bg-led-warn", fault: "bg-led-fault" } as const;
 
@@ -25,14 +26,14 @@ export function DeviceChip() {
   const chipName = attached ? pedal : "Pedal";
   const go = useNav((s) => s.go);
   const view = connectionView({ status, error, mode, hostStatus, platform: host.platform, disconnectReason, lastConnectedAt, device, portName });
-  const detail = status === "connected" ? (mode === "mock" ? `Simulated ${pedal} with ${slotCount} preset slots` : `MIDI port ${portName}`) : `${view.state}: ${view.detail}`;
+  const detail = status === "connected" ? (mode === "mock" ? t`Simulated ${pedal} with ${slotCount} preset slots` : t`MIDI port ${portName ?? ""}`) : `${view.state}: ${view.detail}`;
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <button
           type="button"
           onClick={() => go("device")}
-          aria-label={`${chipName}: ${view.chip}. Open Device`}
+          aria-label={t`${chipName}: ${view.chip}. Open Device`}
           className="no-drag glass-float flex h-8 shrink-0 items-center gap-2 whitespace-nowrap rounded-pill px-3 text-xs text-silkscreen-2 shadow-[var(--glass-shine),0_0_0_1px_var(--glass-edge),0_4px_16px_rgb(0_0_0/0.3)] transition-colors hover:text-silkscreen"
         >
           <span className={cn("size-[7px] shrink-0 rounded-full", LED[view.led])} aria-hidden />

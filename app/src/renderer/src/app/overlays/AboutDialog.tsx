@@ -7,6 +7,8 @@ import { host } from "@/host";
 import { SUPPORTED_DEVICE_KEYS } from "@/state/driver/types";
 import { useUi } from "@/state/ui";
 import { checkForUpdates } from "../updates";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const PLATFORM: Record<string, string> = { darwin: "macOS", win32: "Windows", linux: "Linux" };
 /** "GP-5 and GP-50": the models this build connects to. */
@@ -24,7 +26,7 @@ export function AboutDialog() {
     if (open && version === null) void host.app.version().then(setVersion, () => setVersion(""));
   }, [open, version]);
 
-  const where = host.kind === "electron" ? `Desktop app for ${PLATFORM[host.platform] ?? host.platform}` : "Web version";
+  const where = host.kind === "electron" ? t`Desktop app for ${PLATFORM[host.platform] ?? host.platform}` : "Web version";
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent showCloseButton={false} className="w-[420px] max-w-[calc(100vw-48px)] gap-5 sm:max-w-[420px]">
@@ -33,24 +35,24 @@ export function AboutDialog() {
             <Cable className="size-6" strokeWidth={2.25} />
           </span>
           <div className="flex flex-col gap-0.5">
-            <DialogTitle className="text-lg font-semibold tracking-[-0.012em]">VLTN Tone Studio</DialogTitle>
+            <DialogTitle className="text-lg font-semibold tracking-[-0.012em]"><Trans>VLTN Tone Studio</Trans></DialogTitle>
             <span className="text-xs text-silkscreen-3 tabular-nums">
-              {version ? (version === "web" ? where : `Version ${version} · ${where}`) : where}
+              {version ? (version === "web" ? where : t`Version ${version} · ${where}`) : where}
             </span>
           </div>
         </div>
         <DialogDescription className="text-[13px] text-pretty text-silkscreen-2">
-          {`Editor and librarian for the Valeton ${MODELS}: shape presets live on the pedal, sort its ${SLOTS}preset slots, back them up, and bring NAM captures and IRs from TONE3000.`}
+          {t`Editor and librarian for the Valeton ${MODELS}: shape presets live on the pedal, sort its ${SLOTS}preset slots, back them up, and bring NAM captures and IRs from TONE3000.`}
         </DialogDescription>
-        <p className="text-xs text-pretty text-silkscreen-3">Valeton, {MODELS} are trademarks of their owners. This app is not made or endorsed by Valeton.</p>
+        <p className="text-xs text-pretty text-silkscreen-3"><Trans>Valeton, {MODELS} are trademarks of their owners. This app is not made or endorsed by Valeton.</Trans></p>
         <DialogFooter>
           {host.kind === "electron" && (
             <Button variant="outline" onClick={() => void checkForUpdates()}>
-              Check for updates
+              <Trans>Check for updates</Trans>
             </Button>
           )}
           <DialogClose asChild>
-            <Button>Close</Button>
+            <Button><Trans>Close</Trans></Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

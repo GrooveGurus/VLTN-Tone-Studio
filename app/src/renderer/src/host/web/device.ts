@@ -1,5 +1,6 @@
 import type { DeviceHostApi } from "@shared/host/device";
 import { HostError } from "@shared/ipc";
+import { t } from "@lingui/core/macro";
 
 /** Browser build: no USB, driver or process list; the browser and its version are all it can know. */
 export const webDevice: DeviceHostApi = {
@@ -26,6 +27,6 @@ export const webDevice: DeviceHostApi = {
     return fileName;
   },
   pickSuitePath: async () => {
-    throw new HostError("unsupported", "Choosing Valeton Suite needs the desktop app");
+    throw new HostError("unsupported", t`Choosing Valeton Suite needs the desktop app`);
   },
 };

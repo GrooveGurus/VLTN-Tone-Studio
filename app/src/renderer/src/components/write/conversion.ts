@@ -4,6 +4,7 @@ import { convertsLosslessly, crossFamilyNote, pedalName } from "@/state/device-m
 import type { DeviceKey } from "@/state/device-types";
 import { profileFor } from "@shared/devices";
 import type { PresetSummary } from "./preset-summary";
+import { t } from "@lingui/core/macro";
 
 export interface Conversion {
   from: DeviceKey;
@@ -41,7 +42,7 @@ export function isLossy(c: Conversion): boolean {
 export function droppedSentence(c: Pick<Conversion, "to" | "dropped">): string {
   const n = c.dropped.length;
   if (!n) return "";
-  return `${c.dropped.join(", ")} ${n === 1 ? "has" : "have"} no ${pedalName(c.to)} equivalent, so ${n === 1 ? "that block is" : "those blocks are"} left empty.`;
+  return t`${c.dropped.join(", ")} ${n === 1 ? t`has` : t`have`} no ${pedalName(c.to)} equivalent, so ${n === 1 ? t`that block is` : t`those blocks are`} left empty.`;
 }
 
 /** Everything the preset loses on the way, one sentence each; empty when nothing is lost. */
@@ -50,18 +51,18 @@ function lossSentences(c: Conversion): string[] {
   const n = c.unsynced.length;
   return [
     droppedSentence(c),
-    c.expDropped ? `Its EXP pedal settings are dropped: the ${to} keeps none per preset.` : "",
-    n ? `${c.unsynced.join(", ")} ${n === 1 ? "follows" : "follow"} the tempo; the ${to} has no tempo sync, so set ${n === 1 ? "it" : "them"} again after writing.` : "",
+    c.expDropped ? t`Its EXP pedal settings are dropped: the ${to} keeps none per preset.` : "",
+    n ? t`${c.unsynced.join(", ")} ${n === 1 ? t`follows` : t`follow`} the tempo; the ${to} has no tempo sync, so set ${n === 1 ? t`it` : t`them`} again after writing.` : "",
   ].filter(Boolean);
 }
 
 /** "Made on a GP-50. Converted for your GP-5 when you write it. …" GP-5 → GP-50 says nothing is lost. */
 export function conversionNote(c: Conversion): string {
   if (c.refused) return c.refused;
-  const lead = `Made on a ${pedalName(c.from)}. Converted for your ${pedalName(c.to)} when you write it`;
+  const lead = t`Made on a ${pedalName(c.from)}. Converted for your ${pedalName(c.to)} when you write it`;
   const losses = lossSentences(c);
   if (losses.length) return `${lead}. ${losses.join(" ")}`;
-  return convertsLosslessly(c.from, c.to) ? `${lead}; nothing is lost.` : `${lead}.`;
+  return convertsLosslessly(c.from, c.to) ? t`${lead}; nothing is lost.` : `${lead}.`;
 }
 
 /**
@@ -72,6 +73,6 @@ export function listConversionNote(from: DeviceKey, to: DeviceKey): string | nul
   if (convertsLosslessly(from, to)) return null;
   const a = pedalName(from);
   const b = pedalName(to);
-  if (profileFor(from).family !== profileFor(to).family) return `Presets made on a ${a} can't be converted for a ${b}.`;
-  return `Presets made on a ${a} are converted for your ${b} when you write one: their EXP pedal settings are dropped, tempo-synced times and rates need setting again, and ${a}-only models are left empty. Select a preset to see what it loses.`;
+  if (profileFor(from).family !== profileFor(to).family) return t`Presets made on a ${a} can't be converted for a ${b}.`;
+  return t`Presets made on a ${a} are converted for your ${b} when you write one: their EXP pedal settings are dropped, tempo-synced times and rates need setting again, and ${a}-only models are left empty. Select a preset to see what it loses.`;
 }

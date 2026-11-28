@@ -8,6 +8,7 @@ import { PATCH_SETTINGS, globalsFor, patchSettingByRecord } from "@/gp5/lib/prot
 import { profileFor, type DeviceKey } from "@shared/devices";
 import type { BackupEntry, DeviceFeature, GlobalName, GlobalSpec, Gp5GlobalName, SlotName } from "../device-types";
 import type { DeviceDriver, DriverEvent, DriverOptions, GlobalsSnapshot, ProgressOptions, SyncSnapshot } from "./types";
+import { t } from "@lingui/core/macro";
 
 type PatchSettingField = Extract<DriverEvent, { type: "patchSetting" }>["field"];
 /** PATCH_SETTINGS is keyed by exactly the event's fields (volume, bpm and the EXP fields). */
@@ -209,12 +210,12 @@ export class Gp5Driver implements DeviceDriver {
   /** Range of `name` in the connected model's settings table (the GP-5 and GP-50 tables differ). */
   clampGlobal(name: GlobalName, value: number): number {
     const g = specsOf(this.#session.device)[name];
-    if (!g) throw new RangeError(`The ${this.portName} has no setting ${name}`);
+    if (!g) throw new RangeError(t`The ${this.portName} has no setting ${name}`);
     return Math.max(g.min, Math.min(g.max, Math.round(value)));
   }
 
   async setGlobal(name: GlobalName, value: number): Promise<void> {
-    if (!Object.hasOwn(specsOf(this.#session.device), name)) throw new RangeError(`The ${this.portName} has no setting ${name}`);
+    if (!Object.hasOwn(specsOf(this.#session.device), name)) throw new RangeError(t`The ${this.portName} has no setting ${name}`);
     await this.#session.setGlobal(name as Gp5GlobalName, value);
   }
 

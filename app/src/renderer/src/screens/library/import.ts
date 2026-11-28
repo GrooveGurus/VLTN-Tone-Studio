@@ -7,6 +7,7 @@ import type { DeviceKey } from "@/state/device-types";
 import { orderError, toPresetState } from "@/state/preset-codec";
 import { PRST_MODELS, profileFor, sniffPrst } from "@shared/devices";
 import { IMPORTED_ID, type LocalPreset, type NewPreset, type PickedFile } from "@shared/host/files";
+import { t } from "@lingui/core/macro";
 
 export interface Rejected {
   fileName: string;
@@ -23,8 +24,8 @@ export function checkPrst(bytes: Uint8Array): { ok: true; name: string; device: 
     const p = toPresetState(0, bytes);
     // The GP-150's file checksum (offset 0x0E) is not known: its files are checked by layout and chain only.
     const checksumOk = isGp5Family(device) ? isCrcValid(bytes) : profileFor(device).family === "gp200" ? isChecksumValid(bytes) : true;
-    if (!checksumOk) return { ok: false, reason: "The file is damaged (its checksum doesn't match)." };
-    if (orderError(device, p.order)) return { ok: false, reason: "The file is damaged (its chain order is invalid)." };
+    if (!checksumOk) return { ok: false, reason: t`The file is damaged (its checksum doesn't match).` };
+    if (orderError(device, p.order)) return { ok: false, reason: t`The file is damaged (its chain order is invalid).` };
     return { ok: true, name: p.name || "Untitled", device };
   } catch {
     return { ok: false, reason: NOT_A_PRESET };
@@ -37,7 +38,7 @@ export async function importPicked(files: PickedFile[]): Promise<{ added: LocalP
   const items: NewPreset[] = [];
   for (const f of files) {
     if (f.error || !f.bytes) {
-      rejected.push({ fileName: f.fileName, reason: f.error ?? "Couldn't read the file." });
+      rejected.push({ fileName: f.fileName, reason: f.error ?? t`Couldn't read the file.` });
       continue;
     }
     const check = checkPrst(f.bytes);

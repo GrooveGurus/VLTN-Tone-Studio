@@ -17,6 +17,8 @@ import { notifySuccess } from "@/app/notify";
 import { host, isElectron } from "@/host";
 import type { CollectionInfo } from "@shared/host/files";
 import { useLibrary } from "./store";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export type CollectionDialog =
   | { kind: "new"; then?: (collection: CollectionInfo) => void }
@@ -56,15 +58,15 @@ export function CollectionDialogs({ dialog, onClose }: { dialog: CollectionDialo
       <AlertDialog open onOpenChange={(o) => !o && !saving && onClose()}>
         <AlertDialogContent className="max-w-[440px]">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete {c.title}?</AlertDialogTitle>
+            <AlertDialogTitle><Trans>Delete {c.title}?</Trans></AlertDialogTitle>
             <AlertDialogDescription>
-              Its {c.count === 1 ? "preset is" : `${c.count} presets are`} {isElectron ? "moved to the Trash" : "removed from this computer"}.
-              Nothing changes on the pedal.
+              <Trans>Its</Trans> {c.count === 1 ? t`preset is` : t`${c.count} presets are`} {isElectron ? t`moved to the Trash` : t`removed from this computer`}<Trans>.
+              Nothing changes on the pedal.</Trans>
             </AlertDialogDescription>
           </AlertDialogHeader>
           {error && <p role="alert" className="text-sm text-led-fault">{error}</p>}
           <AlertDialogFooter>
-            <AlertDialogCancel variant="ghost">Cancel</AlertDialogCancel>
+            <AlertDialogCancel variant="ghost"><Trans>Cancel</Trans></AlertDialogCancel>
             <Button
               variant="destructive"
               disabled={saving}
@@ -72,11 +74,11 @@ export function CollectionDialogs({ dialog, onClose }: { dialog: CollectionDialo
                 void run(async () => {
                   await host.files.deleteCollection(c.id);
                   await useLibrary.getState().refreshCollections();
-                  notifySuccess(isElectron ? `Moved ${c.title} to the Trash` : `Removed ${c.title}`);
+                  notifySuccess(isElectron ? t`Moved ${c.title} to the Trash` : t`Removed ${c.title}`);
                 })
               }
             >
-              Delete collection
+              <Trans>Delete collection</Trans>
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -110,20 +112,20 @@ export function CollectionDialogs({ dialog, onClose }: { dialog: CollectionDialo
           }}
         >
           <DialogHeader>
-            <DialogTitle>{isNew ? "New collection" : "Rename collection"}</DialogTitle>
-            <DialogDescription>{isNew ? "A setlist or a folder of presets on this computer." : "Only the name in Tone Studio changes."}</DialogDescription>
+            <DialogTitle>{isNew ? t`New collection` : t`Rename collection`}</DialogTitle>
+            <DialogDescription>{isNew ? t`A setlist or a folder of presets on this computer.` : t`Only the name in Tone Studio changes.`}</DialogDescription>
           </DialogHeader>
           <Field data-invalid={error ? true : undefined}>
-            <FieldLabel htmlFor={inputId}>Name</FieldLabel>
-            <Input id={inputId} value={title} maxLength={60} autoFocus onChange={(e) => setTitle(e.target.value)} aria-invalid={error ? true : undefined} placeholder="Rehearsal set" />
+            <FieldLabel htmlFor={inputId}><Trans>Name</Trans></FieldLabel>
+            <Input id={inputId} value={title} maxLength={60} autoFocus onChange={(e) => setTitle(e.target.value)} aria-invalid={error ? true : undefined} placeholder={t`Rehearsal set`} />
             {error && <FieldError>{error}</FieldError>}
           </Field>
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose}>
-              Cancel
+              <Trans>Cancel</Trans>
             </Button>
             <Button type="submit" disabled={!title.trim() || saving}>
-              {isNew ? "Create" : "Rename"}
+              {isNew ? t`Create` : t`Rename`}
             </Button>
           </DialogFooter>
         </form>

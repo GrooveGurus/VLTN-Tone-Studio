@@ -47,6 +47,8 @@ import { reconnect, runMenuCommand } from "../commands";
 import { notifyError } from "../notify";
 import { requestPresetSwitch } from "../preset-switch";
 import { rank, splitByRanges, type Range, type Searchable } from "./search";
+import { t as lt } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** One palette row. `id` is unique across groups and is cmdk's item value. */
 interface Entry {
@@ -149,8 +151,8 @@ function useGroups(close: () => void): Group[] {
     const catalogDevice = preset?.device ?? lastDevice ?? DEFAULT_DEVICE;
     const catalog = isGp5Family(catalogDevice) ? catalogDevice : null;
     const codes: readonly BlockCode[] = catalog ? blockCodes(catalog) : [];
-    const needsPedal = `Needs the ${pedalName(lastDevice)}`;
-    const pedal = connected ? (busy ? `Wait for the ${busy.kind}` : undefined) : needsPedal;
+    const needsPedal = lt`Needs the ${pedalName(lastDevice)}`;
+    const pedal = connected ? (busy ? lt`Wait for the ${busy.kind}` : undefined) : needsPedal;
     const cmd = (c: AppCommand) => () => {
       close();
       runCommand(c);
@@ -182,7 +184,7 @@ function useGroups(close: () => void): Group[] {
         <>
           <span className="min-w-5 shrink-0 font-semibold text-silkscreen-3 tabular-nums">{profile.slotLabel(n.slot)}</span>
           <Name text={n.name} ranges={ranges} className="flex-1" />
-          {n.slot === slot ? <Badge>Current</Badge> : !connected ? <Hint>Last read</Hint> : recent.includes(n.slot) ? <Hint>Recent</Hint> : null}
+          {n.slot === slot ? <Badge><Trans>Current</Trans></Badge> : !connected ? <Hint><Trans>Last read</Trans></Hint> : recent.includes(n.slot) ? <Hint><Trans>Recent</Trans></Hint> : null}
         </>
       ),
     }));
@@ -190,39 +192,39 @@ function useGroups(close: () => void): Group[] {
     const actions: Entry[] = [
       actionEntry({
         id: "backup",
-        label: "Back up now",
+        label: lt`Back up now`,
         icon: HardDriveDownload,
-        hint: `All ${profile.slotCount} slots, about ${profile.backupSeconds} s`,
+        hint: lt`All ${profile.slotCount} slots, about ${profile.backupSeconds} s`,
         words: ["backup"],
         blocked: pedal,
         run: cmd("backup-pedal"),
       }),
       actionEntry({
         id: "compare",
-        label: "Compare with saved",
+        label: lt`Compare with saved`,
         icon: GitCompareArrows,
-        hint: unsaved ? `${unsaved} change${unsaved === 1 ? "" : "s"}` : "No changes",
+        hint: unsaved ? lt`${unsaved} change${unsaved === 1 ? "" : "s"}` : lt`No changes`,
         blocked: preset ? undefined : needsPedal,
         run: cmd("compare-with-saved"),
       }),
-      actionEntry({ id: "save", label: nn ? `Save to slot ${nn}` : "Save to slot", icon: Save, keys: ["Mod", "S"], blocked: pedal, run: cmd("save-to-slot") }),
-      actionEntry({ id: "rename", label: nn ? `Rename slot ${nn}` : "Rename slot", icon: Pencil, keys: ["F2"], blocked: pedal, run: cmd("rename-slot") }),
-      actionEntry({ id: "write-file", label: "Write a preset file to a slot…", icon: Upload, words: ["prst"], blocked: pedal, run: cmd("write-file-to-slot") }),
-      actionEntry({ id: "discard", label: "Discard changes", icon: RotateCcw, words: ["revert"], blocked: unsaved ? pedal : "No changes", run: cmd("discard-changes") }),
-      actionEntry({ id: "import", label: "Import presets…", icon: FileUp, keys: ["Mod", "O"], words: ["prst", "file"], run: cmd("import-presets") }),
-      actionEntry({ id: "export", label: "Export preset…", icon: FileUp, keys: ["Mod", "E"], words: ["prst", "file"], run: cmd("export-preset") }),
+      actionEntry({ id: "save", label: nn ? lt`Save to slot ${nn}` : lt`Save to slot`, icon: Save, keys: ["Mod", "S"], blocked: pedal, run: cmd("save-to-slot") }),
+      actionEntry({ id: "rename", label: nn ? lt`Rename slot ${nn}` : lt`Rename slot`, icon: Pencil, keys: ["F2"], blocked: pedal, run: cmd("rename-slot") }),
+      actionEntry({ id: "write-file", label: lt`Write a preset file to a slot…`, icon: Upload, words: ["prst"], blocked: pedal, run: cmd("write-file-to-slot") }),
+      actionEntry({ id: "discard", label: lt`Discard changes`, icon: RotateCcw, words: ["revert"], blocked: unsaved ? pedal : "No changes", run: cmd("discard-changes") }),
+      actionEntry({ id: "import", label: lt`Import presets…`, icon: FileUp, keys: ["Mod", "O"], words: ["prst", "file"], run: cmd("import-presets") }),
+      actionEntry({ id: "export", label: lt`Export preset…`, icon: FileUp, keys: ["Mod", "E"], words: ["prst", "file"], run: cmd("export-preset") }),
       actionEntry({
         id: "tone-match",
-        label: "Tone match",
+        label: lt`Tone match`,
         icon: Guitar,
-        hint: `Match a song's guitar tone on the ${pedalName(lastDevice)}`,
+        hint: lt`Match a song's guitar tone on the ${pedalName(lastDevice)}`,
         words: ["tone match", "match", "guitar", "song", "stems", "preset", "ir"],
         run: go("song", "tone"),
       }),
-      actionEntry({ id: "split-song", label: "Split a song into stems", icon: AudioLines, words: ["stems", "song", "separate", "guitar", "vocals", "drums"], run: go("song", "stems") }),
+      actionEntry({ id: "split-song", label: lt`Split a song into stems`, icon: AudioLines, words: ["stems", "song", "separate", "guitar", "vocals", "drums"], run: go("song", "stems") }),
       actionEntry({
         id: "generate-band",
-        label: "Generate drums and bass…",
+        label: lt`Generate drums and bass…`,
         icon: Drum,
         words: ["band", "drums", "bass", "parts", "backing", "generate"],
         run: () => {
@@ -231,23 +233,23 @@ function useGroups(close: () => void): Group[] {
           useBandPanel.getState().show(true);
         },
       }),
-      actionEntry({ id: "backups-folder", label: "Open backups folder", icon: FolderOpen, run: cmd("open-backups-folder") }),
+      actionEntry({ id: "backups-folder", label: lt`Open backups folder`, icon: FolderOpen, run: cmd("open-backups-folder") }),
       actionEntry({
         id: "reconnect",
-        label: connected ? "Reconnect" : `Connect the ${pedalName(lastDevice)}`,
+        label: connected ? lt`Reconnect` : lt`Connect the ${pedalName(lastDevice)}`,
         icon: Unplug,
         words: ["connect", "usb", "midi"],
-        blocked: busy ? `Wait for the ${busy.kind}` : undefined,
+        blocked: busy ? lt`Wait for the ${busy.kind}` : undefined,
         run: () => {
           close();
           void reconnect();
         },
       }),
-      actionEntry({ id: "settings", label: "Device settings", icon: Settings2, keys: ["Mod", ","], words: ["preferences", "options"], run: go("device", "settings") }),
-      actionEntry({ id: "diagnostics", label: "Diagnostics report", icon: Stethoscope, words: ["help", "driver", "troubleshooting"], run: cmd("diagnostics-report") }),
+      actionEntry({ id: "settings", label: lt`Device settings`, icon: Settings2, keys: ["Mod", ","], words: ["preferences", "options"], run: go("device", "settings") }),
+      actionEntry({ id: "diagnostics", label: lt`Diagnostics report`, icon: Stethoscope, words: ["help", "driver", "troubleshooting"], run: cmd("diagnostics-report") }),
       actionEntry({
         id: "about",
-        label: "About VLTN Tone Studio",
+        label: lt`About VLTN Tone Studio`,
         icon: Info,
         words: ["version"],
         run: () => {
@@ -257,7 +259,7 @@ function useGroups(close: () => void): Group[] {
       }),
       actionEntry({
         id: "whats-new",
-        label: "What's new",
+        label: lt`What's new`,
         icon: Sparkles,
         words: ["release", "changelog", "version"],
         run: () => {
@@ -269,7 +271,7 @@ function useGroups(close: () => void): Group[] {
         ? [
             actionEntry({
               id: "check-updates",
-              label: "Check for updates",
+              label: lt`Check for updates`,
               icon: RefreshCw,
               words: ["update", "upgrade", "new version", "release"],
               run: () => {
@@ -289,7 +291,7 @@ function useGroups(close: () => void): Group[] {
         ["device", "Device", Usb, "4"],
         ["song", "Song", AudioLines, "5"],
       ] as const
-    ).map(([screen, label, icon, n]) => actionEntry({ id: `go-${screen}`, label: `Go to ${label}`, icon, keys: ["Mod", "Shift", n], words: ["screen", "open"], run: go(screen) }));
+    ).map(([screen, label, icon, n]) => actionEntry({ id: `go-${screen}`, label: lt`Go to ${label}`, icon, keys: ["Mod", "Shift", n], words: ["screen", "open"], run: go(screen) }));
 
     const models: Entry[] = (catalog ? (modelsFor(catalog) as ModelInfo[]) : []).map((m) => {
       const block = codes.indexOf(m.block);
@@ -306,7 +308,7 @@ function useGroups(close: () => void): Group[] {
             .getState()
             .setModel(block, m.fxid)
             .then(() => useUi.getState().focusRig({ block, picker: false }))
-            .catch((e) => notifyError(`Couldn't set ${m.title}`, e));
+            .catch((e) => notifyError(lt`Couldn't set ${m.title}`, e));
         },
         render: (ranges) => (
           <>
@@ -315,7 +317,7 @@ function useGroups(close: () => void): Group[] {
               <Name text={m.title} ranges={ranges} className="font-semibold" />
               <span className="truncate text-xs text-silkscreen-3">{m.origin ?? m.type}</span>
             </span>
-            {inUse ? <Badge>In use</Badge> : <Hint>{connected && preset ? `Set on ${m.block}` : needsPedal}</Hint>}
+            {inUse ? <Badge><Trans>In use</Trans></Badge> : <Hint>{connected && preset ? lt`Set on ${m.block}` : needsPedal}</Hint>}
           </>
         ),
       };
@@ -339,7 +341,7 @@ function useGroups(close: () => void): Group[] {
               .getState()
               .setModel(capture, fxid)
               .then(() => useUi.getState().focusRig({ block: capture, picker: false }))
-              .catch((e) => notifyError(`Couldn't load ${t.name}`, e));
+              .catch((e) => notifyError(lt`Couldn't load ${t.name}`, e));
           },
           render: (ranges: readonly Range[]) => (
             <>
@@ -364,20 +366,20 @@ function useGroups(close: () => void): Group[] {
               <>
                 <Speaker className="size-4 text-silkscreen-3" aria-hidden />
                 <Name text={t.name} ranges={ranges} className="flex-1" />
-                <Hint>User IR {t.slot + 1}</Hint>
+                <Hint><Trans>User IR</Trans> {t.slot + 1}</Hint>
               </>
             ),
           }) satisfies Entry,
       ),
-      actionEntry({ id: "tone3000", label: "Browse TONE3000", icon: ExternalLink, hint: "Opens the tone picker", words: ["nam", "capture", "ir", "download"], run: cmd("browse-tone3000") }),
+      actionEntry({ id: "tone3000", label: lt`Browse TONE3000`, icon: ExternalLink, hint: lt`Opens the tone picker`, words: ["nam", "capture", "ir", "download"], run: cmd("browse-tone3000") }),
     ];
 
     return [
-      { heading: "Presets on pedal", entries: presets, idle: 3, limit: 8 },
-      { heading: "Models", entries: models, limit: 6 },
-      { heading: "Actions", entries: actions, idle: 4, limit: 6 },
-      { heading: "Tones", entries: tones, idle: 3, limit: 5 },
-      { heading: "Go to", entries: screens, limit: 5 },
+      { heading: lt`Presets on pedal`, entries: presets, idle: 3, limit: 8 },
+      { heading: lt`Models`, entries: models, limit: 6 },
+      { heading: lt`Actions`, entries: actions, idle: 4, limit: 6 },
+      { heading: lt`Tones`, entries: tones, idle: 3, limit: 5 },
+      { heading: lt`Go to`, entries: screens, limit: 5 },
     ];
   }, [names, slot, connected, unsaved, preset, lastDevice, profile, snapTones, userIRs, busy, recent, close]);
 }
@@ -442,7 +444,7 @@ function useResults(groups: Group[], query: string) {
       if (uses.length) {
         const amps = named.every((h) => h.entry.verb === "set AMP model");
         uses.sort((a, b) => Number(a.entry.id.slice(5)) - Number(b.entry.id.slice(5)));
-        ranked.splice(ranked.indexOf(models) + 1, 0, { heading: `Presets on pedal that use ${amps ? "these amps" : "these models"}`, hits: uses.slice(0, 8), best: models.best });
+        ranked.splice(ranked.indexOf(models) + 1, 0, { heading: lt`Presets on pedal that use ${amps ? lt`these amps` : lt`these models`}`, hits: uses.slice(0, 8), best: models.best });
       }
     }
     return ranked;
@@ -456,8 +458,8 @@ export function CommandPalette() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent showCloseButton={false} className="top-[14vh] w-[560px] max-w-[calc(100vw-48px)] translate-y-0 gap-0 overflow-hidden p-0 sm:max-w-[560px]">
-        <DialogTitle className="sr-only">Command palette</DialogTitle>
-        <DialogDescription className="sr-only">Search presets, models, tones and actions</DialogDescription>
+        <DialogTitle className="sr-only"><Trans>Command palette</Trans></DialogTitle>
+        <DialogDescription className="sr-only"><Trans>Search presets, models, tones and actions</Trans></DialogDescription>
         {open && <PaletteBody close={() => setOpen(false)} />}
       </DialogContent>
     </Dialog>
@@ -473,21 +475,21 @@ function PaletteBody({ close }: { close: () => void }) {
   const active = all.find((h) => h.entry.id === value)?.entry ?? all.find((h) => !h.entry.blocked)?.entry;
 
   return (
-    <CommandPrimitive shouldFilter={false} onValueChange={setValue} loop label="Command palette" className="flex flex-col">
+    <CommandPrimitive shouldFilter={false} onValueChange={setValue} loop label={lt`Command palette`} className="flex flex-col">
       <div className="flex h-12 items-center gap-2.5 border-b border-seam px-4 text-silkscreen-3">
         <Search className="size-4 shrink-0" aria-hidden />
         <CommandPrimitive.Input
           value={query}
           onValueChange={setQuery}
-          placeholder="Search presets, models, tones and actions"
-          aria-label="Search"
+          placeholder={lt`Search presets, models, tones and actions`}
+          aria-label={lt`Search`}
           className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-silkscreen outline-none placeholder:text-silkscreen-4"
         />
         <Keys keys={["Esc"]} />
       </div>
       <CommandPrimitive.List className="h-[min(476px,calc(100vh-14vh-140px))] scroll-py-2 overflow-y-auto px-2 pt-1 pb-2">
         <CommandPrimitive.Empty className="px-2 py-10 text-center text-[13px] text-pretty text-silkscreen-3">
-          No matches for “{query.trim()}”. Try a model name, a slot number or the amp it's based on.
+          <Trans>No matches for “{query.trim()}”. Try a model name, a slot number or the amp it's based on.</Trans>
         </CommandPrimitive.Empty>
         {results.map((g) => (
           <CommandPrimitive.Group
@@ -516,7 +518,7 @@ function PaletteBody({ close }: { close: () => void }) {
         <span className="flex items-center gap-1.5">
           <Keys keys={["↑"]} />
           <Keys keys={["↓"]} />
-          move
+          <Trans>move</Trans>
         </span>
         {active && (
           <span className="flex items-center gap-1.5">
@@ -525,7 +527,7 @@ function PaletteBody({ close }: { close: () => void }) {
           </span>
         )}
         <span className="flex-1" />
-        <span>{query.trim() ? `${all.length} result${all.length === 1 ? "" : "s"}` : "Type a model, slot number or tone"}</span>
+        <span>{query.trim() ? lt`${all.length} result${all.length === 1 ? "" : "s"}` : lt`Type a model, slot number or tone`}</span>
       </div>
     </CommandPrimitive>
   );

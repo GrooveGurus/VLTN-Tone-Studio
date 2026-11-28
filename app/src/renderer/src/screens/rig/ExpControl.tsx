@@ -14,12 +14,14 @@ import { useNav } from "@/state/nav";
 import { expTargetParams } from "@/state/device-model";
 import type { ExpEdit, ExpSettings, PresetState } from "@/state/device-types";
 import { editExp } from "./edits";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const VOLUME_TARGET = 0;
 
 /** "Volume" for the EXP volume, else the block code with its current model ("DLY · Pure Eko"). */
 function targetLabel(preset: PresetState, module: number): string {
-  if (module === VOLUME_TARGET) return "Volume";
+  if (module === VOLUME_TARGET) return t`Volume`;
   const code = EXP_TARGETS[module] ?? `Block ${module}`;
   const block = preset.blocks.find((b) => b.code === code);
   return block?.model ? `${code} · ${block.model.title}` : code;
@@ -29,7 +31,7 @@ const apply = (edit: ExpEdit) => {
   try {
     editExp(edit);
   } catch (e) {
-    notifyError("Couldn't change the EXP setting", e);
+    notifyError(t`Couldn't change the EXP setting`, e);
   }
 };
 
@@ -57,7 +59,7 @@ export function ExpControl({ preset, exp, disabled }: { preset: PresetState; exp
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="xs" aria-label={`EXP ${shown}, settings`} className="-mx-1 gap-1.5 px-1.5 text-sm font-normal text-silkscreen-3">
+        <Button variant="ghost" size="xs" aria-label={t`EXP ${shown}, settings`} className="-mx-1 gap-1.5 px-1.5 text-sm font-normal text-silkscreen-3">
           EXP
           <span className={cn("font-semibold", exp.on ? "text-silkscreen" : "text-silkscreen-4")}>{shown}</span>
         </Button>
@@ -65,23 +67,23 @@ export function ExpControl({ preset, exp, disabled }: { preset: PresetState; exp
       <PopoverContent align="start" className="flex w-[320px] flex-col gap-4 bg-surface-solid-raised!">
         {!usable &&
           (locked ? (
-            <Note text="Changing EXP settings needs Experimental pedal commands." action="Open Settings" onAction={() => openDevice("settings")} />
+            <Note text={t`Changing EXP settings needs Experimental pedal commands.`} action={t`Open Settings`} onAction={() => openDevice("settings")} />
           ) : (
-            <Note text={`Connect the ${pedal} to change its EXP settings.`} />
+            <Note text={t`Connect the ${pedal} to change its EXP settings.`} />
           ))}
         {jackIsFootswitch && (
-          <Note text={`The ${pedal}'s EXP/FS jack is set to footswitch, so it ignores these settings until the jack is set to an expression pedal.`} action="Open Device" onAction={() => openDevice(null)} />
+          <Note text={t`The ${pedal}'s EXP/FS jack is set to footswitch, so it ignores these settings until the jack is set to an expression pedal.`} action={t`Open Device`} onAction={() => openDevice(null)} />
         )}
         <div className="flex items-center justify-between gap-3">
           <Label htmlFor={ids.on} className="text-sm font-[550] text-silkscreen-2">
-            EXP pedal
+            <Trans>EXP pedal</Trans>
           </Label>
           <Switch id={ids.on} checked={exp.on} disabled={off} onCheckedChange={(v) => apply({ on: v })} />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={ids.target} className="text-xs text-silkscreen-3">
-            Controls
+            <Trans>Controls</Trans>
           </Label>
           <Select
             value={String(exp.targetModule)}
@@ -107,9 +109,9 @@ export function ExpControl({ preset, exp, disabled }: { preset: PresetState; exp
         {volume ? (
           <>
             <div className="flex flex-col gap-1.5">
-              <span id={ids.pos} className="text-xs text-silkscreen-3">
+              <Trans><span id={ids.pos} className="text-xs text-silkscreen-3">
                 Volume position
-              </span>
+              </span></Trans>
               <ToggleGroup
                 type="single"
                 spacing={1.5}
@@ -118,21 +120,21 @@ export function ExpControl({ preset, exp, disabled }: { preset: PresetState; exp
                 aria-labelledby={ids.pos}
                 onValueChange={(v) => v && apply({ volPosition: v === "1" ? 1 : 0 })}
               >
-                <ToggleGroupItem value="0">Pre (before the amp)</ToggleGroupItem>
-                <ToggleGroupItem value="1">Post (after the amp)</ToggleGroupItem>
+                <ToggleGroupItem value="0"><Trans>Pre (before the amp)</Trans></ToggleGroupItem>
+                <ToggleGroupItem value="1"><Trans>Post (after the amp)</Trans></ToggleGroupItem>
               </ToggleGroup>
             </div>
-            <RangeRow id={ids.range} label="Volume range" min={exp.volMin} max={exp.volMax} disabled={off} onChange={(lo, hi) => apply(changedEnds("volMin", lo, exp.volMin, "volMax", hi, exp.volMax))} />
+            <RangeRow id={ids.range} label={t`Volume range`} min={exp.volMin} max={exp.volMax} disabled={off} onChange={(lo, hi) => apply(changedEnds("volMin", lo, exp.volMin, "volMax", hi, exp.volMax))} />
           </>
         ) : (
           <>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor={ids.param} className="text-xs text-silkscreen-3">
-                Parameter
+                <Trans>Parameter</Trans>
               </Label>
               <Select value={String(exp.targetParam)} disabled={off || params.length === 0} onValueChange={(v) => apply({ targetParam: Number(v) })}>
                 <SelectTrigger id={ids.param} size="sm" className="w-full">
-                  <SelectValue placeholder={`Parameter ${exp.targetParam + 1}`} />
+                  <SelectValue placeholder={t`Parameter ${exp.targetParam + 1}`} />
                 </SelectTrigger>
                 <SelectContent>
                   {params.map((p, i) => (
@@ -145,7 +147,7 @@ export function ExpControl({ preset, exp, disabled }: { preset: PresetState; exp
             </div>
             <RangeRow
               id={ids.range}
-              label="Sweep (share of the parameter's range)"
+              label={t`Sweep (share of the parameter's range)`}
               min={exp.paramMin}
               max={exp.paramMax}
               disabled={off}

@@ -5,8 +5,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { defaultFills, FILLS, type Fills, type SectionOverride, type SectionPlan } from "@/song/band/arrangement";
 import { OCTAVE_SHIFTS, type OctaveShift } from "@/song/band/bass-parts";
 import { findStyle } from "@/song/band/styles";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
-const OCTAVE_LABELS: Record<string, string> = { "-1": "−1 octave", "0": "Same", "1": "+1 octave" };
+const OCTAVE_LABELS: Record<string, string> = { get "-1"() { return t`−1 octave`; }, get "0"() { return t`Same`; }, get "1"() { return t`+1 octave`; } };
 
 /**
  * The bass options a section keeps out of the table: octave, fills, hit the one, slides, dead notes and pickups. Each shows the value the
@@ -28,15 +30,15 @@ export function BandSectionMore({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" size="sm" disabled={disabled} aria-label={`More bass options for ${name}`}>
-          More
+        <Button type="button" variant="outline" size="sm" disabled={disabled} aria-label={t`More bass options for ${name}`}>
+          <Trans>More</Trans>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="flex w-72 flex-col gap-3">
         <label className="flex items-center justify-between gap-2 text-sm">
-          Octave
+          <Trans>Octave</Trans>
           <Select value={String(plan.octave)} disabled={disabled} onValueChange={(value) => onChange({ octave: Number(value) as OctaveShift })}>
-            <SelectTrigger size="sm" aria-label={`Octave of ${name}`} className="w-36">
+            <SelectTrigger size="sm" aria-label={t`Octave of ${name}`} className="w-36">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -49,11 +51,11 @@ export function BandSectionMore({
           </Select>
         </label>
         <label className="flex items-center justify-between gap-2 text-sm">
-          Fills
+          <Trans>Fills</Trans>
           <span className="flex items-center gap-2">
-            <span className="text-xs text-silkscreen-3">Default {defaultFills(name)}</span>
+            <Trans><span className="text-xs text-silkscreen-3">Default {defaultFills(name)}</span></Trans>
             <Select value={String(plan.fills)} disabled={disabled} onValueChange={(value) => onChange({ fills: Number(value) as Fills })}>
-              <SelectTrigger size="sm" aria-label={`Fills of ${name}`} className="w-20">
+              <SelectTrigger size="sm" aria-label={t`Fills of ${name}`} className="w-20">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -67,38 +69,38 @@ export function BandSectionMore({
           </span>
         </label>
         <label className="flex items-center justify-between gap-2 text-sm">
-          <span>
+          <Trans><span>
             Hit the one <span className="text-xs text-silkscreen-3">(a chorus after another section)</span>
-          </span>
+          </span></Trans>
           <Checkbox
-            aria-label={`Hit the one in ${name}`}
+            aria-label={t`Hit the one in ${name}`}
             disabled={disabled}
             checked={plan.hitTheOne}
             onCheckedChange={(on) => onChange({ hitTheOne: on === true })}
           />
         </label>
         <label className="flex items-center justify-between gap-2 text-sm">
-          <span>
+          <Trans><span>
             Slides <span className="text-xs text-silkscreen-3">{styleDefault(technique?.slides)}</span>
-          </span>
-          <Checkbox aria-label={`Slides in ${name}`} disabled={disabled} checked={plan.slides} onCheckedChange={(on) => onChange({ slides: on === true })} />
+          </span></Trans>
+          <Checkbox aria-label={t`Slides in ${name}`} disabled={disabled} checked={plan.slides} onCheckedChange={(on) => onChange({ slides: on === true })} />
         </label>
         <label className="flex items-center justify-between gap-2 text-sm">
-          <span>
+          <Trans><span>
             Dead notes <span className="text-xs text-silkscreen-3">{styleDefault(technique?.deadNotes)}</span>
-          </span>
+          </span></Trans>
           <Checkbox
-            aria-label={`Dead notes in ${name}`}
+            aria-label={t`Dead notes in ${name}`}
             disabled={disabled}
             checked={plan.deadNotes}
             onCheckedChange={(on) => onChange({ deadNotes: on === true })}
           />
         </label>
         <label className="flex items-center justify-between gap-2 text-sm">
-          <span>
+          <Trans><span>
             Pickups <span className="text-xs text-silkscreen-3">{styleDefault(technique?.pickups)}</span>
-          </span>
-          <Checkbox aria-label={`Pickups in ${name}`} disabled={disabled} checked={plan.pickups} onCheckedChange={(on) => onChange({ pickups: on === true })} />
+          </span></Trans>
+          <Checkbox aria-label={t`Pickups in ${name}`} disabled={disabled} checked={plan.pickups} onCheckedChange={(on) => onChange({ pickups: on === true })} />
         </label>
       </PopoverContent>
     </Popover>

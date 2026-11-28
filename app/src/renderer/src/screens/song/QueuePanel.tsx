@@ -5,12 +5,14 @@ import { QUEUE_MAX, isEditable, upcoming } from "@/song/queue";
 import { formatTime } from "@/song/stems/mix";
 import { EntryOverrideControls } from "./EntryOverrideControls";
 import { runningSeconds } from "@/song/performance/running-time";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const row = "flex flex-wrap items-center gap-2 rounded border border-seam p-2";
 
 /** The number of songs in the queue. The limit is named only when the queue is full, since it is not a position. */
 export function queueCount(songs: number): string {
-  if (songs >= QUEUE_MAX) return `Queue full (${QUEUE_MAX} songs)`;
+  if (songs >= QUEUE_MAX) return t`Queue full (${QUEUE_MAX} songs)`;
   return `${songs} ${songs === 1 ? "song" : "songs"}`;
 }
 
@@ -35,19 +37,19 @@ export function QueuePanel() {
   const edit = (reason: string | null) => setHint(reason ?? "");
   const remaining = rest.reduce((sum, id) => sum + duration(id), 0);
   return (
-    <section aria-label="Queue" className="space-y-3 rounded border border-seam p-4">
+    <section aria-label={t`Queue`} className="space-y-3 rounded border border-seam p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-semibold">Queue</h2>
+        <h2 className="font-semibold"><Trans>Queue</Trans></h2>
         <p className="text-sm text-silkscreen-3">
-          {queueCount(library.queue.length)} · {rest.length} to come · {formatTime(remaining)}
+          <Trans>{queueCount(library.queue.length)} · {rest.length} to come · {formatTime(remaining)}</Trans>
         </p>
       </div>
       {playing === undefined ? (
-        <p className="text-sm">Load a song to start the queue. Songs you add then play after it.</p>
+        <p className="text-sm"><Trans>Load a song to start the queue. Songs you add then play after it.</Trans></p>
       ) : (
-        <p className={row} aria-label="Playing now">
-          <strong className="flex-1">Playing: {title(playing)}</strong>
-          <span className="text-xs text-silkscreen-3">locked</span>
+        <p className={row} aria-label={t`Playing now`}>
+          <Trans><strong className="flex-1">Playing: {title(playing)}</strong>
+          <span className="text-xs text-silkscreen-3">locked</span></Trans>
         </p>
       )}
       <ol className="space-y-2">
@@ -71,14 +73,14 @@ export function QueuePanel() {
                 {i + 1}. {title(id)}
               </span>
               <EntryOverrideControls
-                label={`Queue entry ${i + 1}`}
+                label={t`Queue entry ${i + 1}`}
                 value={library.queueOverrides[index] ?? null}
                 disabled={busy}
                 onChange={(next) => edit(library.setQueueOverride(index, next))}
               />
               <Button
                 variant="outline"
-                aria-label={`Move queue entry ${i + 1} up`}
+                aria-label={t`Move queue entry ${i + 1} up`}
                 disabled={busy || !isEditable(state, index - 1)}
                 onClick={() => edit(library.moveInQueue(index, index - 1))}
               >
@@ -86,7 +88,7 @@ export function QueuePanel() {
               </Button>
               <Button
                 variant="outline"
-                aria-label={`Move queue entry ${i + 1} down`}
+                aria-label={t`Move queue entry ${i + 1} down`}
                 disabled={busy || index + 1 >= library.queue.length}
                 onClick={() => edit(library.moveInQueue(index, index + 1))}
               >
@@ -94,28 +96,28 @@ export function QueuePanel() {
               </Button>
               <Button
                 variant="outline"
-                aria-label={`Move queue entry ${i + 1} to top`}
+                aria-label={t`Move queue entry ${i + 1} to top`}
                 disabled={busy || i === 0}
                 onClick={() => edit(library.moveInQueue(index, library.position + 1))}
               >
-                To top
+                <Trans>To top</Trans>
               </Button>
               <Button
                 variant="outline"
-                aria-label={`Move queue entry ${i + 1} to bottom`}
+                aria-label={t`Move queue entry ${i + 1} to bottom`}
                 disabled={busy || index === library.queue.length - 1}
                 onClick={() => edit(library.moveInQueue(index, library.queue.length - 1))}
               >
-                To bottom
+                <Trans>To bottom</Trans>
               </Button>
-              <Button variant="outline" aria-label={`Remove queue entry ${i + 1}`} disabled={busy} onClick={() => edit(library.removeFromQueue(index))}>
-                Remove
+              <Button variant="outline" aria-label={t`Remove queue entry ${i + 1}`} disabled={busy} onClick={() => edit(library.removeFromQueue(index))}>
+                <Trans>Remove</Trans>
               </Button>
             </li>
           );
         })}
       </ol>
-      {!rest.length && playing !== undefined && <p className="text-sm text-silkscreen-3">Nothing is queued after this song.</p>}
+      {!rest.length && playing !== undefined && <p className="text-sm text-silkscreen-3"><Trans>Nothing is queued after this song.</Trans></p>}
       {hint && (
         <p role="status" className="text-sm">
           {hint}

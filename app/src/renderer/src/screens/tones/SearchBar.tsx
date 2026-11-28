@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { loadSearch, useTones } from "./store";
+import { t as lt } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const SORTS: [ToneSort, string][] = [
   ["trending", "Trending"],
@@ -44,13 +46,13 @@ export function SearchBar() {
           type="search"
           value={search.query}
           maxLength={100}
-          placeholder="Search tones: amp, pedal, artist…"
-          aria-label="Search TONE3000"
+          placeholder={lt`Search tones: amp, pedal, artist…`}
+          aria-label={lt`Search TONE3000`}
           className="pl-9"
           onChange={(e) => patch({ query: e.target.value })}
         />
       </div>
-      <ToggleGroup type="multiple" spacing={1.5} value={search.gears} onValueChange={(v) => patch({ gears: v as T3kGear[] })} aria-label="Gear">
+      <ToggleGroup type="multiple" spacing={1.5} value={search.gears} onValueChange={(v) => patch({ gears: v as T3kGear[] })} aria-label={lt`Gear`}>
         {GEARS.map(([v, label]) => (
           <ToggleGroupItem key={v} value={v}>
             {label}
@@ -58,17 +60,17 @@ export function SearchBar() {
         ))}
       </ToggleGroup>
       <Select value={search.architecture ?? ANY} onValueChange={(v) => patch({ architecture: v === ANY ? null : (v as T3kArchitecture) })}>
-        <SelectTrigger size="sm" aria-label="NAM architecture" className="w-32">
+        <SelectTrigger size="sm" aria-label={lt`NAM architecture`} className="w-32">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={ANY}>Any NAM</SelectItem>
+          <SelectItem value={ANY}><Trans>Any NAM</Trans></SelectItem>
           <SelectItem value="1">A1</SelectItem>
           <SelectItem value="2">A2</SelectItem>
         </SelectContent>
       </Select>
       <Select value={search.sort} onValueChange={(v) => patch({ sort: v as ToneSort })}>
-        <SelectTrigger size="sm" aria-label="Sort by" className="w-40">
+        <SelectTrigger size="sm" aria-label={lt`Sort by`} className="w-40">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

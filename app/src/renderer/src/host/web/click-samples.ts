@@ -1,4 +1,5 @@
 import type { ClickSamplesApi, ClickSampleSlot, StoredClickSample } from "@shared/host/click-samples";
+import { t } from "@lingui/core/macro";
 
 /** Browser build: the sample files live in IndexedDB, one record per slot. */
 const DB = "vltn-click-samples";
@@ -9,7 +10,7 @@ function open(): Promise<IDBDatabase> {
     const request = indexedDB.open(DB, 1);
     request.onupgradeneeded = () => request.result.createObjectStore(STORE);
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error("Could not open the sample store."));
+    request.onerror = () => reject(request.error ?? new Error(t`Could not open the sample store.`));
   });
 }
 
@@ -19,7 +20,7 @@ async function run<T>(mode: IDBTransactionMode, job: (store: IDBObjectStore) => 
     return await new Promise<T>((resolve, reject) => {
       const request = job(db.transaction(STORE, mode).objectStore(STORE));
       request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error ?? new Error("The sample store failed."));
+      request.onerror = () => reject(request.error ?? new Error(t`The sample store failed.`));
     });
   } finally {
     db.close();

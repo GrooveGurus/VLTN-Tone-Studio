@@ -13,6 +13,7 @@ import { profileFor, type DeviceKey } from "@shared/devices";
 import type { BackupEntry, ConnectionError, DeviceFeature, GlobalEq, GlobalName, Globals, ModFirmware, SlotName } from "../device-types";
 import { GP200_EQ_DEFAULTS, clampGp200Eq, clampGp200Global, gp200GlobalRecords, gp200GlobalSpec, type Gp200GlobalName, type Gp200Globals } from "./gp200-globals";
 import type { DeviceDriver, DriverEvent, DriverOptions, GlobalsSnapshot, ProgressOptions, SceneList, SlotScenes, SyncSnapshot } from "./types";
+import { t } from "@lingui/core/macro";
 
 /** GP-5 family SnapTone upload file (Suite's cut-down clone): too short for the GP-200, which keeps 1024 IR taps. */
 const GP5_SNAPTONE_FILE_BYTES = 2696;
@@ -42,7 +43,7 @@ export interface Gp200GlobalsSnapshot extends GlobalsSnapshot {
 export class Gp200UpdaterError extends Error implements ConnectionError {
   readonly code = "bootloader" as const;
   constructor() {
-    super("The GP-200 is in firmware update mode. Finish or restart the update with Valeton's updater, then reconnect.");
+    super(t`The GP-200 is in firmware update mode. Finish or restart the update with Valeton's updater, then reconnect.`);
     this.name = "Gp200UpdaterError";
   }
 }
@@ -73,7 +74,7 @@ const unlistedTable = (kind: "irs" | "snapTones"): SlotName[] => {
 /** int32 LE sample block (the GP-5 family's User IR data layout, up to 1024 samples here) → samples. */
 function irSamples(data: Uint8Array): Int32Array {
   if (data.byteLength === 0 || data.byteLength % 4 !== 0 || data.byteLength > USER_IR_MAX_SAMPLES * 4)
-    throw new RangeError(`A GP-200 User IR is up to ${USER_IR_MAX_SAMPLES} samples of 4 bytes; got ${data.byteLength} bytes.`);
+    throw new RangeError(t`A GP-200 User IR is up to ${USER_IR_MAX_SAMPLES} samples of 4 bytes; got ${data.byteLength} bytes.`);
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   return Int32Array.from({ length: data.byteLength / 4 }, (_, i) => view.getInt32(i * 4, true));
 }
@@ -81,9 +82,13 @@ function irSamples(data: Uint8Array): Int32Array {
 /** Features of every GP-200 family model (see Gp200Driver.features). */
 const BASE_FEATURES: readonly DeviceFeature[] = ["exportPreset", "liveBpm", "globalEq", "modified"];
 
-/** The GrooveGurus mod's HELLO → what the store shows ("GrooveGurus C0.7.0"). */
+/**
+ * The GrooveGurus mod's HELLO → what the store shows, as the pedal's About says it: "GrooveGurus C0.8.4" up to 0.8.4,
+ * "GP-Snap 1.0.0" from 1.0 (the mod renamed, ADR-0034; its HELLO still says "cenas" and "C" so editors know it).
+ */
 function modFirmware(h: ModHello): ModFirmware {
-  return { label: `GrooveGurus ${h.letter}${h.version}`, name: h.name, letter: h.letter, version: h.version, base: h.firmwareTag, sceneRecords: { ...h.scenes } };
+  const major = Number(h.version.split(".")[0]);
+  return { label: major >= 1 ? t`GP-Snap ${h.version}` : t`GrooveGurus ${h.letter}${h.version}`, name: h.name, letter: h.letter, version: h.version, base: h.firmwareTag, sceneRecords: { ...h.scenes } };
 }
 
 export class Gp200Driver implements DeviceDriver {
@@ -352,7 +357,7 @@ export class Gp200Driver implements DeviceDriver {
     // Another patch took over while its models were read: the edit was for the one that was left.
     if (buffer !== this.#buffer) return;
     const fxid = this.#fxids?.[block];
-    if (fxid === undefined) throw new RangeError(`The GP-200 has no block ${block}`);
+    if (fxid === undefined) throw new RangeError(t`The GP-200 has no block ${block}`);
     await this.#session.setParam(block, index, fxid, value);
   }
 
@@ -427,7 +432,7 @@ export class Gp200Driver implements DeviceDriver {
    */
   async uploadSnapTone(slot: number, name: string, file: Uint8Array, opts: ProgressOptions = {}): Promise<string> {
     if (file.byteLength === GP5_SNAPTONE_FILE_BYTES)
-      throw new RangeError("This SnapTone was made for the GP-5 or GP-50. Convert the capture again for the GP-200.");
+      throw new RangeError(t`This SnapTone was made for the GP-5 or GP-50. Convert the capture again for the GP-200.`);
     return this.#uploaded("snapTones", await this.#session.uploadSnapTone(slot, name, file, { confirm: true, onProgress: opts.onProgress }));
   }
 
@@ -438,7 +443,7 @@ export class Gp200Driver implements DeviceDriver {
 
   /** "renameToneSlots" (GP-200 only): 0x1015 / 0x100c, then the name is read back and must match. */
   async renameToneSlot(kind: "snaptone" | "ir", slot: number, name: string): Promise<string> {
-    if (!this.features.includes("renameToneSlots")) throw new Error("Renaming SnapTones and User IRs is only available on the GP-200.");
+    if (!this.features.includes("renameToneSlots")) throw new Error(t`Renaming SnapTones and User IRs is only available on the GP-200.`);
     return kind === "snaptone"
       ? this.#session.renameSnapTone(slot, name, { confirm: true })
       : this.#session.renameUserIr(slot, name, { confirm: true });

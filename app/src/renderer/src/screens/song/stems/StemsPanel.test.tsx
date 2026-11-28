@@ -5,7 +5,10 @@ import { useSong } from "@/song/store";
 import type { PcmAudio } from "@/song/types";
 
 vi.mock("@/host", () => ({ host: { song: { downloadedFiles: vi.fn().mockResolvedValue([]) } } }));
-vi.mock("./StemMixer", () => ({ StemMixer: () => "Stem mixer" }));
+vi.mock("./StemMixer", () => ({
+  StemMixer: () => "Stem mixer",
+  STEM_LABEL: { drums: "Drums", bass: "Bass", other: "Other", vocals: "Vocals", guitar: "Guitar", piano: "Piano" },
+}));
 // The part picker plays its preview through an AudioContext, which jsdom does not have.
 vi.mock("./PartPicker", () => ({ PartPicker: () => null }));
 

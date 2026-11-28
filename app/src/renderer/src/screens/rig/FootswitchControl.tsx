@@ -9,6 +9,8 @@ import { switchLabel } from "@/state/device-model";
 import type { PresetState } from "@/state/device-types";
 import { footswitchToggle, shownSwitches, toggleFootswitch } from "./edits";
 import { saveOnlyNote, useLiveMode } from "./live-edits";
+import { t as lt } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * Rig header "Footswitches" (GP-5 family, GP-150) or "CTRL" (GP-200 family): one button for the preset's switch
@@ -18,8 +20,8 @@ import { saveOnlyNote, useLiveMode } from "./live-edits";
 export function FootswitchControl({ preset, disabled }: { preset: PresetState; disabled: boolean }) {
   const pedal = usePedalName();
   const ctrl = profileFor(preset.device).family === "gp200";
-  const title = ctrl ? "CTRL" : "Footswitches";
-  const note = saveOnlyNote(useLiveMode("liveFootswitches"), ctrl ? "A CTRL change" : "A footswitch change", pedal);
+  const title = ctrl ? "CTRL" : lt`Footswitches`;
+  const note = saveOnlyNote(useLiveMode("liveFootswitches"), ctrl ? lt`A CTRL change` : lt`A footswitch change`, pedal);
   const switches = shownSwitches(preset).map((key) => ({ key, label: switchLabel(preset.device, key), assigned: preset.footswitches[key] }));
   const total = switches.reduce((n, s) => n + s.assigned.length, 0);
   const code = (b: number) => preset.blocks[b]?.code ?? "?";
@@ -30,17 +32,17 @@ export function FootswitchControl({ preset, disabled }: { preset: PresetState; d
       <PopoverTrigger asChild>
         <Button variant="ghost" size="xs" className="-mx-1 gap-1.5 px-1.5 text-sm font-normal text-silkscreen-3">
           {title}
-          <span className={total ? "font-semibold text-silkscreen" : "text-silkscreen-4"}>{total === 0 ? "none" : total === 1 ? "1 block" : `${total} blocks`}</span>
+          <span className={total ? "font-semibold text-silkscreen" : "text-silkscreen-4"}>{total === 0 ? lt`none` : total === 1 ? lt`1 block` : lt`${total} blocks`}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="flex w-[320px] flex-col gap-3 bg-surface-solid-raised!">
         <div className="flex flex-col gap-1">
           <span className="text-sm font-[550] text-silkscreen-2">{title}</span>
           <span className="text-xs text-pretty text-silkscreen-3">
-            {ctrl ? "Each CTRL turns its blocks on and off together." : "Each switch turns its blocks on and off together in Stomp mode."}
-            {preset.device === "gp50" && ` Up to ${MAX_FOOTSWITCH_BLOCKS} blocks per switch, and a block can be on one switch only.`}
+            {ctrl ? lt`Each CTRL turns its blocks on and off together.` : lt`Each switch turns its blocks on and off together in Stomp mode.`}
+            {preset.device === "gp50" && lt` Up to ${MAX_FOOTSWITCH_BLOCKS} blocks per switch, and a block can be on one switch only.`}
             {perFootswitch < profile.ctrls &&
-              ` CTRL 1–${perFootswitch} match the ${profile.name}'s ${perFootswitch} footswitches; a higher CTRL shows here when it holds blocks. The CTRL count isn't confirmed on a ${profile.name} yet.`}
+              lt` CTRL 1–${perFootswitch} match the ${profile.name}'s ${perFootswitch} footswitches; a higher CTRL shows here when it holds blocks. The CTRL count isn't confirmed on a ${profile.name} yet.`}
           </span>
         </div>
         <ul className="flex flex-col gap-2">
@@ -50,7 +52,7 @@ export function FootswitchControl({ preset, disabled }: { preset: PresetState; d
               <li key={key} className="flex min-h-7 items-center gap-2">
                 <span className="min-w-9 shrink-0 text-sm font-semibold whitespace-nowrap text-silkscreen tabular-nums">{label}</span>
                 <span className="flex min-w-0 flex-1 flex-wrap gap-1">
-                  {assigned.length === 0 && <span className="text-sm text-silkscreen-4">none</span>}
+                  {assigned.length === 0 && <span className="text-sm text-silkscreen-4"><Trans>none</Trans></span>}
                   {assigned.map((b) => (
                     <span key={b} className="inline-flex h-7 items-center gap-[5px] rounded-pill pr-0.5 pl-[9px] text-xs font-semibold text-silkscreen-2 shadow-[inset_0_0_0_1px_var(--seam-strong)]">
                       <span className="size-1.5 rounded-full" style={{ background: `var(--block-${code(b).toLowerCase()})` }} aria-hidden />
@@ -58,7 +60,7 @@ export function FootswitchControl({ preset, disabled }: { preset: PresetState; d
                       <button
                         type="button"
                         disabled={disabled}
-                        aria-label={`Remove ${code(b)} from ${label}`}
+                        aria-label={lt`Remove ${code(b)} from ${label}`}
                         onClick={() => toggleFootswitch(key, b)}
                         className="grid size-6 place-items-center rounded-full text-silkscreen-3 enabled:hover:bg-accent enabled:hover:text-silkscreen disabled:opacity-50"
                       >
@@ -69,7 +71,7 @@ export function FootswitchControl({ preset, disabled }: { preset: PresetState; d
                 </span>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon-xs" disabled={disabled} aria-label={`Add a block to ${label}`}>
+                    <Button variant="outline" size="icon-xs" disabled={disabled} aria-label={lt`Add a block to ${label}`}>
                       <PlusIcon aria-hidden />
                     </Button>
                   </DropdownMenuTrigger>
@@ -81,9 +83,9 @@ export function FootswitchControl({ preset, disabled }: { preset: PresetState; d
                         <DropdownMenuItem key={b} disabled={"reason" in t} onSelect={() => toggleFootswitch(key, b)}>
                           {code(b)}
                           {"reason" in t ? (
-                            <DropdownMenuShortcut>{MAX_FOOTSWITCH_BLOCKS} blocks max</DropdownMenuShortcut>
+                            <DropdownMenuShortcut><Trans>{MAX_FOOTSWITCH_BLOCKS} blocks max</Trans></DropdownMenuShortcut>
                           ) : (
-                            preset.device === "gp50" && from && <DropdownMenuShortcut>moves from {from.label}</DropdownMenuShortcut>
+                            preset.device === "gp50" && from && <DropdownMenuShortcut><Trans>moves from {from.label}</Trans></DropdownMenuShortcut>
                           )}
                         </DropdownMenuItem>
                       );

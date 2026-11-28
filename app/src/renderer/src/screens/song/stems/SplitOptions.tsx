@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 import { useSong } from "@/song/store";
 import { findQuality, relativeTime, SPLIT_QUALITIES, type QualityId } from "@/song/stems/options";
 import { missingBytes, modelBytes, modelFiles, SEPARATION_MODELS, type SeparationModel, type SeparationModelId } from "@shared/host/song";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Megabytes, as download sizes are shown. */
 export const megabytes = (bytes: number) => Math.round(bytes / 1e6);
@@ -37,8 +39,8 @@ function downloadLabel(model: SeparationModel, downloaded: ReadonlySet<string> |
   const total = megabytes(modelBytes(model));
   if (!downloaded) return `${total} MB`;
   const missing = megabytes(missingBytes(model, downloaded));
-  if (missing === 0) return `${total} MB, downloaded`;
-  return missing === total ? `${total} MB to download` : `${missing} of ${total} MB still to download`;
+  if (missing === 0) return t`${total} MB, downloaded`;
+  return missing === total ? t`${total} MB to download` : t`${missing} of ${total} MB still to download`;
 }
 
 /** Model picker (size, stems, downloaded or not, delete) and quality picker for the next split. */
@@ -53,9 +55,9 @@ export function SplitOptions({ className }: { className?: string }) {
     try {
       const freed = modelFiles(model).filter((f) => downloaded?.has(f.file)).reduce((sum, f) => sum + f.bytes, 0);
       await host.song.deleteModel(model.id);
-      notifySuccess(`${model.label} model deleted`, `${megabytes(freed)} MB freed. The next split with it downloads it again.`);
+      notifySuccess(t`${model.label} model deleted`, t`${megabytes(freed)} MB freed. The next split with it downloads it again.`);
     } catch (e) {
-      notifyError("Couldn't delete the model", e);
+      notifyError(t`Couldn't delete the model`, e);
     } finally {
       refresh();
     }
@@ -64,7 +66,7 @@ export function SplitOptions({ className }: { className?: string }) {
   return (
     <div className={cn("flex flex-col gap-3 text-left", className)}>
       <RadioGroup
-        aria-label="Separation model"
+        aria-label={t`Separation model`}
         value={choice.model}
         onValueChange={(v) => useSong.getState().setChoice({ model: v as SeparationModelId })}
         disabled={busy}
@@ -77,21 +79,21 @@ export function SplitOptions({ className }: { className?: string }) {
             <div key={m.id} className={cn("flex items-start gap-3 px-3 py-2.5 [&+&]:border-t [&+&]:border-seam", choice.model === m.id && "bg-faceplate")}>
               <RadioGroupItem id={id} value={m.id} className="mt-0.5" />
               <label htmlFor={id} className="flex min-w-0 grow cursor-pointer flex-col gap-0.5">
-                <span className="flex items-baseline gap-2 text-[13px] font-semibold text-silkscreen">
+                <Trans><span className="flex items-baseline gap-2 text-[13px] font-semibold text-silkscreen">
                   {m.label}
                   <span className="text-[12px] font-normal text-silkscreen-3">{m.stems.length} stems</span>
-                </span>
+                </span></Trans>
                 <span className="text-[12px] text-pretty text-silkscreen-3">{m.description}</span>
                 <span className="text-[11px] text-silkscreen-2 tabular-nums">{downloadLabel(m, downloaded)}</span>
               </label>
               {stored && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon-sm" aria-label={`Delete the ${m.label} model's files`} disabled={busy} onClick={() => void remove(m)}>
+                    <Button variant="ghost" size="icon-sm" aria-label={t`Delete the ${m.label} model's files`} disabled={busy} onClick={() => void remove(m)}>
                       <Trash2 />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent className="max-w-64">Delete its downloaded files to free disk space. Files it shares with another model go too.</TooltipContent>
+                  <TooltipContent className="max-w-64"><Trans>Delete its downloaded files to free disk space. Files it shares with another model go too.</Trans></TooltipContent>
                 </Tooltip>
               )}
             </div>
@@ -99,9 +101,9 @@ export function SplitOptions({ className }: { className?: string }) {
         })}
       </RadioGroup>
       <div className="flex flex-wrap items-center gap-3">
-        <span id="split-quality" className="text-[12px] font-semibold text-silkscreen-2">
+        <Trans><span id="split-quality" className="text-[12px] font-semibold text-silkscreen-2">
           Quality
-        </span>
+        </span></Trans>
         <ToggleGroup
           type="single"
           value={choice.quality}
@@ -119,7 +121,7 @@ export function SplitOptions({ className }: { className?: string }) {
         </ToggleGroup>
       </div>
       <p className="text-[12px] text-pretty text-silkscreen-3">
-        {quality.description} {factor > 1 ? `Takes about ${factor}× as long as Fast.` : "The quickest split."}
+        {quality.description} {factor > 1 ? t`Takes about ${factor}× as long as Fast.` : t`The quickest split.`}
       </p>
     </div>
   );

@@ -1,13 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { effectiveChoice, PART_KINDS, type PartChoice, type PartChoices, type PartKeys, type PartKind } from "@/song/band/part-choice";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** The three choices, in the order the buttons show them. */
 const OPTIONS: { choice: PartChoice; label: string }[] = [
-  { choice: "original", label: "Original" },
-  { choice: "generated", label: "Generated" },
-  { choice: "both", label: "Both" },
+  { choice: "original", get label() { return t`Original`; } },
+  { choice: "generated", get label() { return t`Generated`; } },
+  { choice: "both", get label() { return t`Both`; } },
 ];
-const LABEL: Record<PartKind, string> = { drums: "Drums", bass: "Bass" };
+const LABEL: Record<PartKind, string> = { get drums() { return t`Drums`; }, get bass() { return t`Bass`; } };
 
 /**
  * The Band panel's "What plays" choice, one row per part. The button that is pressed is the choice that actually plays (see
@@ -28,8 +30,8 @@ export function PartChoiceRows({
   onChange(patch: Partial<PartChoices>): void;
 }) {
   return (
-    <section aria-label="What plays" className="flex flex-col gap-2">
-      <h3 className="font-semibold">What plays</h3>
+    <section aria-label={t`What plays`} className="flex flex-col gap-2">
+      <h3 className="font-semibold"><Trans>What plays</Trans></h3>
       {PART_KINDS.map((kind) => {
         const part = keys[kind] ?? {};
         const shown = effectiveChoice(choices[kind], part);
@@ -53,7 +55,7 @@ export function PartChoiceRows({
                 </Button>
               );
             })}
-            {!hasGenerated && <span className="text-muted-foreground">Generate the {LABEL[kind].toLowerCase()} first.</span>}
+            {!hasGenerated && <span className="text-muted-foreground"><Trans>Generate the {LABEL[kind].toLowerCase()} first.</Trans></span>}
           </div>
         );
       })}

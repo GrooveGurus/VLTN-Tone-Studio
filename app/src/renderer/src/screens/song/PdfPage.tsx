@@ -5,6 +5,7 @@ import type { Mark, Point } from "@shared/chart-annotations";
 import { fitScale } from "@/song/performance/pdf/layout";
 import { clampPoint, strokeMark, textMark, type AnnotationTool } from "@/song/performance/pdf/annotations";
 import { drawMark } from "@/song/performance/pdf/draw";
+import { t } from "@lingui/core/macro";
 
 /** A4 proportions, used for the box of a page until its real size is known, so the page is in place before it draws. */
 const PLACEHOLDER_RATIO = 1.4142;
@@ -75,7 +76,7 @@ export function PdfPage({ doc, page, box, marks, tool, colour, onAdd, onError }:
       task = pdfPage.render({ canvas: target, viewport, transform: dpr === 1 ? undefined : [dpr, 0, 0, dpr, 0, 0] });
       await task.promise;
     })().catch((e: unknown) => {
-      if (alive && !isCancelled(e)) onError(`Page ${page} could not be drawn.`);
+      if (alive && !isCancelled(e)) onError(t`Page ${page} could not be drawn.`);
     });
     return () => {
       alive = false;
@@ -124,7 +125,7 @@ export function PdfPage({ doc, page, box, marks, tool, colour, onAdd, onError }:
     <div
       ref={wrap}
       data-page={page}
-      aria-label={`Page ${page}`}
+      aria-label={t`Page ${page}`}
       className="relative mx-auto shrink-0 bg-white shadow-lg"
       style={{
         width: size?.width ?? box.width,
@@ -134,7 +135,7 @@ export function PdfPage({ doc, page, box, marks, tool, colour, onAdd, onError }:
       <canvas ref={canvas} className="absolute top-0 left-0" aria-hidden="true" />
       <canvas
         ref={overlay}
-        aria-label={`Annotations on page ${page}`}
+        aria-label={t`Annotations on page ${page}`}
         className={"absolute top-0 left-0 " + (tool === "none" ? "pointer-events-none" : "cursor-crosshair touch-none")}
         onPointerDown={(event) => {
           if (!stroke) return;
@@ -161,8 +162,8 @@ export function PdfPage({ doc, page, box, marks, tool, colour, onAdd, onError }:
       {note && (
         <Input
           autoFocus
-          aria-label={`Note on page ${page}`}
-          placeholder="Type a note, then press Enter"
+          aria-label={t`Note on page ${page}`}
+          placeholder={t`Type a note, then press Enter`}
           maxLength={500}
           className="absolute h-8 w-56 bg-white text-sm text-black"
           style={{ left: `${note.x * 100}%`, top: `${note.y * 100}%` }}

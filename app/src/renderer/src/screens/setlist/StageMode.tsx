@@ -7,6 +7,8 @@ import { useDevice } from "@/state/device";
 import { DEFAULT_DEVICE, pedalName, profileOrDefault } from "@/state/device-model";
 import { drift, indexOfSlot, stepIndex } from "./setlist";
 import { useSetlists } from "./store";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * Full-window view for the stage: the current preset very large, the next one under it, your note. → / Space / Page Down
@@ -76,19 +78,19 @@ export function StageMode() {
   const warn = current && drift(current, names).kind !== "ok";
 
   return (
-    <div role="region" aria-label="Stage mode" className="fixed inset-x-0 top-[52px] bottom-0 z-40 flex flex-col bg-[var(--enclosure)] p-8 text-silkscreen">
+    <div role="region" aria-label={t`Stage mode`} className="fixed inset-x-0 top-[52px] bottom-0 z-40 flex flex-col bg-[var(--enclosure)] p-8 text-silkscreen">
       <div className="flex items-center gap-3 text-silkscreen-3">
         <span className="text-lg font-[650]">{list.name}</span>
-        <span className="text-sm">{at >= 0 ? `${at + 1} of ${items.length}` : `${items.length} presets`}</span>
-        {!connected && <span className="text-sm text-led-warn">The {pedalName(device)} isn't connected</span>}
+        <span className="text-sm">{at >= 0 ? t`${at + 1} of ${items.length}` : t`${items.length} presets`}</span>
+        {!connected && <span className="text-sm text-led-warn"><Trans>The {pedalName(device)} isn't connected</Trans></span>}
         <span className="flex-1" />
-        <Button variant="ghost" size="icon" aria-label="Leave stage mode" onClick={() => useSetlists.getState().setStage(false)}>
+        <Button variant="ghost" size="icon" aria-label={t`Leave stage mode`} onClick={() => useSetlists.getState().setStage(false)}>
           <XIcon aria-hidden />
         </Button>
       </div>
 
       <div className="flex flex-1 items-center gap-6">
-        <Button variant="outline" className="h-full max-h-64 w-24" aria-label="Previous preset" disabled={!can} onClick={() => go(-1)}>
+        <Button variant="outline" className="h-full max-h-64 w-24" aria-label={t`Previous preset`} disabled={!can} onClick={() => go(-1)}>
           <ChevronLeftIcon className="size-10" aria-hidden />
         </Button>
         <div className="flex min-w-0 flex-1 flex-col items-center gap-4 text-center">
@@ -99,16 +101,16 @@ export function StageMode() {
               {current.note && <p className="m-0 text-3xl text-silkscreen-2">{current.note}</p>}
             </>
           ) : (
-            <h1 className="m-0 text-5xl font-bold text-silkscreen-3">{connected ? "Press → to start the setlist" : "Waiting for the pedal"}</h1>
+            <h1 className="m-0 text-5xl font-bold text-silkscreen-3">{connected ? t`Press → to start the setlist` : t`Waiting for the pedal`}</h1>
           )}
         </div>
-        <Button variant="outline" className="h-full max-h-64 w-24" aria-label="Next preset" disabled={!can} onClick={() => go(1)}>
+        <Button variant="outline" className="h-full max-h-64 w-24" aria-label={t`Next preset`} disabled={!can} onClick={() => go(1)}>
           <ChevronRightIcon className="size-10" aria-hidden />
         </Button>
       </div>
 
       <div className="flex items-baseline justify-center gap-3 text-2xl text-silkscreen-3">
-        <span>Next</span>
+        <Trans><span>Next</span></Trans>
         {next && <span className="font-semibold text-silkscreen-2">{next.name}</span>}
         {next && <span className="tabular-nums">{slotLabel(next.slot)}</span>}
       </div>

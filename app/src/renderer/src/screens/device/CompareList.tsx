@@ -6,12 +6,14 @@ import { diffPresets, type ChangeRow } from "@/state/unsaved-diff";
 import type { BackupEntry } from "@/state/device-types";
 import type { DeviceKey } from "@shared/devices";
 import type { SlotComparison, SlotState } from "./compare";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const GROUPS: { state: SlotState; title: string; hint: string }[] = [
-  { state: "changed", title: "Changed", hint: "Same preset name, different settings" },
-  { state: "different", title: "Different preset", hint: "Another preset is in this slot" },
-  { state: "empty", title: "Empty on one side", hint: "One of them has no preset" },
-  { state: "same", title: "Same", hint: "Identical, nothing to write" },
+  { state: "changed", get title() { return t`Changed`; }, get hint() { return t`Same preset name, different settings`; } },
+  { state: "different", get title() { return t`Different preset`; }, get hint() { return t`Another preset is in this slot`; } },
+  { state: "empty", get title() { return t`Empty on one side`; }, get hint() { return t`One of them has no preset`; } },
+  { state: "same", get title() { return t`Same`; }, get hint() { return t`Identical, nothing to write`; } },
 ];
 
 /** Block-level differences between the pedal's preset and the backup's, or null when the bytes can't be read. */
@@ -27,14 +29,14 @@ function blockRows(slot: number, pedal: BackupEntry | undefined, backup: BackupE
 /** The pedal's preset and the backup's, block by block, for a slot whose name is the same. */
 function ChangedDetail({ slot, pedal, backup, device }: { slot: number; pedal: BackupEntry | undefined; backup: BackupEntry | undefined; device: DeviceKey }) {
   const rows = useMemo(() => blockRows(slot, pedal, backup, device), [slot, pedal, backup, device]);
-  if (!rows) return <p className="text-sm text-silkscreen-3">The app can't read this preset, so only the bytes differ.</p>;
-  if (!rows.length) return <p className="text-sm text-silkscreen-3">The settings match. Only bytes the pedal doesn't show differ.</p>;
+  if (!rows) return <p className="text-sm text-silkscreen-3"><Trans>The app can't read this preset, so only the bytes differ.</Trans></p>;
+  if (!rows.length) return <p className="text-sm text-silkscreen-3"><Trans>The settings match. Only bytes the pedal doesn't show differ.</Trans></p>;
   return (
-    <ul className="flex flex-col gap-1 text-sm" aria-label="Changed settings">
+    <ul className="flex flex-col gap-1 text-sm" aria-label={t`Changed settings`}>
       <li className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] gap-2 text-xs text-silkscreen-3">
-        <span>Setting</span>
+        <Trans><span>Setting</span>
         <span>On pedal</span>
-        <span>In backup</span>
+        <span>In backup</span></Trans>
       </li>
       {rows.map((r, i) => (
         <li key={i} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] gap-2 text-silkscreen-2">
@@ -72,7 +74,7 @@ export function CompareList({
   const sourceBySlot = new Map(source.map((e) => [e.slot, e]));
 
   return (
-    <div className="flex max-h-[260px] flex-col gap-3 overflow-auto rounded-lg bg-well px-3.5 py-3 text-sm" aria-label="Compare with the pedal">
+    <div className="flex max-h-[260px] flex-col gap-3 overflow-auto rounded-lg bg-well px-3.5 py-3 text-sm" aria-label={t`Compare with the pedal`}>
       {GROUPS.map((g) => {
         const list = rows.filter((r) => r.state === g.state);
         if (!list.length) return null;
@@ -100,8 +102,8 @@ export function CompareList({
                         {slotLabel(r.slot)}
                       </span>
                       <span className="truncate text-silkscreen">
-                        {r.name || "Untitled"}
-                        {r.state === "different" && r.pedalName && <span className="text-silkscreen-3"> (pedal: {r.pedalName})</span>}
+                        {r.name || t`Untitled`}
+                        {r.state === "different" && r.pedalName && <span className="text-silkscreen-3"> <Trans>(pedal: {r.pedalName})</Trans></span>}
                       </span>
                     </button>
                     {expandable && expanded && (

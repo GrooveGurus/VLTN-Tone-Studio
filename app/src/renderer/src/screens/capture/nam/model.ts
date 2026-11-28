@@ -3,6 +3,7 @@
 // A1 = a single `WaveNet` (0.5.x layout: `kernel_size`, `head_size` per layer array).
 import type { CaptureMetadata, CaptureSize } from "@shared/host/capture";
 import { checkNam, NamCheckError } from "@shared/nam";
+import { t } from "@lingui/core/macro";
 
 export type JsonObject = { [key: string]: unknown };
 
@@ -223,13 +224,13 @@ export function inspectNam(file: NamFile): NamInfo {
   const params = arch.kind === "A2" ? arch.submodels.reduce((n, s) => n + s.params, 0) : file.weights.length;
 
   let unsupported: string | null = null;
-  if (arch.kind === "other") unsupported = "This file uses a custom NAM layout we can't read.";
+  if (arch.kind === "other") unsupported = t`This file uses a custom NAM layout we can't read.`;
   else {
     try {
       checkNam(file);
     } catch (e) {
       if (!(e instanceof NamCheckError)) throw e;
-      unsupported = `This capture can't become a SnapTone: ${e.detail}.`;
+      unsupported = t`This capture can't become a SnapTone: ${e.detail}.`;
     }
   }
 
@@ -300,7 +301,7 @@ export class NamTransformError extends Error {
 }
 
 function scaleWaveNet(model: JsonObject, g: number, db: number) {
-  if (!headScaleMatches(model)) throw new NamTransformError("The output level of this model can't be changed losslessly.");
+  if (!headScaleMatches(model)) throw new NamTransformError(t`The output level of this model can't be changed losslessly.`);
   const config = model.config as JsonObject;
   const weights = model.weights as number[];
   config.head_scale = (config.head_scale as number) * g;
@@ -324,7 +325,7 @@ export function withOutputGain(file: NamFile, db: number): NamFile {
   } else if (out.architecture === "WaveNet") {
     scaleWaveNet(out, g, db); // a bare WaveNet's own metadata is the file's metadata
   } else {
-    throw new NamTransformError("The output level of this model can't be changed losslessly.");
+    throw new NamTransformError(t`The output level of this model can't be changed losslessly.`);
   }
   return out;
 }
@@ -339,7 +340,7 @@ export function withSize(file: NamFile, size: CaptureSize): NamFile {
   const info = inspectNam(file);
   if (info.arch.kind !== "A2") return out;
   const keep = info.arch.submodels.find((s) => s.size === size);
-  if (!keep) throw new NamTransformError(`This file has no ${size === "full" ? "Full" : "Lite"} size.`);
+  if (!keep) throw new NamTransformError(t`This file has no ${size === "full" ? t`Full` : t`Lite`} size.`);
   const sub = clone(submodelsOf(file)[keep.index]);
   sub.max_value = 1.0;
   out.config = { ...out.config, submodels: [sub] };

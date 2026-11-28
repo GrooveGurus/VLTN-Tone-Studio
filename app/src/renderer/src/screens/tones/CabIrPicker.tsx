@@ -4,6 +4,8 @@ import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, Sele
 import { DEFAULT_DEVICE, isGp5Family, pedalName } from "@/state/device-model";
 import type { DeviceKey } from "@/state/device-types";
 import { useTones, type CabIrChoice } from "./store";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Opened WAVs are read whole; real IRs are a few hundred KB, so anything this big isn't one. */
 const MAX_IR_FILE = 64 * 1024 * 1024;
@@ -23,9 +25,9 @@ function valueOf(choice: CabIrChoice | null): string {
  * after the SnapTone, so the cab stays a block there. Before the first connection DEFAULT_DEVICE's rule applies.
  */
 export function noCabIrReason(device: DeviceKey | null, ...gears: (string | null | undefined)[]): string | null {
-  if (gears.some(gearIncludesCab)) return "The capture includes the cab, so no cab IR goes into the SnapTone.";
+  if (gears.some(gearIncludesCab)) return t`The capture includes the cab, so no cab IR goes into the SnapTone.`;
   const d = device ?? DEFAULT_DEVICE;
-  return isGp5Family(d) ? null : `CAB plays after the SnapTone on the ${pedalName(d)}, so no cab IR goes into the SnapTone.`;
+  return isGp5Family(d) ? null : t`CAB plays after the SnapTone on the ${pedalName(d)}, so no cab IR goes into the SnapTone.`;
 }
 
 /**
@@ -54,15 +56,15 @@ export function CabIrPicker({ value, onChange, disabled }: { value: CabIrChoice 
   };
 
   const openFile = async (file: File) => {
-    if (file.size > MAX_IR_FILE) return setError(`${file.name} is too large for an impulse response.`);
+    if (file.size > MAX_IR_FILE) return setError(t`${file.name} is too large for an impulse response.`);
     try {
       onChange({ kind: "file", name: file.name.replace(/\.wav$/i, ""), wav: new Uint8Array(await file.arrayBuffer()) });
     } catch {
-      setError(`Couldn't read ${file.name}.`);
+      setError(t`Couldn't read ${file.name}.`);
     }
   };
 
-  const hint = "An engaged SnapTone bypasses CAB, so the cab has to be inside the SnapTone.";
+  const hint = t`An engaged SnapTone bypasses CAB, so the cab has to be inside the SnapTone.`;
 
   return (
     <span className="flex flex-col gap-1">
@@ -78,11 +80,11 @@ export function CabIrPicker({ value, onChange, disabled }: { value: CabIrChoice 
         }}
       />
       <Select value={valueOf(value)} onValueChange={pick} disabled={disabled}>
-        <SelectTrigger className="h-8 w-56" aria-label="Cab IR baked into the SnapTone" aria-describedby={hintId}>
+        <SelectTrigger className="h-8 w-56" aria-label={t`Cab IR baked into the SnapTone`} aria-describedby={hintId}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={NONE}>No cab IR</SelectItem>
+          <SelectItem value={NONE}><Trans>No cab IR</Trans></SelectItem>
           {irTones.map((r) => (
             <SelectItem key={r.tone_id} value={toneValue(r.tone_id)}>
               {r.title}
@@ -91,7 +93,7 @@ export function CabIrPicker({ value, onChange, disabled }: { value: CabIrChoice 
           {value?.kind === "tone" && !irTones.some((r) => r.tone_id === value.toneId) && <SelectItem value={toneValue(value.toneId)}>{value.name}</SelectItem>}
           {value?.kind === "file" && <SelectItem value={FILE}>{value.name}</SelectItem>}
           <SelectSeparator />
-          <SelectItem value={CHOOSE}>Choose a WAV file…</SelectItem>
+          <SelectItem value={CHOOSE}><Trans>Choose a WAV file…</Trans></SelectItem>
         </SelectContent>
       </Select>
       <span id={hintId} className="text-[11px] text-pretty text-silkscreen-3">

@@ -5,6 +5,8 @@ import type { Section } from "@/song/performance/sections";
 import { readStoredBand, writeStoredBand } from "@/song/band/stored";
 import { hasGeneratedParts, missingNotice } from "./band-status";
 import { useBandPanel } from "./band-panel-state";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * Offers to generate the drum or bass part a split did not find. Shown once per song: opening the Band panel from it, or choosing "Not
@@ -22,7 +24,7 @@ export function MissingPartsNotice({ songKey, sections, playing }: { songKey: st
     writeStoredBand(songKey, { bandNoticeDismissed: true });
   };
   return (
-    <section aria-label="Missing parts" className="flex flex-wrap items-center gap-3 rounded-lg border border-seam px-3 py-2 text-sm">
+    <section aria-label={t`Missing parts`} className="flex flex-wrap items-center gap-3 rounded-lg border border-seam px-3 py-2 text-sm">
       <p className="flex-1">{text}</p>
       <Button
         size="sm"
@@ -31,10 +33,10 @@ export function MissingPartsNotice({ songKey, sections, playing }: { songKey: st
           show(true);
         }}
       >
-        Open Band panel
+        <Trans>Open Band panel</Trans>
       </Button>
       <Button size="sm" variant="ghost" onClick={dismiss}>
-        Not now
+        <Trans>Not now</Trans>
       </Button>
     </section>
   );

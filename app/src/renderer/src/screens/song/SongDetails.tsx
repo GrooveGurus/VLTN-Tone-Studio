@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useSongLibrary } from "@/song/library";
 import type { LibrarySong } from "@shared/song-library";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const field = "rounded border border-seam bg-transparent p-2";
 
@@ -32,11 +34,11 @@ export function SongDetails({ song }: { song: LibrarySong }) {
       notes: notes.trim() || null,
     });
   return (
-    <div className="grid gap-2 rounded border border-seam p-3 sm:grid-cols-2" aria-label={`Details for ${song.title}`}>
-      <input aria-label="Song key" placeholder="Key, such as A minor" className={field} value={key} onChange={(e) => setKey(e.target.value)} />
+    <div className="grid gap-2 rounded border border-seam p-3 sm:grid-cols-2" aria-label={t`Details for ${song.title}`}>
+      <input aria-label={t`Song key`} placeholder={t`Key, such as A minor`} className={field} value={key} onChange={(e) => setKey(e.target.value)} />
       <input
-        aria-label="Song year"
-        placeholder="Year"
+        aria-label={t`Song year`}
+        placeholder={t`Year`}
         inputMode="numeric"
         className={field}
         value={year}
@@ -44,15 +46,15 @@ export function SongDetails({ song }: { song: LibrarySong }) {
         onChange={(e) => setYear(e.target.value)}
       />
       <input
-        aria-label="Keywords"
-        placeholder="Keywords, comma separated"
+        aria-label={t`Keywords`}
+        placeholder={t`Keywords, comma separated`}
         className={field + " sm:col-span-2"}
         value={keywords}
         onChange={(e) => setKeywords(e.target.value)}
       />
       <textarea
-        aria-label="Song notes"
-        placeholder="Notes"
+        aria-label={t`Song notes`}
+        placeholder={t`Notes`}
         className={field + " sm:col-span-2"}
         rows={2}
         value={notes}
@@ -60,9 +62,9 @@ export function SongDetails({ song }: { song: LibrarySong }) {
       />
       <div className="flex items-center gap-2 sm:col-span-2">
         <Button disabled={!yearOk || library.busy} onClick={save}>
-          Save details
+          <Trans>Save details</Trans>
         </Button>
-        {!yearOk && <span className="text-sm text-red-400">Enter a year from 1000 to 2999, or leave it blank.</span>}
+        {!yearOk && <span className="text-sm text-red-400"><Trans>Enter a year from 1000 to 2999, or leave it blank.</Trans></span>}
       </div>
     </div>
   );

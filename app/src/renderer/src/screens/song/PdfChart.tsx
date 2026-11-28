@@ -13,6 +13,8 @@ import { clearChartPage, setChartPage } from "@/song/performance/pdf/current-pag
 import { emptyAnnotations, readAnnotations, type ChartAnnotations, type Mark } from "@shared/chart-annotations";
 import { PdfPage } from "./PdfPage";
 import { PdfToolbar } from "./PdfToolbar";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Where the layout choice is kept. It is a per-computer preference, like the autoscroll style. */
 const LAYOUT_KEY = "vltn.performance.pdf.v1";
@@ -95,7 +97,7 @@ export function PdfChart({ songId, follow, stage, className, onShowText }: PdfCh
     (async () => {
       const library = host.song.library;
       const urls = await library?.chartUrls(songId);
-      if (!urls) throw new Error("This song has no PDF chart.");
+      if (!urls) throw new Error(t`This song has no PDF chart.`);
       const loaded = await openChart(urls.pdf);
       if (!alive) {
         void loaded.close();
@@ -107,8 +109,8 @@ export function PdfChart({ songId, follow, stage, className, onShowText }: PdfCh
       if (!alive) return;
       latest.current = read.annotations;
       setAnnotations(read.annotations);
-      if (read.unreadable) setNotice("The annotations could not be read, so the PDF is shown without them.");
-      else if (read.skipped) setNotice(`${read.skipped} annotation${read.skipped === 1 ? "" : "s"} could not be read and left out.`);
+      if (read.unreadable) setNotice(t`The annotations could not be read, so the PDF is shown without them.`);
+      else if (read.skipped) setNotice(read.skipped === 1 ? t`1 annotation could not be read and left out.` : t`${read.skipped} annotations could not be read and left out.`);
       docRef.current = loaded.doc;
       pageRef.current = 1;
       setPage(1);
@@ -116,7 +118,7 @@ export function PdfChart({ songId, follow, stage, className, onShowText }: PdfCh
     })().catch((e: unknown) => {
       if (!alive) return;
       const reason = e instanceof Error ? e.message : "";
-      setError(`This PDF could not be shown${reason ? `: ${reason}` : "."} The text chart is still available.`);
+      setError(t`This PDF could not be shown${reason ? `: ${reason}` : "."} The text chart is still available.`);
     });
     return () => {
       alive = false;
@@ -131,7 +133,7 @@ export function PdfChart({ songId, follow, stage, className, onShowText }: PdfCh
     pending.current = null;
     if (!job) return;
     void host.song.library?.saveAnnotations(job.id, JSON.stringify(job.annotations)).catch((e: unknown) => {
-      setNotice(`The annotations could not be saved: ${e instanceof Error ? e.message : "unknown error"}`);
+      setNotice(t`The annotations could not be saved: ${e instanceof Error ? e.message : t`unknown error`}`);
     });
   }, []);
   // Edits made for one song are saved before the reader moves to another song or closes.
@@ -192,12 +194,12 @@ export function PdfChart({ songId, follow, stage, className, onShowText }: PdfCh
       const count = docRef.current?.numPages ?? 0;
       if (layoutRef.current === "page") {
         const next = turnedPage(pageRef.current, direction, turnStep(showsSpread(boxRef.current.width)), count);
-        if (next === pageRef.current) return direction > 0 ? "This is the last page." : "This is the first page.";
+        if (next === pageRef.current) return direction > 0 ? t`This is the last page.` : t`This is the first page.`;
         goTo(next);
         return;
       }
       const el = scroller.current;
-      if (!el) return "The PDF is not on screen.";
+      if (!el) return t`The PDF is not on screen.`;
       scrollPdfBy(el, direction, byPage, half);
     },
     [goTo],
@@ -267,7 +269,7 @@ export function PdfChart({ songId, follow, stage, className, onShowText }: PdfCh
           {error}
         </p>
         <Button variant="outline" onClick={onShowText}>
-          Show text chart
+          <Trans>Show text chart</Trans>
         </Button>
       </div>
     );
@@ -302,7 +304,7 @@ export function PdfChart({ songId, follow, stage, className, onShowText }: PdfCh
       <div
         ref={scroller}
         tabIndex={0}
-        aria-label="PDF chart"
+        aria-label={t`PDF chart`}
         onWheel={() => holdAutoscroll()}
         onTouchMove={() => holdAutoscroll()}
         className={
@@ -310,7 +312,7 @@ export function PdfChart({ songId, follow, stage, className, onShowText }: PdfCh
         }
       >
         {!doc ? (
-          <p className="text-sm text-silkscreen-3">Loading the PDF chart…</p>
+          <p className="text-sm text-silkscreen-3"><Trans>Loading the PDF chart…</Trans></p>
         ) : (
           <div className={layout === "page" ? "flex h-full items-start justify-center gap-4" : "flex flex-col items-center gap-4"}>
             {shown.map((n) => (

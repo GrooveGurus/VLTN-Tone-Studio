@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { decodeMidiFile, encodeMidiFile, parseSmf, type MidiFileOption } from "@/song/performance/smf";
 import { HelpNote } from "@/components/ui/help-note";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Attaches a song's standard MIDI file. The file is read first, so one that cannot play is refused and never saved. */
 type Summary = { count: number; seconds: number } | { error: string };
@@ -11,8 +13,8 @@ type Summary = { count: number; seconds: number } | { error: string };
 function readFile(file: File): Promise<Uint8Array> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => (reader.result instanceof ArrayBuffer ? resolve(new Uint8Array(reader.result)) : reject(new Error("The file could not be read.")));
-    reader.onerror = () => reject(new Error("The file could not be read."));
+    reader.onload = () => (reader.result instanceof ArrayBuffer ? resolve(new Uint8Array(reader.result)) : reject(new Error(t`The file could not be read.`)));
+    reader.onerror = () => reject(new Error(t`The file could not be read.`));
     reader.readAsArrayBuffer(file);
   });
 }
@@ -39,22 +41,22 @@ export function MidiFileField({ file, onChange }: { file: MidiFileOption | null;
     }
   };
   return (
-    <SettingsCard title="Song MIDI file" summary={file ? file.name : "No file attached"} storageKey="midi-file">
+    <SettingsCard title={t`Song MIDI file`} summary={file ? file.name : t`No file attached`} storageKey="midi-file">
       <HelpNote>
-        <p>A standard MIDI file (format 0 or 1) plays alongside the chart’s cues, at the song’s speed, when Send cues is on. It is saved with the song.</p>
+        <p><Trans>A standard MIDI file (format 0 or 1) plays alongside the chart’s cues, at the song’s speed, when Send cues is on. It is saved with the song.</Trans></p>
       </HelpNote>
       {file && (
         <p role="status">
           {file.name}
-          {summary && "count" in summary ? ` · ${summary.count} messages · ${summary.seconds.toFixed(1)} s` : ""}
-          {summary && "error" in summary ? ` · cannot play: ${summary.error}` : ""}
+          {summary && "count" in summary ? t` · ${summary.count} messages · ${summary.seconds.toFixed(1)} s` : ""}
+          {summary && "error" in summary ? t` · cannot play: ${summary.error}` : ""}
         </p>
       )}
       <div className="flex flex-wrap items-center gap-3">
         <label>
-          Attach .mid file{" "}
+          <Trans>Attach .mid file{" "}</Trans>
           <input
-            aria-label="Song MIDI file input"
+            aria-label={t`Song MIDI file input`}
             type="file"
             accept=".mid,.midi,audio/midi"
             onChange={(e) => {
@@ -66,7 +68,7 @@ export function MidiFileField({ file, onChange }: { file: MidiFileOption | null;
         </label>
         {file && (
           <Button variant="outline" onClick={() => onChange(null)}>
-            Remove MIDI file
+            <Trans>Remove MIDI file</Trans>
           </Button>
         )}
       </div>

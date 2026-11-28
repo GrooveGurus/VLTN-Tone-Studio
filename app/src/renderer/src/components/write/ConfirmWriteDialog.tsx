@@ -21,6 +21,8 @@ import { cn } from "@/lib/utils";
 import { MiniChain } from "./MiniChain";
 import { summarize } from "./preset-summary";
 import { backUpSlot, describeError, resolveBackupSource, type BackupSource } from "./write-helpers";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export interface ConfirmWriteDialogProps {
   open: boolean;
@@ -87,8 +89,8 @@ export function ConfirmWriteDialog({ open, onOpenChange, title, slot, replacing,
     source?.kind === "none"
       ? source.reason
       : source?.kind === "backup"
-        ? `Saves the copy from the backup of ${backupDate} to Replaced presets (reading the slot now would drop your unsaved changes)`
-        : "Saves it to Replaced presets on this computer";
+        ? t`Saves the copy from the backup of ${backupDate} to Replaced presets (reading the slot now would drop your unsaved changes)`
+        : t`Saves it to Replaced presets on this computer`;
   const chain = incoming.prst ? summarize(incoming.prst) : null;
 
   const changeBackup = (on: boolean) => {
@@ -123,12 +125,12 @@ export function ConfirmWriteDialog({ open, onOpenChange, title, slot, replacing,
     <AlertDialog open={open} onOpenChange={(o) => !running && onOpenChange(o)}>
       <AlertDialogContent className="max-w-[480px] gap-4" onEscapeKeyDown={(e) => running && e.preventDefault()}>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-balance">{running ? `Writing ${incoming.name} to slot ${label}` : title}</AlertDialogTitle>
+          <AlertDialogTitle className="text-balance">{running ? t`Writing ${incoming.name} to slot ${label}` : title}</AlertDialogTitle>
           <AlertDialogDescription className="text-pretty">
             {running
-              ? `Keep the ${pedal} connected until the check finishes.`
+              ? t`Keep the ${pedal} connected until the check finishes.`
               : (description ??
-                `The ${pedal} stores the preset in slot ${label}. Tone Studio reads the slot back afterwards to check that every byte arrived.${replacing ? " The pedal has no undo." : ""}`)}
+                t`The ${pedal} stores the preset in slot ${label}. Tone Studio reads the slot back afterwards to check that every byte arrived.${replacing ? t` The pedal has no undo.` : ""}`)}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -136,33 +138,33 @@ export function ConfirmWriteDialog({ open, onOpenChange, title, slot, replacing,
           <div className="flex flex-col gap-3">
             <ol className="flex flex-col gap-2 text-sm">
               {doBackup && (
-                <Step n={1} state={phase === "backup" ? "run" : "done"} label={phase === "backup" ? `Backing up slot ${label}` : `Backed up slot ${label}`} detail={backedUp ?? "Reading it from the pedal"} />
+                <Step n={1} state={phase === "backup" ? "run" : "done"} label={phase === "backup" ? t`Backing up slot ${label}` : t`Backed up slot ${label}`} detail={backedUp ?? t`Reading it from the pedal`} />
               )}
               <Step
                 n={doBackup ? 2 : 1}
                 state={phase === "backup" ? "todo" : verifying ? "done" : "run"}
-                label={verifying ? "Sent the preset" : "Sending the preset"}
-                detail={`${frames} of ${frameTotal} frames ${acked ? "acknowledged" : "sent"}`}
+                label={verifying ? t`Sent the preset` : t`Sending the preset`}
+                detail={t`${frames} of ${frameTotal} frames ${acked ? t`acknowledged` : t`sent`}`}
               />
-              <Step n={doBackup ? 3 : 2} state={verifying ? "run" : "todo"} label="Verifying" detail={`Reading slot ${label} back`} />
+              <Step n={doBackup ? 3 : 2} state={verifying ? "run" : "todo"} label={t`Verifying`} detail={t`Reading slot ${label} back`} />
             </ol>
-            <Progress value={verifying ? 92 : pct} aria-label="Write progress" />
+            <Progress value={verifying ? 92 : pct} aria-label={t`Write progress`} />
           </div>
         ) : (
           <>
             <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 rounded-lg bg-well px-3.5 py-3 text-sm">
-              <dt className="text-silkscreen-3">Preset</dt>
+              <dt className="text-silkscreen-3"><Trans>Preset</Trans></dt>
               <dd className="flex min-w-0 items-center gap-2 text-silkscreen">
                 <span className="truncate font-semibold">{incoming.name}</span>
                 {chain && <MiniChain chain={chain} />}
               </dd>
               {incoming.detail && (
                 <>
-                  <dt className="text-silkscreen-3">From</dt>
+                  <dt className="text-silkscreen-3"><Trans>From</Trans></dt>
                   <dd className="min-w-0 text-silkscreen">{incoming.detail}</dd>
                 </>
               )}
-              <dt className="text-silkscreen-3">Slot {label} now</dt>
+              <dt className="text-silkscreen-3"><Trans>Slot {label} now</Trans></dt>
               <dd className="min-w-0 text-silkscreen">
                 {replacing ? (
                   <>
@@ -170,7 +172,7 @@ export function ConfirmWriteDialog({ open, onOpenChange, title, slot, replacing,
                     {replacing.detail && <span className="text-silkscreen-3">, {replacing.detail}</span>}
                   </>
                 ) : (
-                  "Empty, nothing is replaced"
+                  t`Empty, nothing is replaced`
                 )}
               </dd>
             </dl>
@@ -185,11 +187,11 @@ export function ConfirmWriteDialog({ open, onOpenChange, title, slot, replacing,
               />
               <Label htmlFor={checkboxId} className={cn("flex flex-col items-start gap-0.5 font-normal", canBackUp ? "text-silkscreen" : "text-silkscreen-3")}>
                 <span>
-                  Back up slot {label} first{!replacing && " (not needed, the slot is empty)"}
+                  <Trans>Back up slot {label} first</Trans>{!replacing && t` (not needed, the slot is empty)`}
                 </span>
                 {replacing && <span className="text-xs text-pretty text-silkscreen-3">{backupHint}</span>}
                 {source?.kind === "backup" && source.stale && (
-                  <span className="text-xs text-pretty text-led-fault">This copy is from {backupDate} and may be older than what's on the pedal.</span>
+                  <span className="text-xs text-pretty text-led-fault"><Trans>This copy is from {backupDate} and may be older than what's on the pedal.</Trans></span>
                 )}
               </Label>
             </div>
@@ -205,18 +207,18 @@ export function ConfirmWriteDialog({ open, onOpenChange, title, slot, replacing,
         <AlertDialogFooter className="items-center">
           {running ? (
             <>
-              <span className="mr-auto text-xs text-silkscreen-3">A write can't be stopped once frames are sent.</span>
+              <span className="mr-auto text-xs text-silkscreen-3"><Trans>A write can't be stopped once frames are sent.</Trans></span>
               <Button disabled>
                 <Spinner data-icon="inline-start" />
-                Writing
+                <Trans>Writing</Trans>
               </Button>
             </>
           ) : (
             <>
-              <AlertDialogCancel variant="ghost">Cancel</AlertDialogCancel>
+              <AlertDialogCancel variant="ghost"><Trans>Cancel</Trans></AlertDialogCancel>
               <Button variant={replacing ? "destructive" : "default"} disabled={!connected} onClick={() => void confirm()}>
                 <ArrowDownToLineIcon data-icon="inline-start" />
-                {error ? "Retry" : action}
+                {error ? t`Retry` : action}
               </Button>
             </>
           )}
@@ -242,7 +244,7 @@ function Step({ n, state, label, detail }: { n: number; state: "done" | "run" | 
       <span className="flex flex-col">
         <span className={cn("font-medium", state !== "todo" && "text-silkscreen")}>{label}</span>
         <span className="text-xs text-silkscreen-3">{detail}</span>
-        <span className="sr-only">{state === "done" ? "done" : state === "run" ? "in progress" : "waiting"}</span>
+        <span className="sr-only">{state === "done" ? t`done` : state === "run" ? t`in progress` : t`waiting`}</span>
       </span>
     </li>
   );

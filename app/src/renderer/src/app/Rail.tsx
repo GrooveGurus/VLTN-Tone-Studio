@@ -2,14 +2,15 @@ import type { LucideIcon } from "lucide-react";
 import { AudioLines, AudioWaveform, Cable, LibraryBig, ListMusic, Settings2, Usb } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNav, type Screen } from "@/state/nav";
+import { t } from "@lingui/core/macro";
 
 const ITEMS: { screen: Screen; label: string; icon: LucideIcon }[] = [
-  { screen: "rig", label: "Rig", icon: Cable },
-  { screen: "library", label: "Library", icon: LibraryBig },
-  { screen: "setlist", label: "Setlist", icon: ListMusic },
-  { screen: "tones", label: "Tones", icon: AudioWaveform },
-  { screen: "device", label: "Device", icon: Usb },
-  { screen: "song", label: "Song", icon: AudioLines },
+  { screen: "rig", get label() { return t`Rig`; }, icon: Cable },
+  { screen: "library", get label() { return t`Library`; }, icon: LibraryBig },
+  { screen: "setlist", get label() { return t`Setlist`; }, icon: ListMusic },
+  { screen: "tones", get label() { return t`Tones`; }, icon: AudioWaveform },
+  { screen: "device", get label() { return t`Device`; }, icon: Usb },
+  { screen: "song", get label() { return t`Song`; }, icon: AudioLines },
 ];
 
 /**
@@ -23,14 +24,15 @@ export function Rail() {
   const settings = screen === "device" && param === "settings";
   const current = settings ? null : screen === "capture" ? "tones" : screen;
   return (
-    <nav aria-label="Main" className="glass-float mb-3 ml-3 flex flex-col gap-0.5 rounded-xl py-2.5">
+    <nav aria-label={t`Main`} className="glass-float mb-3 ml-3 flex flex-col gap-0.5 rounded-xl py-2.5">
       {ITEMS.map(({ screen: s, label, icon: Icon }) => (
         <RailItem key={s} label={label} active={current === s} onClick={() => go(s)}>
           <Icon className="size-5" aria-hidden />
         </RailItem>
       ))}
       <span className="flex-1" />
-      <RailItem label="Settings" active={settings} onClick={() => go("device", "settings")}>
+      {/* The rail is narrow: its own message, so a translation can be shorter than the Settings page title. */}
+      <RailItem label={t({ message: "Settings", context: "rail" })} active={settings} onClick={() => go("device", "settings")}>
         <Settings2 className="size-5" aria-hidden />
       </RailItem>
     </nav>

@@ -13,6 +13,7 @@ import {
 } from "@shared/host/song";
 import { DOWNLOAD_TIMEOUTS, idleAbort, raceAbort } from "@shared/idle-abort";
 import { HostError } from "@shared/ipc";
+import { t } from "@lingui/core/macro";
 
 // Browser build: each model file is cached in Cache Storage under its pinned URL, checked before it is stored.
 // A model's files download one after another, so an interrupted download keeps the files already finished
@@ -31,7 +32,7 @@ async function download(f: ModelFile, onBytes: (received: number) => void, signa
   const watch = idleAbort(DOWNLOAD_TIMEOUTS);
   if (signal?.aborted) watch.cancel();
   else signal?.addEventListener("abort", () => watch.cancel(), { once: true });
-  const failed = () => (watch.cancelled() ? new HostError("cancelled", "The download was cancelled.") : new HostError("network", modelDownloadError(null)));
+  const failed = () => (watch.cancelled() ? new HostError("cancelled", t`The download was cancelled.`) : new HostError("network", modelDownloadError(null)));
   try {
     let res: Response;
     try {
@@ -106,7 +107,7 @@ export const webSong: SongHostApi = {
     try {
       let done = 0;
       for (const f of missing) {
-        if (stop.signal.aborted) throw new HostError("cancelled", "The download was cancelled.");
+        if (stop.signal.aborted) throw new HostError("cancelled", t`The download was cancelled.`);
         await downloadOnce(f, (received) => listeners.forEach((cb) => cb({ received: done + received, total })), stop.signal);
         done += f.bytes;
       }

@@ -12,6 +12,8 @@ import {
   type SongTriggerSettings as Options,
   type WhilePlaying,
 } from "@/song/performance/song-triggers";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const field = "rounded border border-seam bg-transparent p-2 text-[13px]";
 
@@ -28,7 +30,7 @@ export function SongTriggerSettings({ songs: library, inputReady }: { songs: rea
   // A clash is named once, on the later song of the pair, so the list does not say the same thing twice.
   const clashLines = songs.flatMap((song) => {
     const earlier = triggerClashes(songs, song.id).filter((other) => songs.indexOf(other) < songs.indexOf(song));
-    return earlier.length ? [`${song.title}: same trigger as ${earlier.map((other) => other.title).join(", ")}. The first song in the library loads.`] : [];
+    return earlier.length ? [t`${song.title}: same trigger as ${earlier.map((other) => other.title).join(", ")}. The first song in the library loads.`] : [];
   });
   const boundLines = withTrigger.flatMap((song) => {
     const binding = bindingClaiming(song.trigger, bindings);
@@ -37,32 +39,32 @@ export function SongTriggerSettings({ songs: library, inputReady }: { songs: rea
   const hint = WHILE_PLAYING_OPTIONS.find((option) => option.id === options.whilePlaying)?.hint;
   return (
     <SettingsCard
-      title="Load songs from MIDI"
-      summary={`${withTrigger.length} song${withTrigger.length === 1 ? "" : "s"} with a trigger`}
+      title={t`Load songs from MIDI`}
+      summary={t`${withTrigger.length} song${withTrigger.length === 1 ? "" : "s"} with a trigger`}
       storageKey="song-triggers"
       defaultOpen={false}
     >
       <p className="text-[12px] text-silkscreen-3">
-        {withTrigger.length} song{withTrigger.length === 1 ? "" : "s"} with a trigger. Triggers listen on the selected MIDI input, and our own output is
-        ignored.
+        <Trans>{withTrigger.length} song</Trans>{withTrigger.length === 1 ? "" : "s"} <Trans>with a trigger. Triggers listen on the selected MIDI input, and our own output is
+        ignored.</Trans>
       </p>
       <label className="flex items-center gap-2 text-[13px]">
-        <Checkbox aria-label="Load songs from MIDI" checked={options.listen} onCheckedChange={(checked) => save({ listen: checked === true })} />
-        Load songs from MIDI on the selected input
+        <Checkbox aria-label={t`Load songs from MIDI`} checked={options.listen} onCheckedChange={(checked) => save({ listen: checked === true })} />
+        <Trans>Load songs from MIDI on the selected input</Trans>
       </label>
-      {!inputReady && <p className="text-[12px] text-silkscreen-3">Choose a MIDI input in MIDI setup. Triggers do nothing without one.</p>}
+      {!inputReady && <p className="text-[12px] text-silkscreen-3"><Trans>Choose a MIDI input in MIDI setup. Triggers do nothing without one.</Trans></p>}
       <div className="flex flex-wrap items-start gap-4">
         <label className="flex flex-col gap-1 text-[13px]">
-          Songs that can load
-          <select aria-label="Song trigger scope" className={field} value={options.scope} onChange={(e) => save({ scope: e.target.value as SongScope })}>
-            <option value="library">Whole library</option>
-            <option value="playlist">Current playlist only</option>
+          <Trans>Songs that can load</Trans>
+          <select aria-label={t`Song trigger scope`} className={field} value={options.scope} onChange={(e) => save({ scope: e.target.value as SongScope })}>
+            <option value="library"><Trans>Whole library</Trans></option>
+            <option value="playlist"><Trans>Current playlist only</Trans></option>
           </select>
         </label>
         <label className="flex flex-col gap-1 text-[13px]">
-          While a song plays
+          <Trans>While a song plays</Trans>
           <select
-            aria-label="While a song plays"
+            aria-label={t`While a song plays`}
             className={field}
             value={options.whilePlaying}
             onChange={(e) => save({ whilePlaying: e.target.value as WhilePlaying })}
@@ -77,11 +79,11 @@ export function SongTriggerSettings({ songs: library, inputReady }: { songs: rea
         </label>
       </div>
       <label className="flex items-center gap-2 text-[13px]">
-        <Checkbox aria-label="Start a song loaded from MIDI" checked={options.autoplay} onCheckedChange={(checked) => save({ autoplay: checked === true })} />
-        Start a song as soon as a trigger loads it
+        <Checkbox aria-label={t`Start a song loaded from MIDI`} checked={options.autoplay} onCheckedChange={(checked) => save({ autoplay: checked === true })} />
+        <Trans>Start a song as soon as a trigger loads it</Trans>
       </label>
       {(clashLines.length > 0 || boundLines.length > 0) && (
-        <ul aria-label="Trigger conflicts" className="flex flex-col gap-1 text-[12px] text-silkscreen-2">
+        <ul aria-label={t`Trigger conflicts`} className="flex flex-col gap-1 text-[12px] text-silkscreen-2">
           {[...clashLines, ...boundLines].map((line) => (
             <li key={line}>{line}</li>
           ))}

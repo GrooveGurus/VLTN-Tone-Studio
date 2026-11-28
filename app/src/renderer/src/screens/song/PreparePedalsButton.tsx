@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useSongLibrary } from "@/song/library";
 import { selectArmed, useSession, type PerformanceSession } from "@/song/performance/session";
+import { t } from "@lingui/core/macro";
 
 /** Preparation deliberately stops before count-in or audio; ordinary Play can still do both. */
 export function PreparePedalsButton({ session }: { session: PerformanceSession }) {
@@ -16,13 +17,13 @@ export function PreparePedalsButton({ session }: { session: PerformanceSession }
     <Button
       variant="outline"
       disabled={!player || playing || starting || !enabled || !armed || !!parseError || !!busy}
-      title="Load pedal presets and tempo, wait for loading, then stop at Ready. Play starts the count-in and music."
+      title={t`Load pedal presets and tempo, wait for loading, then stop at Ready. Play starts the count-in and music.`}
       onClick={() => {
         session.invalidatePreparation();
         void session.preparePedals();
       }}
     >
-      {ready ? "Prepare again" : "Prepare pedals"}
+      {ready ? t`Prepare again` : t`Prepare pedals`}
     </Button>
   );
 }

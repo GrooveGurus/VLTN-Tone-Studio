@@ -4,6 +4,7 @@ import { releaseUrl, type UpdateSnapshot } from "@shared/host/update";
 import { host, isElectron } from "@/host";
 import { useDevice } from "@/state/device";
 import { notifyError, notifySuccess, showToast } from "./notify";
+import { t } from "@lingui/core/macro";
 
 /*
  * App updates in the renderer (src/shared/host/update.ts). Main owns the state; this mirrors it and drives the
@@ -35,19 +36,19 @@ let userCheck = false;
  */
 export function restartBlocker(): { kind: "busy" | "unsaved"; message: string } | null {
   const d = useDevice.getState();
-  if (d.busy && d.busy.kind !== "sync") return { kind: "busy", message: "The pedal is busy. Restart when it finishes its current job." };
-  if (d.unsavedChanges > 0) return { kind: "unsaved", message: "The preset on the pedal has unsaved changes. Save them first, or restart now and lose them." };
+  if (d.busy && d.busy.kind !== "sync") return { kind: "busy", message: t`The pedal is busy. Restart when it finishes its current job.` };
+  if (d.unsavedChanges > 0) return { kind: "unsaved", message: t`The preset on the pedal has unsaved changes. Save them first, or restart now and lose them.` };
   return null;
 }
 
 export const openReleasePage = (version: string) =>
-  host.app.openExternal(releaseUrl(version)).catch((e) => notifyError("Couldn't open the release page", e));
+  host.app.openExternal(releaseUrl(version)).catch((e) => notifyError(t`Couldn't open the release page`, e));
 
 export async function downloadUpdate(): Promise<void> {
   try {
     await host.update.download();
   } catch (e) {
-    notifyError("Couldn't download the update", e);
+    notifyError(t`Couldn't download the update`, e);
   }
 }
 
@@ -57,7 +58,7 @@ export async function installUpdate(): Promise<void> {
     await host.update.install();
   } catch (e) {
     useUpdate.setState({ installing: false });
-    notifyError("Couldn't restart to update", e);
+    notifyError(t`Couldn't restart to update`, e);
   }
 }
 
@@ -99,15 +100,15 @@ export async function checkForUpdates(): Promise<void> {
   try {
     snap = await host.update.check();
   } catch (e) {
-    notifyError("Couldn't check for updates", e, checkForUpdates);
+    notifyError(t`Couldn't check for updates`, e, checkForUpdates);
     return;
   } finally {
     userCheck = false;
   }
   useUpdate.setState({ snapshot: snap });
   const { state } = snap;
-  if (state.status === "current") notifySuccess("Tone Studio is up to date", `Version ${snap.current} is the newest release.`);
-  else if (state.status === "error") notifyError("Couldn't check for updates", state, checkForUpdates);
+  if (state.status === "current") notifySuccess(t`Tone Studio is up to date`, t`Version ${snap.current} is the newest release.`);
+  else if (state.status === "error") notifyError(t`Couldn't check for updates`, state, checkForUpdates);
   else if (state.status === "available") offer(snap);
   else useUpdate.setState({ prompt: true }); // downloading or ready: show where it is
 }
@@ -124,13 +125,13 @@ function onSnapshot(next: UpdateSnapshot): void {
       showToast({
         tone: "ok",
         sticky: true,
-        title: `Tone Studio ${state.version} is ready`,
-        body: "It was downloaded and checked. Restart to install it, or it installs when you quit.",
-        action: { label: "Restart now", run: installUpdate },
+        title: t`Tone Studio ${state.version} is ready`,
+        body: t`It was downloaded and checked. Restart to install it, or it installs when you quit.`,
+        action: { label: t`Restart now`, run: installUpdate },
       });
     }
   }
-  if (state.status === "error" && prev?.status === "downloading" && !before.prompt) notifyError("Couldn't download the update", state, () => retryUpdate(true));
+  if (state.status === "error" && prev?.status === "downloading" && !before.prompt) notifyError(t`Couldn't download the update`, state, () => retryUpdate(true));
 }
 
 /** Mirrors main's update state and opens the dialog for a new version. Mount once (AppShell). */

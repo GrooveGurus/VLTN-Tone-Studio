@@ -5,6 +5,8 @@ import { audienceBlank, audienceIndex, audienceNextLine } from "@/song/performan
 import { transpose } from "@/song/performance/chart";
 import { formatted } from "@/screens/song/lyric-format";
 import type { FollowerClient, FollowerState } from "./follower-client";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** The text size steps a follower can take on this device, and the transpose limits, in semitones. */
 const SIZE = { min: 0.6, max: 1.8, step: 0.1 } as const;
@@ -25,17 +27,17 @@ export function FollowerView({ client, state }: { client: FollowerClient; state:
   return (
     <main className="follower">
       <header className="follower-bar">
-        <span className="follower-title">{model?.title || "VLTN band sync"}</span>
+        <span className="follower-title">{model?.title || t`VLTN band sync`}</span>
         <span role="status" className="follower-status">
           {state.message}
-          {!state.synced && state.phase === "live" ? " Syncing clock…" : ""}
+          {!state.synced && state.phase === "live" ? t` Syncing clock…` : ""}
         </span>
       </header>
-      <section className="follower-stage" aria-label="Song">
+      <section className="follower-stage" aria-label={t`Song`}>
         {blank || !model ? (
-          <p className="follower-blank">{model ? "" : "Waiting for the performer's song."}</p>
+          <p className="follower-blank">{model ? "" : t`Waiting for the performer's song.`}</p>
         ) : model.screen === "logo" ? (
-          <p className="follower-blank">VLTN Tone Studio</p>
+          <p className="follower-blank"><Trans>VLTN Tone Studio</Trans></p>
         ) : model.timed ? (
           <Timed model={model} index={index} size={size} shift={shift} chords={chords} />
         ) : (
@@ -43,23 +45,23 @@ export function FollowerView({ client, state }: { client: FollowerClient; state:
         )}
       </section>
       <footer className="follower-controls">
-        <button type="button" onClick={() => setSize((value) => Math.max(SIZE.min, +(value - SIZE.step).toFixed(2)))} aria-label="Smaller text">
+        <button type="button" onClick={() => setSize((value) => Math.max(SIZE.min, +(value - SIZE.step).toFixed(2)))} aria-label={t`Smaller text`}>
           A−
         </button>
-        <button type="button" onClick={() => setSize((value) => Math.min(SIZE.max, +(value + SIZE.step).toFixed(2)))} aria-label="Larger text">
+        <button type="button" onClick={() => setSize((value) => Math.min(SIZE.max, +(value + SIZE.step).toFixed(2)))} aria-label={t`Larger text`}>
           A+
         </button>
-        <button type="button" onClick={() => setShift((value) => Math.max(-SHIFT, value - 1))} aria-label="Transpose down">
+        <button type="button" onClick={() => setShift((value) => Math.max(-SHIFT, value - 1))} aria-label={t`Transpose down`}>
           ♭
         </button>
-        <span aria-label="Transpose" className="follower-shift">
+        <span aria-label={t`Transpose`} className="follower-shift">
           {shift > 0 ? `+${shift}` : shift}
         </span>
-        <button type="button" onClick={() => setShift((value) => Math.min(SHIFT, value + 1))} aria-label="Transpose up">
+        <button type="button" onClick={() => setShift((value) => Math.min(SHIFT, value + 1))} aria-label={t`Transpose up`}>
           ♯
         </button>
         <button type="button" aria-pressed={chords} onClick={() => setChords((value) => !value)}>
-          Chords
+          <Trans>Chords</Trans>
         </button>
         {state.controlAllowed && <Transport client={client} />}
       </footer>
@@ -72,10 +74,10 @@ function Transport({ client }: { client: FollowerClient }) {
   return (
     <span className="follower-transport">
       <button type="button" onClick={send("transport.playPause")}>
-        Play / pause
+        <Trans>Play / pause</Trans>
       </button>
       <button type="button" onClick={send("transport.stop")}>
-        Stop
+        <Trans>Stop</Trans>
       </button>
     </span>
   );
@@ -131,7 +133,7 @@ function Timed({ model, index, size, shift, chords }: { model: AudienceModel; in
 
 function ChordRow({ chords, size }: { chords: string[]; size: string }) {
   return (
-    <div aria-label="Chords" className="follower-chords" style={{ fontSize: `calc(${size} * 0.6)` }}>
+    <div aria-label={t`Chords`} className="follower-chords" style={{ fontSize: `calc(${size} * 0.6)` }}>
       {chords.map((chord, i) => (
         <span key={i}>{chord}</span>
       ))}

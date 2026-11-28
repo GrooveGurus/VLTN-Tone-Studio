@@ -14,6 +14,8 @@ import { Inspector } from "./Inspector";
 import { LocalPane } from "./LocalPane";
 import { SlotList } from "./SlotList";
 import { useLibrary } from "./store";
+import { t as lt } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const WIDE = "(min-width: 1400px)";
 
@@ -47,7 +49,7 @@ function Library() {
   useLibraryWiring();
 
   useEffect(() => {
-    void useLibrary.getState().refreshCollections().catch((e) => notifyError("Couldn't open the library", e));
+    void useLibrary.getState().refreshCollections().catch((e) => notifyError(lt`Couldn't open the library`, e));
   }, []);
 
   // SnapTone names for the "Amp or SnapTone" column: one read, no preset switching.
@@ -62,7 +64,7 @@ function Library() {
         <LocalPane />
         <SlotList sheetMode={!wide} />
         {wide && (
-          <aside id="library-inspector" aria-label="Selected preset" className="flex min-h-0 flex-col pt-1">
+          <aside id="library-inspector" aria-label={lt`Selected preset`} className="flex min-h-0 flex-col pt-1">
             <Inspector />
           </aside>
         )}
@@ -78,8 +80,8 @@ function Library() {
             className="h-auto w-[344px] rounded-xl border-0 px-5 pt-[18px] pb-4 sm:max-w-none"
             style={{ top: 132, bottom: 46, right: 16 }}
           >
-            <SheetTitle className="sr-only">Details</SheetTitle>
-            <SheetDescription className="sr-only">The selected slot or preset</SheetDescription>
+            <SheetTitle className="sr-only"><Trans>Details</Trans></SheetTitle>
+            <SheetDescription className="sr-only"><Trans>The selected slot or preset</Trans></SheetDescription>
             <Inspector onClose={() => useLibrary.setState({ sheetOpen: false })} />
           </SheetContent>
         </Sheet>
@@ -111,29 +113,29 @@ function useLibraryWiring() {
     if (local) actions.writeLocal(local);
     else await actions.importFiles({ thenWrite: true });
   });
-  useCommand("open-backups-folder", () => host.files.openBackupsFolder().catch((e) => notifyError("Couldn't open the backups folder", e)));
+  useCommand("open-backups-folder", () => host.files.openBackupsFolder().catch((e) => notifyError(lt`Couldn't open the backups folder`, e)));
   useFileHandler("prst", (files) => actions.importOpenFiles(files));
 
   useStatusMessage(
     backingUp
-      ? { led: "warn", text: "The pedal steps through every preset while it backs up. Turn your amp down." }
+      ? { led: "warn", text: lt`The pedal steps through every preset while it backs up. Turn your amp down.` }
       : drag?.kind === "local"
-        ? { led: "on", text: `Dragging ${drag.preset.name}: drop it on a slot to write it to the pedal` }
+        ? { led: "on", text: lt`Dragging ${drag.preset.name}: drop it on a slot to write it to the pedal` }
         : drag?.kind === "slots"
-          ? { led: "on", text: "Drop on a slot to move, hold Alt to copy, or drop on a collection to save a copy" }
+          ? { led: "on", text: lt`Drop on a slot to move, hold Alt to copy, or drop on a collection to save a copy` }
           : null,
   );
   useStatusHints(
     drag
       ? [
-          { keys: ["Esc"], label: "cancel drag" },
-          { keys: ["Alt"], label: "copy" },
+          { keys: ["Esc"], label: lt`cancel drag` },
+          { keys: ["Alt"], label: lt`copy` },
         ]
       : [
-          { keys: ["Shift"], label: "click range" },
-          ...(connected ? [{ keys: ["Enter"], label: "play on pedal" }] : []),
-          { keys: ["F2"], label: "rename" },
-          { keys: ["Del"], label: resets ? "reset to init patch" : "clear" },
+          { keys: ["Shift"], label: lt`click range` },
+          ...(connected ? [{ keys: ["Enter"], label: lt`play on pedal` }] : []),
+          { keys: ["F2"], label: lt`rename` },
+          { keys: ["Del"], label: resets ? lt`reset to init patch` : lt`clear` },
         ],
   );
 }
@@ -168,12 +170,12 @@ function LibraryHead() {
     right = (
       <div role="status" className="flex w-[420px] flex-col gap-1.5">
         <div className="flex justify-between gap-3 text-sm text-silkscreen-3">
-          <span>
+          <Trans><span>
             Backing up preset <b className="font-semibold text-silkscreen">{Math.min(slotCount, done + 1)}</b> of {slotCount}
-          </span>
-          <span>{left === null ? `About ${backupSeconds} s in total` : `About ${left} s left`}</span>
+          </span></Trans>
+          <span>{left === null ? lt`About ${backupSeconds} s in total` : lt`About ${left} s left`}</span>
         </div>
-        <Progress value={backup.progress * 100} aria-label="Backup progress" />
+        <Progress value={backup.progress * 100} aria-label={lt`Backup progress`} />
       </div>
     );
   } else if (job) {
@@ -192,28 +194,28 @@ function LibraryHead() {
             <>
               <span className="flex items-center gap-1.5">
                 <CircleCheckIcon className="size-3.5" aria-hidden />
-                Last {newest.count === slotCount ? "full " : ""}backup{" "}
+                <Trans>Last</Trans> {newest.count === slotCount ? lt`full ` : ""}<Trans>backup{" "}</Trans>
                 <b className="font-semibold text-silkscreen">
-                  {today ? "today, " : ""}
+                  {today ? lt`today, ` : ""}
                   {formatDay(newest.createdAt)}
                 </b>
               </span>
               <span>
-                {newest.count} slots in {host.kind === "web" ? "this browser" : `backups/${newest.id.slice(newest.id.indexOf("/") + 1)}`}
+                <Trans>{newest.count} slots in</Trans> {host.kind === "web" ? lt`this browser` : lt`backups/${newest.id.slice(newest.id.indexOf("/") + 1)}`}
               </span>
             </>
           ) : (
-            <span>No backup yet. Back up before you change anything.</span>
+            <span><Trans>No backup yet. Back up before you change anything.</Trans></span>
           )}
         </div>
         <Button
           variant="outline"
           disabled={status !== "connected" || busy !== null || unsaved > 0}
-          title={unsaved > 0 ? "Save or discard your unsaved changes on the Rig first" : status !== "connected" ? `Connect the ${pedal} to back it up` : `Reads all ${slotCount} slots, about ${backupSeconds} s`}
+          title={unsaved > 0 ? lt`Save or discard your unsaved changes on the Rig first` : status !== "connected" ? lt`Connect the ${pedal} to back it up` : lt`Reads all ${slotCount} slots, about ${backupSeconds} s`}
           onClick={() => void runBackupNow()}
         >
           <HardDriveDownloadIcon data-icon="inline-start" />
-          Back up now
+          <Trans>Back up now</Trans>
         </Button>
       </>
     );
@@ -221,7 +223,7 @@ function LibraryHead() {
 
   return (
     <div className="flex items-end gap-6 px-6 pt-5 pb-4">
-      <h1 className="text-[32px] leading-none font-bold tracking-[-0.02em] text-balance text-silkscreen">Library</h1>
+      <h1 className="text-[32px] leading-none font-bold tracking-[-0.02em] text-balance text-silkscreen"><Trans>Library</Trans></h1>
       <div className="ml-auto flex items-center gap-4">{right}</div>
     </div>
   );

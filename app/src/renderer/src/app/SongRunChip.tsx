@@ -9,6 +9,7 @@ import { isRunning, useAnalysisJob } from "@/song/analysis/analysis-job";
 import { runStatusLine, runSummaryLine } from "@/song/analysis/run-status";
 import { songRunner } from "@/song/analysis/song-runner-app";
 import { useNav } from "@/state/nav";
+import { t } from "@lingui/core/macro";
 
 /** How long the summary stays in the status bar after a run ends. */
 export const RUN_SUMMARY_MS = 15_000;
@@ -38,7 +39,7 @@ export function SongRunChip() {
     <button type="button" onClick={open} className="flex min-w-0 max-w-[45%] shrink items-center gap-2 text-left hover:text-silkscreen-1">
       <span className={cn("size-[7px] shrink-0 rounded-full", run.running ? "bg-led-warn" : "bg-led-on")} aria-hidden />
       <span className="truncate">{text}</span>
-      {run.running && <Progress className="w-16 shrink-0" value={percent} aria-label="Song analysis progress" />}
+      {run.running && <Progress className="w-16 shrink-0" value={percent} aria-label={t`Song analysis progress`} />}
     </button>
   );
 }

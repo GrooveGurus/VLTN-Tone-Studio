@@ -12,6 +12,8 @@ import { useDevice, usePedalName } from "@/state/device";
 import { notifyError } from "@/app/notify";
 import { irSlotLabel, readSlots, runSend, updateDraft, writeUserIr, type SendState } from "./store";
 import { irOccupant, irSummary, ReplaceIrNote, UserIrSlotPicker, useIrWriteBlocker } from "./UserIrParts";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export const kb = (n: number) => (n >= 1_048_576 ? `${(n / 1_048_576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
 
@@ -37,7 +39,7 @@ export function Step({ n, status, title, children }: { n: number; status: StepSt
       </span>
       <div className="flex min-w-0 flex-col gap-0.5 pt-px text-[12px]">
         <b className={cn("font-semibold", status === "pending" ? "text-silkscreen-2" : "text-silkscreen")}>
-          <span className="sr-only">{`Step ${n}, ${status}: `}</span>
+          <span className="sr-only">{t`Step ${n}, ${status}: `}</span>
           {title}
         </b>
         {children}
@@ -82,26 +84,26 @@ export function UserIrSteps({ send, model }: { send: SendState; model: T3kModel 
     if (n === 1 && phase === "idle") return "current";
     return "pending";
   };
-  const modelLabel = model ? model.name : "the model";
+  const modelLabel = model ? model.name : t`the model`;
   const replacing = irOccupant(userIRs, slot);
-  const slotText = slot === null ? "a User IR slot" : irSlotLabel(slot);
+  const slotText = slot === null ? t`a User IR slot` : irSlotLabel(slot);
   const canEdit = phase === "idle" || phase === "ready" || (phase === "error" && step !== 2);
   const canWrite = Boolean(ir) && (phase === "ready" || (phase === "error" && step >= 3));
 
   return (
     <ol ref={listRef} className="flex flex-col">
-      <Step n={1} status={status(1)} title={step > 1 || phase === "linked" ? `Downloaded ${modelLabel}` : `Download ${modelLabel}`}>
+      <Step n={1} status={status(1)} title={step > 1 || phase === "linked" ? t`Downloaded ${modelLabel}` : t`Download ${modelLabel}`}>
         {phase === "running" && step === 1 && (
           <>
-            <span className="text-silkscreen-3">{send.total ? `${kb(send.received)} of ${kb(send.total)}` : send.received ? kb(send.received) : "Starting the download…"}</span>
-            <Progress value={send.total ? (send.received / send.total) * 100 : undefined} className="mt-1 w-56" aria-label="Download progress" />
+            <span className="text-silkscreen-3">{send.total ? t`${kb(send.received)} of ${kb(send.total)}` : send.received ? kb(send.received) : t`Starting the download…`}</span>
+            <Progress value={send.total ? (send.received / send.total) * 100 : undefined} className="mt-1 w-56" aria-label={t`Download progress`} />
           </>
         )}
         {phase === "error" && step === 1 && <StepError error={error} />}
         {canEdit && (
           <span className="mt-1.5 flex flex-wrap items-center gap-2">
             <label className="flex items-center gap-2 text-silkscreen-2">
-              <span>Name on the pedal</span>
+              <Trans><span>Name on the pedal</span></Trans>
               <Input
                 value={send.name}
                 maxLength={10}
@@ -119,40 +121,40 @@ export function UserIrSteps({ send, model }: { send: SendState; model: T3kModel 
           <span className="mt-2 flex flex-col items-start gap-1">
             <Button size="sm" disabled={!send.name || !model} onClick={() => void runSend(send.toneId)}>
               {phase === "error" && <RotateCcw data-icon="inline-start" />}
-              {phase === "error" ? "Retry" : "Download and check"}
+              {phase === "error" ? t`Retry` : t`Download and check`}
             </Button>
-            <span className="text-[11px] text-silkscreen-3">Nothing is written to the pedal until you choose a slot and press Write.</span>
+            <Trans><span className="text-[11px] text-silkscreen-3">Nothing is written to the pedal until you choose a slot and press Write.</span></Trans>
           </span>
         )}
       </Step>
 
-      <Step n={2} status={status(2)} title={ir ? "Checked the IR" : "Check the IR"}>
-        {ir ? <span className="text-pretty text-silkscreen-3">{irSummary(ir)}</span> : phase !== "error" && <span className="text-silkscreen-3">Confirm it's a WAV file and convert it for the {pedal}</span>}
+      <Step n={2} status={status(2)} title={ir ? t`Checked the IR` : t`Check the IR`}>
+        {ir ? <span className="text-pretty text-silkscreen-3">{irSummary(ir)}</span> : phase !== "error" && <span className="text-silkscreen-3"><Trans>Confirm it's a WAV file and convert it for the {pedal}</Trans></span>}
         {phase === "running" && step === 2 && <Spinner className="mt-1" />}
         {phase === "error" && step === 2 && <StepError error={error} />}
       </Step>
 
-      <Step n={3} status={status(3)} title={step > 3 || phase === "linked" ? `Chose ${slotText}` : "Choose a User IR slot"}>
+      <Step n={3} status={status(3)} title={step > 3 || phase === "linked" ? t`Chose ${slotText}` : t`Choose a User IR slot`}>
         {canEdit && <UserIrSlotPicker value={slot} onChange={(s) => updateDraft(send.toneId, { proposedSlot: s })} />}
         {replacing && phase !== "linked" && phase !== "writing" && <ReplaceIrNote name={replacing} />}
       </Step>
 
-      <Step n={4} status={status(4)} title={phase === "linked" ? `Wrote ${slotText}` : `Write ${slotText} on the ${pedal}`}>
-        {phase === "writing" && <Progress value={send.progress * 100} className="mt-1 w-56" aria-label="User IR write progress" />}
+      <Step n={4} status={status(4)} title={phase === "linked" ? t`Wrote ${slotText}` : t`Write ${slotText} on the ${pedal}`}>
+        {phase === "writing" && <Progress value={send.progress * 100} className="mt-1 w-56" aria-label={t`User IR write progress`} />}
         {phase === "error" && step === 4 && <StepError error={error} />}
         {canWrite && (
           <span className="mt-2 flex flex-col items-start gap-1">
             <Button size="sm" disabled={blocker !== null || !send.name} onClick={() => void writeUserIr(send.toneId)}>
               {phase === "error" && <RotateCcw data-icon="inline-start" />}
-              {replacing ? `Replace ${replacing} in ${slotText}` : `Write to ${slotText}`}
+              {replacing ? t`Replace ${replacing} in ${slotText}` : t`Write to ${slotText}`}
             </Button>
             {blocker && <span className="text-[11px] text-silkscreen-3">{blocker}</span>}
           </span>
         )}
       </Step>
 
-      <Step n={5} status={status(5)} title={phase === "linked" && send.linkedSlot !== null ? `Linked to ${irSlotLabel(send.linkedSlot)} on your ${pedal}` : "Link the new IR"}>
-        {phase !== "linked" && <span className="text-pretty text-silkscreen-3">The slot map then shows this tone's image for that slot.</span>}
+      <Step n={5} status={status(5)} title={phase === "linked" && send.linkedSlot !== null ? t`Linked to ${irSlotLabel(send.linkedSlot)} on your ${pedal}` : t`Link the new IR`}>
+        {phase !== "linked" && <span className="text-pretty text-silkscreen-3"><Trans>The slot map then shows this tone's image for that slot.</Trans></span>}
         {phase === "linked" && send.linkedSlot !== null && <UseOnGp5 isIr slot={send.linkedSlot} />}
       </Step>
     </ol>
@@ -162,7 +164,7 @@ export function UserIrSteps({ send, model }: { send: SendState; model: T3kModel 
 export function StepError({ error }: { error: string | null }) {
   return (
     <span role="alert" className="text-pretty text-led-fault">
-      {error ?? "Something went wrong."}
+      {error ?? t`Something went wrong.`}
     </span>
   );
 }
@@ -183,7 +185,7 @@ export function UseOnGp5({ isIr, slot }: { isIr: boolean; slot: number }) {
       await d.setModel(block, isIr ? userIr.fxidBase + slot : snapTone.fxidBase + slot);
       d.setBlockEnabled(block, true);
     } catch (e) {
-      notifyError("Couldn't use it in the current preset", e);
+      notifyError(t`Couldn't use it in the current preset`, e);
     } finally {
       setBusy(false);
     }
@@ -192,9 +194,9 @@ export function UseOnGp5({ isIr, slot }: { isIr: boolean; slot: number }) {
   return (
     <span className="mt-2 flex flex-col items-start gap-1">
       <Button size="sm" variant="outline" disabled={busy} onClick={use}>
-        Use in current preset
+        <Trans>Use in current preset</Trans>
       </Button>
-      <span className="text-[11px] text-silkscreen-3">Plays now. It stays an unsaved change until you save the preset.</span>
+      <Trans><span className="text-[11px] text-silkscreen-3">Plays now. It stays an unsaved change until you save the preset.</span></Trans>
     </span>
   );
 }

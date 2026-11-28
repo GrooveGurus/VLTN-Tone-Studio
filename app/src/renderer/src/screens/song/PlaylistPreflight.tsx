@@ -13,6 +13,8 @@ import { playlistPreflight, type PlaylistCheck } from "@/song/performance/playli
 import { songEntries } from "@/song/performance/song-triggers";
 import type { LibrarySong } from "@shared/song-library";
 import { flushSettings, onSettingsChange, LIBRARY_PREFIX } from "@/song/performance/settings";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 export function PlaylistPreflight({ ids, disabled, revision, songs }: { ids: string[]; disabled: boolean; revision: unknown; songs: readonly LibrarySong[] }) {
   const preparationDefaults = usePreparationDefaults((state) => state.settings);
   const config = useMidiConfiguration(),
@@ -85,30 +87,30 @@ export function PlaylistPreflight({ ids, disabled, revision, songs }: { ids: str
     }
   };
   return (
-    <section aria-label="Playlist preflight" className="my-3 space-y-2 rounded border border-seam p-3">
+    <section aria-label={t`Playlist preflight`} className="my-3 space-y-2 rounded border border-seam p-3">
       <Button variant="outline" disabled={disabled || busy || !ids.length} onClick={() => void check()}>
-        {busy ? "Checking playlist…" : "Check playlist"}
+        {busy ? t`Checking playlist…` : t`Check playlist`}
       </Button>
       <p className="text-xs text-silkscreen-3">
-        Checks saved audio files, charts, MIDI channels, tempo and Before song preparation for every entry. Save song changes first. No playback or MIDI is
-        sent. Output preferences do not confirm a connected pedal.
+        <Trans>Checks saved audio files, charts, MIDI channels, tempo and Before song preparation for every entry. Save song changes first. No playback or MIDI is
+        sent. Output preferences do not confirm a connected pedal.</Trans>
       </p>
-      {busy && <p role="status">Checking saved files without loading audio into memory…</p>}
+      {busy && <p role="status"><Trans>Checking saved files without loading audio into memory…</Trans></p>}
       {error && <p role="alert">{error}</p>}
       {report && (
         <>
           <p role="status">
-            {report.length} entries checked · {report.reduce((n, r) => n + r.errors.length, 0)} errors · {report.reduce((n, r) => n + r.warnings.length, 0)}{" "}
-            performance warnings · {report.reduce((n, r) => n + r.advice.length, 0)} arrangement notes
+            <Trans>{report.length} entries checked ·</Trans> {report.reduce((n, r) => n + r.errors.length, 0)} <Trans>errors ·</Trans> {report.reduce((n, r) => n + r.warnings.length, 0)}<Trans>{" "}
+            performance warnings ·</Trans> {report.reduce((n, r) => n + r.advice.length, 0)} <Trans>arrangement notes</Trans>
           </p>
           <p className="text-xs">
-            Snapshot of saved files and current MIDI preferences. Recheck after external file changes. File presence and size are checked, not audio contents or
-            physical pedal response. Warnings are advisory.
+            <Trans>Snapshot of saved files and current MIDI preferences. Recheck after external file changes. File presence and size are checked, not audio contents or
+            physical pedal response. Warnings are advisory.</Trans>
           </p>
-          <p aria-label="Playlist preparation total">
-            Configured preparation waits: {preparationSeconds(report.reduce((total, result) => total + (result.preparation?.totalWaitMs ?? 0), 0))} s across{" "}
+          <p aria-label={t`Playlist preparation total`}>
+            <Trans>Configured preparation waits: {preparationSeconds(report.reduce((total, result) => total + (result.preparation?.totalWaitMs ?? 0), 0))} s across{" "}
             {report.filter((result) => result.preparation).length} entries. Fresh song loads with Send cues enabled are assumed. Audio loading, MIDI delivery,
-            start delay and count-in can add time; entries with errors need fixing first.
+            start delay and count-in can add time; entries with errors need fixing first.</Trans>
           </p>
           <PlaylistPreflightIssues report={report} />
           <ol className="max-h-80 space-y-2 overflow-auto">
@@ -120,22 +122,22 @@ export function PlaylistPreflight({ ids, disabled, revision, songs }: { ids: str
                 {r.preparation && (
                   <details className="my-2 rounded border border-seam p-2">
                     <summary className="cursor-pointer">
-                      Before song: {preparationSeconds(r.preparation.totalWaitMs)} s · {r.preparation.steps.filter((step) => step.kind === "send").length}{" "}
-                      command group{r.preparation.steps.filter((step) => step.kind === "send").length === 1 ? "" : "s"}
+                      <Trans>Before song: {preparationSeconds(r.preparation.totalWaitMs)} s · {r.preparation.steps.filter((step) => step.kind === "send").length}{" "}
+                      command group</Trans>{r.preparation.steps.filter((step) => step.kind === "send").length === 1 ? "" : "s"}
                     </summary>
-                    <p className="my-2 text-xs">From the saved playable beginning, with fresh once-command history. Opening this preview sends nothing.</p>
-                    <PreparationSequenceDetails plan={r.preparation} label={`Preparation steps for entry ${r.entry}`} />
+                    <p className="my-2 text-xs"><Trans>From the saved playable beginning, with fresh once-command history. Opening this preview sends nothing.</Trans></p>
+                    <PreparationSequenceDetails plan={r.preparation} label={t`Preparation steps for entry ${r.entry}`} />
                   </details>
                 )}
                 <p>
-                  {r.errors.length} errors · {r.warnings.length} performance warnings
+                  <Trans>{r.errors.length} errors · {r.warnings.length} performance warnings</Trans>
                 </p>
                 <ArrangementAdvice items={r.advice} />
                 {r.notes.length > 0 && (
                   <ul>
                     {r.notes.map((text, index) => (
                       <li key={index} className="text-silkscreen-3">
-                        Note: {text}
+                        <Trans>Note: {text}</Trans>
                       </li>
                     ))}
                   </ul>

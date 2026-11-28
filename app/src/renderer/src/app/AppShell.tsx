@@ -73,8 +73,13 @@ export function AppShell() {
  * `?screen=library` (and `&param=`) opens a screen. The desktop app connects to the
  * real pedal on launch; failures stay in the device store's error state (chip and Device screen show it).
  */
+/** Once per page: the shell remounts when the language changes, and must not connect to the pedal again. */
+let launched = false;
+
 function useLaunchParams() {
   useEffect(() => {
+    if (launched) return;
+    launched = true;
     const q = new URLSearchParams(location.search);
     const screen = q.get("screen");
     if (screen === "rig" || screen === "library" || screen === "tones" || screen === "device" || screen === "capture" || screen === "song" || screen === "setlist") useNav.getState().go(screen, q.get("param"));

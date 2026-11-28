@@ -7,6 +7,7 @@ import { GearFrame, type Control } from "./controls";
 import { formatValue } from "./knob-math";
 import { Defs, Enclosure, FootswitchArt, KnobArt, LightBar, Nameplate, Screw, T } from "./parts";
 import { paramTitle, type GearBaseProps, type GearKnob } from "./types";
+import { t } from "@lingui/core/macro";
 
 /** The faders (up to 6 bands) and the volume knob an EQ drawing has room for. */
 export const eqControls = (all: readonly GearKnob[]) => ({ bands: all.filter((b) => !/^vol/i.test(b.label)).slice(0, 6), vol: all.find((b) => /^vol/i.test(b.label)) });
@@ -36,7 +37,7 @@ export function EqPedal({ name, origin, on = true, knobs = [], interactive, disa
   return (
     <GearFrame
       view={[W, H]}
-      label={`${name} graphic EQ pedal, ${on ? "on" : "bypassed"}`}
+      label={t`${name} graphic EQ pedal, ${on ? t`on` : t`bypassed`}`}
       interactive={interactive}
       disabled={disabled}
       className={className}
@@ -156,7 +157,7 @@ export function Capture({ name, on = true, image, caption = "SnapTone", block = 
   return (
     <GearFrame
       view={[100, 150]}
-      label={`${name} capture, ${on ? "on" : "off"}`}
+      label={t`${name} capture, ${on ? t`on` : t`off`}`}
       interactive={interactive}
       disabled={disabled}
       className={className}

@@ -1,5 +1,6 @@
 import { DEFAULT_SETTINGS, type AppApi, type AppSettings } from "@shared/host/app";
 import { HostError } from "@shared/ipc";
+import { t } from "@lingui/core/macro";
 
 const KEY = "gp5.settings";
 const read = (): AppSettings => ({ ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(KEY) ?? "{}") });
@@ -13,17 +14,17 @@ export const webApp: AppApi = {
     return next;
   },
   openExternal: async (url) => {
-    if (!/^https?:\/\//i.test(url)) throw new HostError("invalid", "Only http(s) links can be opened");
+    if (!/^https?:\/\//i.test(url)) throw new HostError("invalid", t`Only http(s) links can be opened`);
     window.open(url, "_blank", "noopener");
   },
   showItemInFolder: async () => {
-    throw new HostError("unsupported", "Showing files in a folder needs the desktop app");
+    throw new HostError("unsupported", t`Showing files in a folder needs the desktop app`);
   },
   openPath: async () => {
-    throw new HostError("unsupported", "Opening files needs the desktop app");
+    throw new HostError("unsupported", t`Opening files needs the desktop app`);
   },
   launchSuite: async () => {
-    throw new HostError("unsupported", "Opening Valeton Suite needs the desktop app");
+    throw new HostError("unsupported", t`Opening Valeton Suite needs the desktop app`);
   },
   setProgress: async () => {},
   takeOpenedFiles: async () => [],

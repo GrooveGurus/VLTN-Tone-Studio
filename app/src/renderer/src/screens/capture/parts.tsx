@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { useTones } from "@/screens/tones/store";
 import { useCapture } from "./store";
 import type { NamInfo } from "./nam/model";
+import { t } from "@lingui/core/macro";
 
 export function Led({ tone, className }: { tone: "on" | "warn" | "fault" | "off"; className?: string }) {
   return (
@@ -32,7 +33,7 @@ export function useCaptureTitle(): string {
   if (record) return record.title;
   const name = loaded?.file.metadata?.name;
   if (typeof name === "string" && name.trim()) return name.trim();
-  return loaded?.source.fileName.replace(/\.nam$/i, "") ?? "Capture";
+  return loaded?.source.fileName.replace(/\.nam$/i, "") ?? t`Capture`;
 }
 
 export const fmtInt = (n: number) => n.toLocaleString("en-US");
@@ -41,7 +42,7 @@ export const fmtInt = (n: number) => n.toLocaleString("en-US");
 export function archLabel(info: NamInfo): { arch: string; detail: string } {
   if (info.arch.kind === "A2") {
     const sizes = info.arch.submodels.map((s) => s.size);
-    const detail = sizes.includes("full") && sizes.includes("lite") ? "Full + Lite" : sizes.includes("full") ? "Full only" : "Lite only";
+    const detail = sizes.includes("full") && sizes.includes("lite") ? t`Full + Lite` : sizes.includes("full") ? t`Full only` : t`Lite only`;
     return { arch: "A2", detail };
   }
   if (info.arch.kind === "A1") return { arch: "A1", detail: info.arch.size[0].toUpperCase() + info.arch.size.slice(1) };

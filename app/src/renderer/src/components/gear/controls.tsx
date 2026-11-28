@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEv
 import { cn } from "@/lib/utils";
 import { Loupe } from "./Loupe";
 import { dragValue, formatValue, keyValue, parseTyped, valueText, wheelValue, type ValueSpec } from "./knob-math";
+import { t as lt } from "@lingui/core/macro";
 
 interface Rect {
   x: number;
@@ -194,7 +195,7 @@ function ValueEditor({ label, initial, style, onDone }: { label: string; initial
     <span className="pointer-events-none absolute z-10 grid place-items-center" style={style}>
       <input
         autoFocus
-        aria-label={`${label} value`}
+        aria-label={lt`${label} value`}
         inputMode="decimal"
         value={text}
         onFocus={(e) => e.currentTarget.select()}

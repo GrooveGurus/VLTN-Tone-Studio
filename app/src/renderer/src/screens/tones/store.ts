@@ -11,6 +11,7 @@ import { notifySuccess } from "@/app/notify";
 import type { PresetRef } from "./usage";
 import { convertToClone, snapToneFile } from "@/snaptone/convert";
 import { prepareUserIr, type UserIrFile } from "@/userir/convert";
+import { t as lt } from "@lingui/core/macro";
 
 export interface ListState {
   tones: T3kTone[];
@@ -171,7 +172,7 @@ export async function loadRecords(): Promise<void> {
 }
 
 /** User IR slots are 0-based on the wire and 1-based on the pedal and in Valeton Suite ("User IR 1" = slot 0). */
-export const irSlotLabel = (slot: number) => `User IR ${slot + 1}`;
+export const irSlotLabel = (slot: number) => lt`User IR ${slot + 1}`;
 
 export const slotLabel = (kind: "snaptone" | "ir", slot: number) => (kind === "ir" ? irSlotLabel(slot) : snapToneLabel(useDevice.getState().device ?? DEFAULT_DEVICE, slot));
 
@@ -364,7 +365,7 @@ const pedal = () => pedalName(useDevice.getState().device);
  */
 function linkDevice(): DeviceKey {
   const device = useDevice.getState().device;
-  if (!device) throw new Error("Connect the pedal first: a slot link needs the pedal model the slot is on.");
+  if (!device) throw new Error(lt`Connect the pedal first: a slot link needs the pedal model the slot is on.`);
   return device;
 }
 
@@ -437,7 +438,7 @@ export function cancelSend(toneId: number): void {
 }
 
 function sendError(toneId: number, e: unknown): void {
-  if (onUnauthorized(e)) patchSend(toneId, { phase: "error", error: "Your TONE3000 sign-in expired. Sign in again, then retry." });
+  if (onUnauthorized(e)) patchSend(toneId, { phase: "error", error: lt`Your TONE3000 sign-in expired. Sign in again, then retry.` });
   else patchSend(toneId, { phase: "error", error: message(e) });
 }
 
@@ -491,7 +492,7 @@ export async function writeSnapTone(toneId: number): Promise<void> {
     const rec = await host.tones.link(toneId, { kind: "snaptone", slot, slotName: stored, device: linkDevice() });
     storeRecord(rec);
     patchSend(toneId, { phase: "linked", step: 5, linkedSlot: slot });
-    notifySuccess(`Wrote ${slotLabel("snaptone", slot)} on your ${pedal()}`, rec.title);
+    notifySuccess(lt`Wrote ${slotLabel("snaptone", slot)} on your ${pedal()}`, rec.title);
   } catch (e) {
     patchSend(toneId, { phase: "error", error: message(e) });
   }
@@ -508,7 +509,7 @@ export async function writeUserIr(toneId: number): Promise<void> {
     const rec = await host.tones.link(toneId, { kind: "ir", slot, slotName: stored, device: linkDevice() });
     storeRecord(rec);
     patchSend(toneId, { phase: "linked", step: 5, linkedSlot: slot });
-    notifySuccess(`Wrote ${irSlotLabel(slot)} on your ${pedal()}`, rec.title);
+    notifySuccess(lt`Wrote ${irSlotLabel(slot)} on your ${pedal()}`, rec.title);
   } catch (e) {
     patchSend(toneId, { phase: "error", error: message(e) });
   }
@@ -529,7 +530,7 @@ export async function linkSlot(toneId: number, kind: "snaptone" | "ir", slot: nu
   storeRecord(rec);
   patchSend(toneId, { phase: "linked", linkedSlot: slot });
   set({ linkChoice: null });
-  notifySuccess(`Linked to ${slotLabel(kind, slot)} on your ${pedal()}`, rec.title);
+  notifySuccess(lt`Linked to ${slotLabel(kind, slot)} on your ${pedal()}`, rec.title);
   return rec;
 }
 
@@ -563,6 +564,6 @@ export async function renameSlot(kind: "snaptone" | "ir", slot: number, name: st
   for (const r of Object.values(get().records))
     if (linkedSlotOn(r, kind, device) === slot) storeRecord(await host.tones.link(r.tone_id, { kind, slot, slotName: stored, device: linkDevice() }));
   set({ renameChoice: null });
-  notifySuccess(`Renamed ${slotLabel(kind, slot)} on your ${pedal()}`, stored);
+  notifySuccess(lt`Renamed ${slotLabel(kind, slot)} on your ${pedal()}`, stored);
   return stored;
 }

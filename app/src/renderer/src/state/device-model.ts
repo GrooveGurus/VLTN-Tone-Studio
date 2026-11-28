@@ -12,6 +12,7 @@ import type { ConnectionStatus, DeviceFeature, DeviceMode, GlobalSpec, Globals, 
 import { GP150_GLOBAL_SPECS } from "./driver/gp150-globals";
 import { gp200SpecsFor } from "./driver/gp200-globals";
 import { SUPPORTED_DEVICE_KEYS } from "./driver/types";
+import { t } from "@lingui/core/macro";
 
 /**
  * Features built on commands known only from static reverse engineering, not yet tested on hardware, per family: on a
@@ -92,12 +93,12 @@ export function pedalNameOrBoth(device: DeviceKey | null): string {
 /** Valeton's apps for `device`: the editor that may hold its port, and the tool that updates its firmware. */
 export function vendorApps(device: DeviceKey | null): { editor: string; updater: string } {
   return device && profileFor(device).family === "gp200"
-    ? { editor: "Valeton's GP-200 editor", updater: "Valeton's updater" }
+    ? { editor: t`Valeton's GP-200 editor`, updater: "Valeton's updater" }
     : { editor: "Valeton Suite", updater: "Valeton Suite" };
 }
 
 export function vendorAppName(app: VendorApp): string {
-  return app === "suite" ? "Valeton Suite" : "Valeton's GP-200 editor";
+  return app === "suite" ? "Valeton Suite" : t`Valeton's GP-200 editor`;
 }
 
 /**
@@ -144,7 +145,7 @@ export function switchLabel(device: DeviceKey, index: number): string {
 /** Model a .prst belongs to (see sniffPrst); throws when the bytes are no known preset. */
 export function presetDevice(prst: Uint8Array): DeviceKey {
   const device = sniffPrst(prst);
-  if (!device) throw new Error(`Not a ${PRST_MODELS} preset`);
+  if (!device) throw new Error(t`Not a ${PRST_MODELS} preset`);
   return device;
 }
 
@@ -166,14 +167,14 @@ export function convertsLosslessly(from: DeviceKey, to: DeviceKey): boolean {
 
 /** Plain refusal for a preset of another family ("This preset is for a GP-200; Tone Studio can't convert it for a GP-5."). */
 export function crossFamilyNote(from: DeviceKey, to: DeviceKey): string {
-  return `This preset is for a ${pedalName(from)}; Tone Studio can't convert it for a ${pedalName(to)}.`;
+  return t`This preset is for a ${pedalName(from)}; Tone Studio can't convert it for a ${pedalName(to)}.`;
 }
 
 /** Why `value` can't be a slot name on `pedal` (printable ASCII only, not blank), or null when it can. */
 export function slotNameError(value: string, pedal: string): string | null {
   const bad = [...value].find((c) => !/^[\x20-\x7e]$/.test(c));
-  if (bad) return `The ${pedal} can't show “${bad}”. Use letters A to Z, digits, spaces and keyboard symbols.`;
-  return value.trimEnd() === "" ? "A slot needs a name." : null;
+  if (bad) return t`The ${pedal} can't show “${bad}”. Use letters A to Z, digits, spaces and keyboard symbols.`;
+  return value.trimEnd() === "" ? t`A slot needs a name.` : null;
 }
 
 /** Blocks of GP-5 family `prst` whose model does not exist on `target`, e.g. ["PRE (PRE C-Wah)"]. Empty when nothing is lost. */

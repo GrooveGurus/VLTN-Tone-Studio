@@ -4,11 +4,12 @@ import { useDevice } from "@/state/device";
 import type { BlockState } from "@/state/device-types";
 import { editBlock, snapshot } from "./edits";
 import { useRig } from "./rig-store";
+import { t } from "@lingui/core/macro";
 
 /** Copy a block's model and settings (in-app clipboard; pasting works on the same block type). */
 export function copyBlock(block: BlockState) {
   useRig.setState({ clipboard: { ...snapshot(block), code: block.code, title: modelTitle(block) } });
-  notifySuccess(`Copied ${modelTitle(block)} settings`, `Paste them onto a ${block.code} block from its right-click menu.`);
+  notifySuccess(t`Copied ${modelTitle(block)} settings`, t`Paste them onto a ${block.code} block from its right-click menu.`);
 }
 
 /** Paste the copied model and settings onto `index` (same block type only); keeps its on/off state. */

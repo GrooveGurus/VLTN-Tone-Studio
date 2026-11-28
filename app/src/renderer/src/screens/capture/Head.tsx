@@ -19,6 +19,8 @@ import { formatKhz, type NamInfo } from "./nam/model";
 import { originalRecipe } from "./nam/recipe";
 import { exportText, isDirty, useCapture, useShownRecipe } from "./store";
 import { archLabel, Led, useCaptureTitle, useToneRecord } from "./parts";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export interface Verdict {
   tone: "on" | "warn" | "fault";
@@ -32,14 +34,14 @@ export interface Verdict {
  */
 export function verdictOf(info: NamInfo, linkedSlot: number | null, device: DeviceKey | null): Verdict {
   const pedal = pedalNameOrBoth(device);
-  if (info.unsupported) return { tone: "fault", label: "Can't convert this capture", reason: info.unsupported };
+  if (info.unsupported) return { tone: "fault", label: t`Can't convert this capture`, reason: info.unsupported };
   if (linkedSlot !== null)
-    return { tone: "on", label: `Linked to ${snapToneLabel(device ?? DEFAULT_DEVICE, linkedSlot)} on your ${pedal}`, reason: `This tone is linked to a user SnapTone slot on your ${pedal}.` };
+    return { tone: "on", label: t`Linked to ${snapToneLabel(device ?? DEFAULT_DEVICE, linkedSlot)} on your ${pedal}`, reason: t`This tone is linked to a user SnapTone slot on your ${pedal}.` };
   const reason =
     info.arch.kind === "A1"
-      ? `NAM A1 ${info.arch.size}: Tone Studio turns it into a SnapTone the way Valeton Suite does and writes it to the pedal.`
-      : "NAM A2: Tone Studio renders its Full size into a SnapTone the way Valeton Suite does and writes it to the pedal.";
-  return { tone: "on", label: `Ready for ${pedal}`, reason };
+      ? t`NAM A1 ${info.arch.size}: Tone Studio turns it into a SnapTone the way Valeton Suite does and writes it to the pedal.`
+      : t`NAM A2: Tone Studio renders its Full size into a SnapTone the way Valeton Suite does and writes it to the pedal.`;
+  return { tone: "on", label: t`Ready for ${pedal}`, reason };
 }
 
 export function Head({ onOpenFile }: { onOpenFile: () => void }) {
@@ -61,13 +63,13 @@ export function Head({ onOpenFile }: { onOpenFile: () => void }) {
     try {
       const name = `${title}.nam`;
       const path = await host.capture.exportFile(name, exportText(loaded, recipe));
-      if (path) notifySuccess(`Exported ${name}`, isElectron ? path : "Saved to your downloads.");
+      if (path) notifySuccess(t`Exported ${name}`, isElectron ? path : t`Saved to your downloads.`);
     } catch (e) {
-      notifyError("Couldn't export the capture", e);
+      notifyError(t`Couldn't export the capture`, e);
     }
   };
 
-  const onShowFiles = () => host.capture.showFiles(loaded.key).catch((e) => notifyError("Couldn't show the files", e));
+  const onShowFiles = () => host.capture.showFiles(loaded.key).catch((e) => notifyError(t`Couldn't show the files`, e));
 
   return (
     <div className="flex items-end gap-5 px-6 pt-3.5 pb-4">
@@ -77,17 +79,17 @@ export function Head({ onOpenFile }: { onOpenFile: () => void }) {
         <ToneImage url={null} gear={String(loaded.file.metadata?.gear_type ?? "amp")} format="nam" alt="" square caption={false} className="w-[92px] max-[1420px]:w-20" />
       )}
       <div className="flex min-w-0 flex-col gap-1.5">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[11px] text-silkscreen-3">
+        <nav aria-label={t`Breadcrumb`} className="flex items-center gap-2 text-[11px] text-silkscreen-3">
           <button
             type="button"
             onClick={() => go("tones", source.kind === "tone" ? source.ref : null)}
             className="relative inline-flex items-center gap-0.5 text-silkscreen-2 before:absolute before:-inset-x-1 before:-inset-y-2 hover:text-silkscreen"
           >
             <ChevronLeft className="size-3.5" aria-hidden />
-            Tones
+            <Trans>Tones</Trans>
           </button>
           <span className="size-[3px] rounded-full bg-silkscreen-4" aria-hidden />
-          <span>Edit capture</span>
+          <Trans><span>Edit capture</span></Trans>
           <span className="size-[3px] rounded-full bg-silkscreen-4" aria-hidden />
           {source.kind === "tone" ? (
             <span className="font-extrabold tracking-[0.02em] text-silkscreen-2">TONE3000</span>
@@ -108,10 +110,10 @@ export function Head({ onOpenFile }: { onOpenFile: () => void }) {
             </HoverCardTrigger>
             <HoverCardContent className="w-72 text-[12px] text-silkscreen-2">
               {info.arch.kind === "A2"
-                ? "One A2 file holds two sizes of the same model: Full for accuracy, Lite for small hardware."
+                ? t`One A2 file holds two sizes of the same model: Full for accuracy, Lite for small hardware.`
                 : info.arch.kind === "A1"
-                  ? `NAM A1 WaveNet, ${info.arch.size} size, in the ${info.arch.layout === "0.5" ? "0.5.x" : "0.7.x"} file layout.`
-                  : `NAM ${info.arch.architecture} model.`}
+                  ? t`NAM A1 WaveNet, ${info.arch.size} size, in the ${info.arch.layout === "0.5" ? "0.5.x" : "0.7.x"} file layout.`
+                  : t`NAM ${info.arch.architecture} model.`}
             </HoverCardContent>
           </HoverCard>
           <HoverCard openDelay={300}>
@@ -145,9 +147,9 @@ export function Head({ onOpenFile }: { onOpenFile: () => void }) {
           {record && <span>{licenseLabel(record.license)}</span>}
           {info.sampleRate !== null && <span>{formatKhz(info.sampleRate)}</span>}
           {record && (
-            <Button variant="link" size="sm" className="h-8 gap-1.5 text-[12px]" onClick={() => host.app.openExternal(record.url).catch((e) => notifyError("Couldn't open the tone page", e))}>
+            <Button variant="link" size="sm" className="h-8 gap-1.5 text-[12px]" onClick={() => host.app.openExternal(record.url).catch((e) => notifyError(t`Couldn't open the tone page`, e))}>
               <ExternalLink className="size-3" aria-hidden />
-              Tone page
+              <Trans>Tone page</Trans>
             </Button>
           )}
         </div>
@@ -157,48 +159,48 @@ export function Head({ onOpenFile }: { onOpenFile: () => void }) {
           {saving ? (
             <>
               <Spinner className="size-3.5" />
-              Saving version {nextN}
+              <Trans>Saving version {nextN}</Trans>
             </>
           ) : viewing !== null ? null : dirty ? (
             <>
               <Led tone="warn" />
-              Draft, not a version yet
+              <Trans>Draft, not a version yet</Trans>
             </>
           ) : base > 0 ? (
             <>
               <CircleCheck className="size-3.5 text-led-on" aria-hidden />
-              {savedN === base ? `Saved as version ${base}` : `Version ${base}`}
+              {savedN === base ? t`Saved as version ${base}` : t`Version ${base}`}
             </>
           ) : (
             <>
               <CircleCheck className="size-3.5 text-led-on" aria-hidden />
-              Original, no changes
+              <Trans>Original, no changes</Trans>
             </>
           )}
         </span>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon-sm" aria-label="Undo" disabled={!past.length || viewing !== null} onClick={undo}>
+            <Button variant="ghost" size="icon-sm" aria-label={t`Undo`} disabled={!past.length || viewing !== null} onClick={undo}>
               <Undo2 />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Undo</TooltipContent>
+          <TooltipContent><Trans>Undo</Trans></TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon-sm" aria-label="Redo" disabled={!future.length || viewing !== null} onClick={redo}>
+            <Button variant="ghost" size="icon-sm" aria-label={t`Redo`} disabled={!future.length || viewing !== null} onClick={redo}>
               <Redo2 />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Redo</TooltipContent>
+          <TooltipContent><Trans>Redo</Trans></TooltipContent>
         </Tooltip>
         <Button variant="outline" size="sm" onClick={onExport} disabled={!recipe}>
           <Download className="size-3.5" aria-hidden />
-          {info.arch.kind === "A2" ? "Export A2 .nam" : "Export .nam"}
+          {info.arch.kind === "A2" ? t`Export A2 .nam` : t`Export .nam`}
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon-sm" aria-label="More">
+            <Button variant="ghost" size="icon-sm" aria-label={t`More`}>
               <EllipsisVertical />
             </Button>
           </DropdownMenuTrigger>
@@ -206,12 +208,12 @@ export function Head({ onOpenFile }: { onOpenFile: () => void }) {
             <DropdownMenuGroup>
               <DropdownMenuItem onSelect={onOpenFile}>
                 <FileUp />
-                Open a .nam file…
+                <Trans>Open a .nam file…</Trans>
               </DropdownMenuItem>
               {isElectron && (
                 <DropdownMenuItem onSelect={onShowFiles}>
                   <FolderOpen />
-                  Show files
+                  <Trans>Show files</Trans>
                 </DropdownMenuItem>
               )}
             </DropdownMenuGroup>
@@ -219,7 +221,7 @@ export function Head({ onOpenFile }: { onOpenFile: () => void }) {
             <DropdownMenuGroup>
               <DropdownMenuItem disabled={viewing !== null} onSelect={() => edit(() => originalRecipe(loaded.file))}>
                 <RotateCcw />
-                Revert to original
+                <Trans>Revert to original</Trans>
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>

@@ -2,6 +2,7 @@ import { useDevice } from "@/state/device";
 import { profileOrDefault } from "@/state/device-model";
 import { useUi } from "@/state/ui";
 import { notifyError } from "./notify";
+import { t } from "@lingui/core/macro";
 
 /**
  * Switch the pedal to `slot` (wraps around the pedal's slots). With unsaved edits this opens the shell's
@@ -28,6 +29,6 @@ export async function switchNow(target: number): Promise<void> {
     if (from !== null) ui.noteRecentSlot(from);
     ui.noteRecentSlot(target);
   } catch (e) {
-    notifyError("Couldn't switch presets", e, () => switchNow(target));
+    notifyError(t`Couldn't switch presets`, e, () => switchNow(target));
   }
 }

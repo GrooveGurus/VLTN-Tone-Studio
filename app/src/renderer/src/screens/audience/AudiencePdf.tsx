@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import type { PDFDocumentProxy, RenderTask } from "pdfjs-dist";
 import { fitScale } from "@/song/performance/pdf/layout";
 import { openChart } from "@/song/performance/pdf/document";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * One page of the song's PDF, fitted to the audience screen. It draws the page only: the performer's marks stay with the performer's
@@ -73,10 +75,10 @@ export function AudiencePdf({ url, page }: { url: string; page: number }) {
     };
   }, [doc, page, box]);
 
-  if (failed) return <p className="p-[5vh] text-center text-[3vh] text-silkscreen-3">The PDF chart could not be shown.</p>;
+  if (failed) return <p className="p-[5vh] text-center text-[3vh] text-silkscreen-3"><Trans>The PDF chart could not be shown.</Trans></p>;
   return (
     <div ref={wrap} className="flex h-full w-full items-center justify-center">
-      <canvas ref={canvas} aria-label={`Chart page ${page}`} />
+      <canvas ref={canvas} aria-label={t`Chart page ${page}`} />
     </div>
   );
 }

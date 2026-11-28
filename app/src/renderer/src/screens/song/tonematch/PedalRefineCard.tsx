@@ -12,6 +12,8 @@ import { useToneMatch } from "@/song/tonematch/store";
 import { useDevice, usePedalName } from "@/state/device";
 import { Meter } from "./IrMatchCard";
 import { Section } from "./parts";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const steps = (d: number) => d.toFixed(1);
 
@@ -21,10 +23,10 @@ function Takes() {
   if (!history.length) return null;
   const best = Math.min(...history.map((r) => r.measure.distance));
   return (
-    <ol aria-label="Takes so far" className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] tabular-nums text-silkscreen-2">
+    <ol aria-label={t`Takes so far`} className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] tabular-nums text-silkscreen-2">
       {history.map((r, i) => (
         <li key={i} className={cn(r.measure.distance === best && "font-semibold text-silkscreen")}>
-          Take {i + 1}: {steps(r.measure.distance)}
+          <Trans>Take</Trans> {i + 1}: {steps(r.measure.distance)}
           {r.measure.distance === best && " ✓"}
         </li>
       ))}
@@ -37,10 +39,10 @@ function InputPicker({ disabled }: { disabled: boolean }) {
   const inputId = usePedalRefine((s) => s.inputId);
   return (
     <label className="flex items-center gap-2 text-[12px] text-silkscreen-2">
-      Record from
+      <Trans>Record from</Trans>
       <Select value={inputId ?? ""} onValueChange={(v) => void usePedalRefine.getState().selectInput(v)} disabled={disabled}>
-        <SelectTrigger className="h-8 w-72" aria-label="Audio input to record from">
-          <SelectValue placeholder="Choose an input" />
+        <SelectTrigger className="h-8 w-72" aria-label={t`Audio input to record from`}>
+          <SelectValue placeholder={t`Choose an input`} />
         </SelectTrigger>
         <SelectContent>
           {inputs.map((i) => (
@@ -77,27 +79,27 @@ export function PedalRefineCard() {
   );
 
   return (
-    <Section title="Tune it on the pedal">
+    <Section title={t`Tune it on the pedal`}>
       <p className="text-[12px] text-pretty text-silkscreen-3">
-        The proposal is a starting point worked out from the song. Here it is checked against what the {pedal} really plays: you play up to {MAX_ROUNDS} takes of about {TAKE_S} s in the song's style, Tone Studio
-        records the {pedal}'s output, compares it with the song's guitar and corrects the amp's Gain and the five Guitar EQ bands after each take. It keeps the best take, and nothing is written to a slot.
+        <Trans>The proposal is a starting point worked out from the song. Here it is checked against what the {pedal} really plays: you play up to {MAX_ROUNDS} takes of about {TAKE_S} s in the song's style, Tone Studio
+        records the {pedal}'s output, compares it with the song's guitar and corrects the amp's Gain and the five Guitar EQ bands after each take. It keeps the best take, and nothing is written to a slot.</Trans>
       </p>
 
       {step.kind === "idle" && (
         <div className="flex flex-wrap items-center gap-3">
           <Button disabled={!connected || auditionBusy || irBusy} onClick={() => void usePedalRefine.getState().open()}>
             <SlidersHorizontal data-icon="inline-start" />
-            Tune it on the pedal
+            <Trans>Tune it on the pedal</Trans>
           </Button>
-          {!connected && <span className="text-[12px] text-silkscreen-3">Connect the {pedal} first; the takes go through it.</span>}
-          {connected && irBusy && <span className="text-[12px] text-silkscreen-3">Finish the IR match first.</span>}
+          {!connected && <span className="text-[12px] text-silkscreen-3"><Trans>Connect the {pedal} first; the takes go through it.</Trans></span>}
+          {connected && irBusy && <span className="text-[12px] text-silkscreen-3"><Trans>Finish the IR match first.</Trans></span>}
         </div>
       )}
 
       {step.kind === "opening" && (
         <p role="status" className="flex items-center gap-2 text-[12px] text-silkscreen-2">
           <Spinner />
-          Putting the proposal on the {pedal} and opening the audio input…
+          <Trans>Putting the proposal on the {pedal} and opening the audio input…</Trans>
         </p>
       )}
 
@@ -114,35 +116,35 @@ export function PedalRefineCard() {
           <div className="flex flex-wrap items-center gap-2">
             <Button onClick={() => usePedalRefine.getState().record()}>
               <Mic data-icon="inline-start" />
-              Record take {step.take}
+              <Trans>Record take {step.take}</Trans>
             </Button>
             {step.take > 1 && (
               <Button variant="outline" onClick={() => usePedalRefine.getState().finishNow()}>
                 <Check data-icon="inline-start" />
-                Use the best take
+                <Trans>Use the best take</Trans>
               </Button>
             )}
             <Button variant="ghost" onClick={() => void usePedalRefine.getState().cancel()}>
               <X data-icon="inline-start" />
-              Cancel
+              <Trans>Cancel</Trans>
             </Button>
           </div>
-          <p className="text-[12px] text-pretty text-silkscreen-3">Play the part of the song you matched, the same way each time: it is the sound that is compared, not the notes.</p>
+          <p className="text-[12px] text-pretty text-silkscreen-3"><Trans>Play the part of the song you matched, the same way each time: it is the sound that is compared, not the notes.</Trans></p>
         </div>
       )}
 
       {step.kind === "recording" && (
         <div className="flex flex-col gap-3">
           <Meter level={level} />
-          <Progress value={Math.min(100, (seconds / TAKE_S) * 100)} aria-label={`Take ${step.take} of up to ${MAX_ROUNDS}`} />
+          <Progress value={Math.min(100, (seconds / TAKE_S) * 100)} aria-label={t`Take ${step.take} of up to ${MAX_ROUNDS}`} />
           <div className="flex items-center gap-3">
             <Button variant="outline" onClick={() => void usePedalRefine.getState().finishTake()}>
               <Square data-icon="inline-start" />
-              Stop and measure
+              <Trans>Stop and measure</Trans>
             </Button>
-            <span className="text-[12px] tabular-nums text-silkscreen-2" role="status">
+            <Trans><span className="text-[12px] tabular-nums text-silkscreen-2" role="status">
               Take {step.take}: {seconds.toFixed(0)} of {TAKE_S} s
-            </span>
+            </span></Trans>
           </div>
         </div>
       )}
@@ -151,22 +153,22 @@ export function PedalRefineCard() {
         <div className="flex flex-col gap-3">
           <p role="status" className="text-[13px] text-pretty">
             {step.best.measure.distance < step.start.measure.distance
-              ? `Closer to the song's guitar: ${steps(step.start.measure.distance)} → ${steps(step.best.measure.distance)} steps in ${step.takes} ${step.takes === 1 ? "take" : "takes"} (1 step is about a difference you can hear).`
-              : `The proposal as it was is the closest of ${step.takes} ${step.takes === 1 ? "take" : "takes"} (${steps(step.start.measure.distance)} steps), so nothing changed.`}
+              ? t`Closer to the song's guitar: ${steps(step.start.measure.distance)} → ${steps(step.best.measure.distance)} steps in ${step.takes} ${step.takes === 1 ? t`take` : t`takes`} (1 step is about a difference you can hear).`
+              : t`The proposal as it was is the closest of ${step.takes} ${step.takes === 1 ? t`take` : t`takes`} (${steps(step.start.measure.distance)} steps), so nothing changed.`}
           </p>
           <Takes />
-          <p className="text-[12px] text-pretty text-silkscreen-3">The {pedal} is playing the best settings now. Keep them to put them in the proposal above, then save the preset from the Rig.</p>
+          <p className="text-[12px] text-pretty text-silkscreen-3"><Trans>The {pedal} is playing the best settings now. Keep them to put them in the proposal above, then save the preset from the Rig.</Trans></p>
           <div className="flex flex-wrap items-center gap-2">
             <Button onClick={() => usePedalRefine.getState().keep()}>
               <Check data-icon="inline-start" />
-              Keep these settings
+              <Trans>Keep these settings</Trans>
             </Button>
             <Button variant="outline" onClick={() => void usePedalRefine.getState().open()}>
               <RotateCcw data-icon="inline-start" />
-              Take again
+              <Trans>Take again</Trans>
             </Button>
             <Button variant="ghost" onClick={() => void usePedalRefine.getState().cancel()}>
-              Leave it
+              <Trans>Leave it</Trans>
             </Button>
           </div>
         </div>
@@ -180,7 +182,7 @@ export function PedalRefineCard() {
           <div>
             <Button variant="outline" onClick={() => void usePedalRefine.getState().open()}>
               <RotateCcw data-icon="inline-start" />
-              Try again
+              <Trans>Try again</Trans>
             </Button>
           </div>
         </div>

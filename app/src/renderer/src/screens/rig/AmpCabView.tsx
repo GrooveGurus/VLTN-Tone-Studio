@@ -17,6 +17,8 @@ import { ampCab } from "./order";
 import { BoardHead, ModelButton } from "./Pedalboard";
 import { useRig } from "./rig-store";
 import { snapToneName } from "./snaptone";
+import { t as lt } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Stands the gear on the stage floor: bottom-aligned in the space above the strip, with a contact shadow. */
 function Floor({ children }: { children: ReactNode }) {
@@ -61,7 +63,7 @@ export function AmpCabView({ preset, readOnly }: { preset: PresetState; readOnly
   );
   return (
     <section
-      aria-label="Amp and cab"
+      aria-label={lt`Amp and cab`}
       className="relative mx-7 my-3.5 flex min-h-0 flex-1 flex-col gap-3.5 overflow-hidden rounded-xl bg-[#0a090c] bg-cover bg-center bg-no-repeat px-6 pt-[18px] pb-5 shadow-[inset_0_0_0_1px_var(--glass-edge),inset_0_1px_0_rgb(255_255_255/0.07)] [@media(max-height:820px)]:my-2.5 [@media(max-height:820px)]:gap-2.5 [@media(max-height:820px)]:py-3"
       style={{ backgroundImage: `url(${stageUrl})` }}
     >
@@ -71,17 +73,17 @@ export function AmpCabView({ preset, readOnly }: { preset: PresetState; readOnly
         style={{ backgroundImage: `url(${floorUrl})` }}
       />
       <BoardHead
-        title="Amp & cab"
+        title={lt`Amp & cab`}
         hint={
           nsOn
-            ? "NS is on, so the SnapTone replaces the amp and cab. Their settings stay in the preset."
-            : `The amp's controls stay in the strip below. Pick a cab or one of your ${profileFor(preset.device).userIr.slots} User IR slots.`
+            ? lt`NS is on, so the SnapTone replaces the amp and cab. Their settings stay in the preset.`
+            : lt`The amp's controls stay in the strip below. Pick a cab or one of your ${profileFor(preset.device).userIr.slots} User IR slots.`
         }
       />
       <div className={cn("relative grid min-h-0 flex-1 grid-cols-2", readOnly && "opacity-70", nsOn && "saturate-[.4]")}>
         <div className="flex min-h-0 flex-col items-center gap-3.5 px-6 py-1 [@media(max-height:820px)]:gap-2.5" onPointerDownCapture={() => useRig.getState().select(a)}>
           <div className="flex w-full max-w-[420px] items-center gap-3.5">
-            <span className="text-sm font-semibold text-silkscreen-2">Amp</span>
+            <Trans><span className="text-sm font-semibold text-silkscreen-2">Amp</span></Trans>
             <ModelButton block={amp} label={ampName} selected={selected === a} disabled={readOnly} className="flex-1" />
           </div>
           <Floor>
@@ -111,14 +113,14 @@ export function AmpCabView({ preset, readOnly }: { preset: PresetState; readOnly
           </Floor>
           <div className="mt-auto flex w-full max-w-[440px] items-center gap-3 rounded-pill bg-[rgb(10_10_12/0.66)] px-2.5 py-1.5 text-xs">
             {voicing && <Badge variant="outline">{sentence(voicing)}</Badge>}
-            <span className="min-w-0 truncate text-silkscreen-3">{amp.model?.origin ? `Modeled on ${amp.model.origin}` : ampName}</span>
+            <span className="min-w-0 truncate text-silkscreen-3">{amp.model?.origin ? lt`Modeled on ${amp.model.origin}` : ampName}</span>
             <span className="grow" />
-            <Switch checked={amp.enabled} disabled={readOnly} onCheckedChange={(on) => editEnabled(a, on)} aria-label="Amp on" />
+            <Switch checked={amp.enabled} disabled={readOnly} onCheckedChange={(on) => editEnabled(a, on)} aria-label={lt`Amp on`} />
           </div>
         </div>
         <div className="flex min-h-0 flex-col items-center gap-3.5 px-6 py-1 [@media(max-height:820px)]:gap-2.5" onPointerDownCapture={() => useRig.getState().select(c)}>
           <div className="flex w-full max-w-[420px] items-center gap-3.5">
-            <span className="text-sm font-semibold text-silkscreen-2">Cab</span>
+            <Trans><span className="text-sm font-semibold text-silkscreen-2">Cab</span></Trans>
             <ModelButton block={cab} selected={selected === c} disabled={readOnly} className="flex-1" />
           </div>
           <Floor>
@@ -151,22 +153,22 @@ export function AmpCabView({ preset, readOnly }: { preset: PresetState; readOnly
               type="single"
               value={isIR ? "ir" : "factory"}
               disabled={readOnly}
-              aria-label="Cab source"
+              aria-label={lt`Cab source`}
               onValueChange={(v) => {
                 if (!v || (v === "ir") === isIR) return;
                 useRig.getState().select(c);
                 useRig.getState().openPicker({ block: c, tab: v === "ir" ? "User IR" : "factory" });
               }}
             >
-              <ToggleGroupItem value="factory">Factory cabs</ToggleGroupItem>
-              <ToggleGroupItem value="ir">{usedIRs ? `User IRs (${usedIRs})` : "User IRs"}</ToggleGroupItem>
+              <ToggleGroupItem value="factory"><Trans>Factory cabs</Trans></ToggleGroupItem>
+              <ToggleGroupItem value="ir">{usedIRs ? lt`User IRs (${usedIRs})` : lt`User IRs`}</ToggleGroupItem>
             </ToggleGroup>
             <span className="grow" />
             {cabVol && (
               <Dial
                 layout="row"
                 size={40}
-                label="Volume"
+                label={lt`Volume`}
                 ariaLabel={`${modelTitle(cab)} Volume`}
                 value={cabVol.value}
                 spec={cabVol}
@@ -175,7 +177,7 @@ export function AmpCabView({ preset, readOnly }: { preset: PresetState; readOnly
                 onChange={(v) => editParam(c, Number(cabVol.id), v)}
               />
             )}
-            <Switch checked={cab.enabled} disabled={readOnly} onCheckedChange={(on) => editEnabled(c, on)} aria-label="Cab on" />
+            <Switch checked={cab.enabled} disabled={readOnly} onCheckedChange={(on) => editEnabled(c, on)} aria-label={lt`Cab on`} />
           </div>
         </div>
       </div>
@@ -191,13 +193,13 @@ export function AmpStrip({ preset, readOnly }: { preset: PresetState; readOnly: 
   const snapTones = useDevice((s) => s.snapTones);
   const name = artFor(amp) === "capture" ? snapToneName(amp, snapTones, preset.device) : modelTitle(amp);
   return (
-    <section aria-label={nsOn ? "Amp controls, replaced by SnapTone" : "Amp controls"} className={cn("relative mx-7 mt-2.5 mb-3.5", readOnly && "opacity-70")}>
-      <span className="absolute -top-[18px] left-2 z-[1] text-xs font-medium text-silkscreen-3">Amp, {name}</span>
+    <section aria-label={nsOn ? lt`Amp controls, replaced by SnapTone` : lt`Amp controls`} className={cn("relative mx-7 mt-2.5 mb-3.5", readOnly && "opacity-70")}>
+      <Trans><span className="absolute -top-[18px] left-2 z-[1] text-xs font-medium text-silkscreen-3">Amp, {name}</span></Trans>
       <div className="absolute -top-[22px] right-1.5 z-[1] flex gap-1.5">
         {nsOn ? (
           <Button variant="secondary" size="sm" disabled={readOnly} onClick={() => editEnabled(ns, false)}>
             <PowerIcon className="size-3.5" aria-hidden />
-            Turn NS off
+            <Trans>Turn NS off</Trans>
           </Button>
         ) : (
           <Button
@@ -210,13 +212,13 @@ export function AmpStrip({ preset, readOnly }: { preset: PresetState; readOnly: 
             }}
           >
             <LayersIcon className="size-3.5" aria-hidden />
-            Change amp
+            <Trans>Change amp</Trans>
           </Button>
         )}
       </div>
       {nsOn && (
         <span className="absolute top-1/2 left-1/2 z-[1] -translate-x-1/2 -translate-y-1/2 rounded-pill bg-well px-3.5 py-1.5 text-sm font-semibold whitespace-nowrap text-block-ns shadow-[inset_0_0_0_1px_var(--block-ns)]">
-          The SnapTone replaces the amp and cab while NS is on
+          <Trans>The SnapTone replaces the amp and cab while NS is on</Trans>
         </span>
       )}
       <AmpPanel

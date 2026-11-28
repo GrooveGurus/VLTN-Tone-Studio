@@ -8,6 +8,8 @@ import { configuredPedals, usePedalLibrary } from "@/song/performance/pedal-libr
 import { useMidiDiagnostics } from "@/song/performance/midi-diagnostics";
 import { useBluetooth, resetBluetoothTiming } from "@/bluetooth/connection";
 import { HelpNote } from "@/components/ui/help-note";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** How often the counters on screen may refresh. The scheduler and Bluetooth writes update their stores far more often than that. */
 const REFRESH_MS = 500;
@@ -99,20 +101,20 @@ export function MidiHealth({
     };
   }, []);
   return (
-    <details className="rounded border border-seam p-3" aria-label="MIDI health">
+    <details className="rounded border border-seam p-3" aria-label={t`MIDI health`}>
       <summary className="cursor-pointer">
-        MIDI preflight & timing · {parseError ? "chart error" : `${report.warnings.length} warnings · ${report.advice.length} arrangement notes`} ·{" "}
-        {timing.failures} timing/dispatch failures
+        <Trans>MIDI preflight & timing ·</Trans> {parseError ? t`chart error` : t`${report.warnings.length} warnings · ${report.advice.length} arrangement notes`} <Trans>·{" "}
+        {timing.failures} timing/dispatch failures</Trans>
       </summary>
       <div className="space-y-3 pt-3 text-sm">
         <p>
-          {report.commands} chart commands. {report.channels.map(([ch, count]) => `Ch ${ch}: ${count}`).join(" · ") || "No channel commands."}
+          <Trans>{report.commands} chart commands.</Trans> {report.channels.map(([ch, count]) => t`Ch ${ch}: ${count}`).join(" · ") || t`No channel commands.`}
         </p>
         <HelpNote>
           <p>
-            Warnings are advisory; intentional sequences are preserved. Up to 100 performance warnings and 100 arrangement notes are shown separately. Profile
+            <Trans>Warnings are advisory; intentional sequences are preserved. Up to 100 performance warnings and 100 arrangement notes are shown separately. Profile
             channels are app settings, not a readback of physical pedals. Raw cues cannot identify a pedal or verify its CC assignments. Check the physical
-            routing and receive channels before the set.
+            routing and receive channels before the set.</Trans>
           </p>
         </HelpNote>
         {parseError ? (
@@ -124,23 +126,23 @@ export function MidiHealth({
             ))}
           </ul>
         ) : (
-          <p>No static cue issues found. This does not verify pedal response or physical MIDI routing.</p>
+          <p><Trans>No static cue issues found. This does not verify pedal response or physical MIDI routing.</Trans></p>
         )}
         {!parseError && <ArrangementAdvice items={report.advice.map((issue) => issue.text)} />}
-        <p aria-label="MIDI timing totals">
-          Queued: {timing.queued} · More than 5 ms late: {timing.late} · Worst dispatch lateness: {timing.maxLateMs.toFixed(1)} ms · Failures: {timing.failures}
+        <p aria-label={t`MIDI timing totals`}>
+          <Trans>Queued: {timing.queued} · More than 5 ms late: {timing.late} · Worst dispatch lateness: {timing.maxLateMs.toFixed(1)} ms · Failures: {timing.failures}</Trans>
         </p>
         <HelpNote>
           <p>
-            Times measure app dispatch to the selected MIDI API, not pedal delivery. Worker scheduling still crosses a window bridge for Web MIDI/Bluetooth.
-            Rendering or driver stalls can delay it; interrupted batches are discarded. Counters span songs in this app session.
+            <Trans>Times measure app dispatch to the selected MIDI API, not pedal delivery. Worker scheduling still crosses a window bridge for Web MIDI/Bluetooth.
+            Rendering or driver stalls can delay it; interrupted batches are discarded. Counters span songs in this app session.</Trans>
           </p>
         </HelpNote>
-        {timing.lastFailure && <p>Last failure: {timing.lastFailure}</p>}
+        {timing.lastFailure && <p><Trans>Last failure: {timing.lastFailure}</Trans></p>}
         {outputName && /bluetooth/i.test(outputName) && ble?.performanceTiming && (
           <p>
-            Bluetooth writes: {ble.performanceTiming.commands} · Worst queue lateness: {ble.performanceTiming.maxLateMs.toFixed(1)} ms · Longest packet write:{" "}
-            {ble.performanceTiming.maxWriteMs.toFixed(1)} ms
+            <Trans>Bluetooth writes: {ble.performanceTiming.commands} · Worst queue lateness: {ble.performanceTiming.maxLateMs.toFixed(1)} ms · Longest packet write:{" "}
+            {ble.performanceTiming.maxWriteMs.toFixed(1)} ms</Trans>
           </p>
         )}
         <button
@@ -152,17 +154,17 @@ export function MidiHealth({
             setTiming(useMidiDiagnostics.getState());
           }}
         >
-          Reset timing counters
+          <Trans>Reset timing counters</Trans>
         </button>
         <div className="max-h-40 overflow-auto">
-          <table className="w-full text-left" aria-label="Recent MIDI dispatch">
+          <table className="w-full text-left" aria-label={t`Recent MIDI dispatch`}>
             <thead>
               <tr>
-                <th>Action</th>
-                <th>Due (app s)</th>
-                <th>Queued (app s)</th>
-                <th>Late (ms)</th>
-                <th>MIDI bytes</th>
+                <th><Trans>Action</Trans></th>
+                <th><Trans>Due (app s)</Trans></th>
+                <th><Trans>Queued (app s)</Trans></th>
+                <th><Trans>Late (ms)</Trans></th>
+                <th><Trans>MIDI bytes</Trans></th>
               </tr>
             </thead>
             <tbody>
@@ -174,7 +176,7 @@ export function MidiHealth({
                   <td>{event.lateMs.toFixed(1)}</td>
                   <td>
                     {event.bytes.map((b) => b.toString(16).padStart(2, "0")).join(" ")}
-                    {(event.byteCount ?? 0) > event.bytes.length ? ` ... (${event.byteCount} bytes)` : ""}
+                    {(event.byteCount ?? 0) > event.bytes.length ? t` ... (${event.byteCount ?? 0} bytes)` : ""}
                   </td>
                 </tr>
               ))}

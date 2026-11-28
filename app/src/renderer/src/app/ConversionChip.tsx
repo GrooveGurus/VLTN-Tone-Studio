@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { host } from "@/host";
 import { CONVERTED_PHASE, CONVERTING_PHASE } from "@shared/song-library";
+import { t } from "@lingui/core/macro";
 
 export interface ConversionProgress {
   completed: number;
@@ -13,7 +14,7 @@ export interface ConversionProgress {
 
 /** The status line for a conversion: "Converting library: 2 of 6 songs". */
 export function conversionLine({ completed, total }: ConversionProgress): string {
-  return `Converting library: ${completed} of ${total} ${total === 1 ? "song" : "songs"}`;
+  return t`Converting library: ${completed} of ${total} ${total === 1 ? t`song` : t`songs`}`;
 }
 
 export function ConversionChip() {
@@ -32,7 +33,7 @@ export function ConversionChip() {
     <span className="flex min-w-0 max-w-[30%] shrink items-center gap-2">
       <span className="size-[7px] shrink-0 rounded-full bg-led-warn" aria-hidden />
       <span className="truncate">{conversionLine(progress)}</span>
-      <Progress className="w-16 shrink-0" value={percent} aria-label="Conversion progress" />
+      <Progress className="w-16 shrink-0" value={percent} aria-label={t`Conversion progress`} />
     </span>
   );
 }

@@ -4,6 +4,8 @@
 import { profileFor, type DeviceKey } from "@shared/devices";
 import { isGp5Family } from "@/state/device-model";
 import { orderError } from "@/state/preset-codec";
+import { t as lt } from "@lingui/core/macro";
+import { i18n } from "@lingui/core";
 
 /** GP-5 family: the blocks that may move, and DST, where the fixed core starts. */
 const GP5_MOVABLE: readonly number[] = [0, 1, 6, 7, 8];
@@ -17,7 +19,7 @@ export function ampCab(device: DeviceKey): { amp: number; cab: number } {
 
 export type GroupId = "before" | "amp" | "after";
 export const GROUPS: readonly GroupId[] = ["before", "amp", "after"];
-export const GROUP_TITLE: Record<GroupId, string> = { before: "Before the amp", amp: "Amp & cab", after: "After the amp" };
+export const GROUP_TITLE: Record<GroupId, string> = { get before() { return lt`Before the amp`; }, get amp() { return lt`Amp & cab`; }, get after() { return lt`After the amp`; } };
 
 export const isMovable = (device: DeviceKey, block: number) => !isGp5Family(device) || GP5_MOVABLE.includes(block);
 
@@ -118,8 +120,10 @@ export function chainItems(order: readonly number[], loop: LoopPos): ChainItem[]
 export const gapLabel = (order: readonly number[], pos: number, codes: readonly string[]) =>
   pos <= 0 ? `before ${codes[order[0]]}` : `after ${codes[order[Math.min(pos, order.length) - 1]]}`;
 
-/** "A", "A and B", "A, B and C". */
-export const joinAnd = (items: readonly string[]) => (items.length < 2 ? (items[0] ?? "") : `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`);
+/** "A", "A and B", "A, B and C", in the language shown ("A, B e C" in Portuguese). */
+export const joinAnd = (items: readonly string[]) =>
+  // British English keeps the editor's own style in English: no comma before "and".
+  new Intl.ListFormat(!i18n.locale || i18n.locale === "en" ? "en-GB" : i18n.locale, { style: "long", type: "conjunction" }).format(items);
 
 /**
  * Board hint for one side of the amp, from the order rules: which of its pedals can move and which stay put.
@@ -129,7 +133,17 @@ export function orderHint(device: DeviceKey, order: readonly number[], group: "b
   const blocks = groupsOf(device, order)[group];
   const movable = blocks.filter((b) => isMovable(device, b)).map((b) => codes[b]);
   const fixed = blocks.filter((b) => !isMovable(device, b)).map((b) => codes[b]);
-  const stays = fixed.length ? `${joinAnd(fixed)} ${fixed.length === 1 ? "stays" : "stay"} ${group === "before" ? "in front of the amp" : "right after the cab"}` : "";
-  if (!movable.length) return `${stays}. To bring a pedal here, drag it onto “${GROUP_TITLE[group]}” in the chain overview.`;
-  return `Drag a pedal to reorder. ${joinAnd(movable)} can move${stays ? `; ${stays}` : ""}.`;
+  const fixedList = joinAnd(fixed);
+  const stays = !fixed.length
+    ? ""
+    : group === "before"
+      ? fixed.length === 1
+        ? lt`${fixedList} stays in front of the amp`
+        : lt`${fixedList} stay in front of the amp`
+      : fixed.length === 1
+        ? lt`${fixedList} stays right after the cab`
+        : lt`${fixedList} stay right after the cab`;
+  if (!movable.length) return lt`${stays}. To bring a pedal here, drag it onto “${GROUP_TITLE[group]}” in the chain overview.`;
+  const movableList = joinAnd(movable);
+  return stays ? lt`Drag a pedal to reorder. ${movableList} can move; ${stays}.` : lt`Drag a pedal to reorder. ${movableList} can move.`;
 }

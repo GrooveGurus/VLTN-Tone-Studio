@@ -5,6 +5,7 @@ import { SCENE_COUNT, SCENE_CTRLS, SCENE_NAME, bitsToFloat, defaultSceneName, fl
 import type { PresetEdits, PresetState } from "./device-types";
 import { editPrst, toPresetState } from "./preset-codec";
 import { diffPresets, type ChangeRow } from "./unsaved-diff";
+import { t } from "@lingui/core/macro";
 
 export const SCENE_LETTERS = ["A", "B", "C", "D"] as const;
 
@@ -47,8 +48,8 @@ export function sceneName(name: string, k: number): string {
 
 /** Why a name can't be used as typed (it is cleaned when saved), or null. */
 export function sceneNameError(name: string): string | null {
-  if (name.length > SCENE_NAME) return `At most ${SCENE_NAME} characters`;
-  if (Array.from(name).some((c) => c < " " || c > "~")) return "Letters without accents, digits and basic symbols only";
+  if (name.length > SCENE_NAME) return t`At most ${SCENE_NAME} characters`;
+  if (Array.from(name).some((c) => c < " " || c > "~")) return t`Letters without accents, digits and basic symbols only`;
   return null;
 }
 
@@ -160,7 +161,7 @@ export function captureScene(base: PresetState, now: PresetState, k: number, pre
     }
   });
   if (now.order.join() !== base.order.join()) dropped.push("Chain order");
-  if (now.footswitches.some((l, i) => i >= SCENE_CTRLS && l.join() !== base.footswitches[i]?.join())) dropped.push("CTRL 5-8 assignments (a scene holds CTRL 1-4)");
+  if (now.footswitches.some((l, i) => i >= SCENE_CTRLS && l.join() !== base.footswitches[i]?.join())) dropped.push(t`CTRL 5-8 assignments (a scene holds CTRL 1-4)`);
   if (now.name !== base.name) dropped.push("Preset name");
   if (JSON.stringify(now.gp200) !== JSON.stringify(base.gp200)) dropped.push("Patch settings");
   return { scene, dropped };

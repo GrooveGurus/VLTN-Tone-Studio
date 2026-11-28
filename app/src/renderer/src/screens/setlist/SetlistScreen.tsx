@@ -14,6 +14,8 @@ import { DEFAULT_DEVICE, pedalName, profileOrDefault } from "@/state/device-mode
 import type { SlotName } from "@/state/device-types";
 import { drift, parseImport, serialize, type Setlist, type SetlistItem } from "./setlist";
 import { useSetlists } from "./store";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Setlists: ordered pedal presets for a gig, with a stage mode that steps through them. */
 export function SetlistScreen() {
@@ -28,16 +30,16 @@ export function SetlistScreen() {
     try {
       const imported = parseImport(await file.text());
       useSetlists.getState().importAll(imported);
-      notifySuccess("Setlists imported", `${imported.length} ${imported.length === 1 ? "setlist" : "setlists"} added.`);
+      notifySuccess(t`Setlists imported`, t`${imported.length} ${imported.length === 1 ? t`setlist` : t`setlists`} added.`);
     } catch (e) {
-      notifyError("Couldn't import the setlists", e);
+      notifyError(t`Couldn't import the setlists`, e);
     }
   };
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex items-center gap-3 px-7 pt-4 pb-3">
-        <h1 className="m-0 mr-auto text-[32px] leading-[1.05] font-bold tracking-[-0.02em]">Setlists</h1>
+        <h1 className="m-0 mr-auto text-[32px] leading-[1.05] font-bold tracking-[-0.02em]"><Trans>Setlists</Trans></h1>
         <input
           ref={fileInput}
           type="file"
@@ -51,15 +53,15 @@ export function SetlistScreen() {
         />
         <Button variant="ghost" onClick={() => fileInput.current?.click()}>
           <ImportIcon data-icon="inline-start" />
-          Import
+          <Trans>Import</Trans>
         </Button>
         <Button onClick={() => useSetlists.getState().create("New setlist", device)}>
           <PlusIcon data-icon="inline-start" />
-          New setlist
+          <Trans>New setlist</Trans>
         </Button>
       </div>
       <div className="grid min-h-0 flex-1 grid-cols-[240px_minmax(0,1fr)] gap-4 px-7 pb-4">
-        <ul aria-label={`${pedalName(device)} setlists`} className="flex min-h-0 flex-col gap-1 overflow-auto">
+        <ul aria-label={t`${pedalName(device)} setlists`} className="flex min-h-0 flex-col gap-1 overflow-auto">
           {lists.map((l) => (
             <li key={l.id}>
               <button
@@ -69,7 +71,7 @@ export function SetlistScreen() {
                 className={cn("flex w-full flex-col rounded-lg px-3 py-2 text-left hover:bg-white/6", l.id === current?.id && "bg-white/14")}
               >
                 <span className="truncate font-[650] text-silkscreen">{l.name}</span>
-                <span className="text-xs text-silkscreen-3">{l.items.length === 1 ? "1 preset" : `${l.items.length} presets`}</span>
+                <span className="text-xs text-silkscreen-3">{l.items.length === 1 ? t`1 preset` : t`${l.items.length} presets`}</span>
               </button>
             </li>
           ))}
@@ -79,8 +81,8 @@ export function SetlistScreen() {
         ) : (
           <Empty className="self-start">
             <EmptyHeader>
-              <EmptyTitle>No setlists for the {pedalName(device)} yet</EmptyTitle>
-              <EmptyDescription>Make one for a gig, add the presets you need in the order you play them, then step through them in Stage mode.</EmptyDescription>
+              <EmptyTitle><Trans>No setlists for the {pedalName(device)} yet</Trans></EmptyTitle>
+              <EmptyDescription><Trans>Make one for a gig, add the presets you need in the order you play them, then step through them in Stage mode.</Trans></EmptyDescription>
             </EmptyHeader>
           </Empty>
         )}
@@ -115,26 +117,26 @@ function Detail({ list }: { list: Setlist }) {
   return (
     <section aria-label={list.name} className="flex min-h-0 flex-col gap-3">
       <div className="flex items-center gap-2">
-        <Input aria-label="Setlist name" className="h-9 max-w-xs text-base font-[650]" value={title} onChange={(e) => setTitle(e.target.value)} onBlur={rename} onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()} />
+        <Input aria-label={t`Setlist name`} className="h-9 max-w-xs text-base font-[650]" value={title} onChange={(e) => setTitle(e.target.value)} onBlur={rename} onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()} />
         <span className="flex-1" />
         <Button variant="outline" onClick={() => setPicker(true)}>
           <PlusIcon data-icon="inline-start" />
-          Add preset
+          <Trans>Add preset</Trans>
         </Button>
         <Button disabled={list.items.length === 0} onClick={() => s.setStage(true)}>
           <PresentationIcon data-icon="inline-start" />
-          Stage mode
+          <Trans>Stage mode</Trans>
         </Button>
-        <Button variant="ghost" size="icon" aria-label="Export setlist" onClick={exportList}>
+        <Button variant="ghost" size="icon" aria-label={t`Export setlist`} onClick={exportList}>
           <DownloadIcon aria-hidden />
         </Button>
-        <Button variant="ghost" size="icon" aria-label="Delete setlist" onClick={() => setDeleting(true)}>
+        <Button variant="ghost" size="icon" aria-label={t`Delete setlist`} onClick={() => setDeleting(true)}>
           <Trash2Icon aria-hidden />
         </Button>
       </div>
 
       {list.items.length === 0 ? (
-        <p className="text-sm text-silkscreen-3">Empty. Add presets in the order you play them.</p>
+        <p className="text-sm text-silkscreen-3"><Trans>Empty. Add presets in the order you play them.</Trans></p>
       ) : (
         <ol className="flex min-h-0 flex-col gap-1.5 overflow-auto pb-1">
           {list.items.map((item, i) => (
@@ -155,11 +157,11 @@ function Detail({ list }: { list: Setlist }) {
         </ol>
       )}
 
-      <CommandDialog open={picker} onOpenChange={setPicker} title="Add a preset" description="Pick a pedal preset to add to the setlist">
-        <CommandInput placeholder="Find a preset by number or name" />
+      <CommandDialog open={picker} onOpenChange={setPicker} title={t`Add a preset`} description={t`Pick a pedal preset to add to the setlist`}>
+        <CommandInput placeholder={t`Find a preset by number or name`} />
         <CommandList className="max-h-[360px]">
-          <CommandEmpty>No preset matches</CommandEmpty>
-          <CommandGroup heading="Presets on the pedal">
+          <CommandEmpty><Trans>No preset matches</Trans></CommandEmpty>
+          <CommandGroup heading={t`Presets on the pedal`}>
             {names
               .filter((n) => !isEmptyName(n.name))
               .map((n) => (
@@ -182,12 +184,12 @@ function Detail({ list }: { list: Setlist }) {
       <AlertDialog open={deleting} onOpenChange={setDeleting}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete “{list.name}”?</AlertDialogTitle>
-            <AlertDialogDescription>The presets stay on the pedal; only this list is removed. Export it first if you want to keep a copy.</AlertDialogDescription>
+            <AlertDialogTitle><Trans>Delete “{list.name}”?</Trans></AlertDialogTitle>
+            <AlertDialogDescription><Trans>The presets stay on the pedal; only this list is removed. Export it first if you want to keep a copy.</Trans></AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => s.remove(list.id)}>Delete setlist</AlertDialogAction>
+            <AlertDialogCancel><Trans>Cancel</Trans></AlertDialogCancel>
+            <AlertDialogAction onClick={() => s.remove(list.id)}><Trans>Delete setlist</Trans></AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -223,28 +225,28 @@ function Row({ item, index, last, slotLabel, playing, names, listId, onDragStart
       <span className="w-5 text-right text-xs font-semibold text-silkscreen-3 tabular-nums">{index + 1}</span>
       <span className="min-w-8 text-xs font-semibold text-silkscreen-3 tabular-nums">{slotLabel(item.slot)}</span>
       <div className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate font-[650] text-silkscreen">{item.name || "Unnamed"}</span>
+        <span className="truncate font-[650] text-silkscreen">{item.name || t`Unnamed`}</span>
         {d.kind !== "ok" && (
           <span className="flex items-center gap-1.5 text-xs text-led-warn">
             <TriangleAlertIcon className="size-3 shrink-0" aria-hidden />
-            {d.kind === "moved" ? `This preset is now in slot ${slotLabel(d.slot)}.` : `This slot now holds “${d.now}”.`}
+            {d.kind === "moved" ? t`This preset is now in slot ${slotLabel(d.slot)}.` : t`This slot now holds “${d.now}”.`}
             <button type="button" className="underline underline-offset-2" onClick={() => s.relink(listId, item.id, d.kind === "moved" ? { slot: d.slot, name: item.name } : { slot: item.slot, name: d.now })}>
-              {d.kind === "moved" ? "Follow it" : "Use it"}
+              {d.kind === "moved" ? t`Follow it` : t`Use it`}
             </button>
           </span>
         )}
       </div>
-      <Input aria-label={`Note for ${item.name}`} className="h-8 w-56 text-sm" placeholder="Note (capo, tuning…)" value={item.note} onChange={(e) => s.setNote(listId, item.id, e.target.value)} />
-      <Button variant="ghost" size="icon-sm" aria-label={`Play ${item.name}`} onClick={() => void requestPresetSwitch(item.slot)}>
+      <Input aria-label={t`Note for ${item.name}`} className="h-8 w-56 text-sm" placeholder={t`Note (capo, tuning…)`} value={item.note} onChange={(e) => s.setNote(listId, item.id, e.target.value)} />
+      <Button variant="ghost" size="icon-sm" aria-label={t`Play ${item.name}`} onClick={() => void requestPresetSwitch(item.slot)}>
         <PlayIcon aria-hidden />
       </Button>
-      <Button variant="ghost" size="icon-sm" aria-label="Move up" disabled={index === 0} onClick={() => s.moveItem(listId, index, index - 1)}>
+      <Button variant="ghost" size="icon-sm" aria-label={t`Move up`} disabled={index === 0} onClick={() => s.moveItem(listId, index, index - 1)}>
         <ArrowUpIcon aria-hidden />
       </Button>
-      <Button variant="ghost" size="icon-sm" aria-label="Move down" disabled={last} onClick={() => s.moveItem(listId, index, index + 1)}>
+      <Button variant="ghost" size="icon-sm" aria-label={t`Move down`} disabled={last} onClick={() => s.moveItem(listId, index, index + 1)}>
         <ArrowDownIcon aria-hidden />
       </Button>
-      <Button variant="ghost" size="icon-sm" aria-label={`Remove ${item.name}`} onClick={() => s.removeItem(listId, item.id)}>
+      <Button variant="ghost" size="icon-sm" aria-label={t`Remove ${item.name}`} onClick={() => s.removeItem(listId, item.id)}>
         <XIcon aria-hidden />
       </Button>
     </li>

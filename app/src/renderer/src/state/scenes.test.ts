@@ -156,6 +156,37 @@ describe("scenes store on a modded pedal", () => {
     await scenes().leave();
   });
 
+  it("saves with a name from the save flow, cleaned for the pedal; capture writes nothing", { timeout: 20_000 }, async () => {
+    const base = dev().saved!;
+    await scenes().edit(1);
+    dev().setBpm(133);
+    const before = pedal().modScenes(dev().slot!);
+    expect(scenes().capture(1).scene).toMatchObject({ name: "CENA B", bpm: 133 });
+    expect(pedal().modScenes(dev().slot!)).toEqual(before);
+    await scenes().save(1, "  Verso Ação ");
+    expect(decodeSceneRecord(pedal().modScenes(dev().slot!)!).scenes[1]).toMatchObject({ name: "Verso Acao", bpm: 133 });
+    expect(scenes().editing).toBe(1);
+    await until(() => expect(dev().preset?.bpm).toBe(133));
+    expect(dev().saved?.volume).toBe(base.volume);
+    await scenes().leave();
+  });
+
+  it("saves into another scene: the edit moves there and the scene it came from stays as stored", { timeout: 20_000 }, async () => {
+    const base = dev().saved!;
+    await scenes().edit(1);
+    await until(() => expect(dev().preset?.bpm).toBe(133));
+    const b = decodeSceneRecord(pedal().modScenes(dev().slot!)!).scenes[1];
+    dev().setVolume(base.volume + 3);
+    await scenes().save(3, "Refrao");
+    const rec = decodeSceneRecord(pedal().modScenes(dev().slot!)!);
+    expect(rec.scenes[1]).toEqual(b);
+    expect(rec.scenes[3]).toMatchObject({ name: "Refrao", bpm: 133, volume: base.volume + 3 });
+    expect(scenes().editing).toBe(3);
+    await until(async () => expect((await onPedal()).volume).toBe(base.volume + 3));
+    await scenes().remove(3);
+    await scenes().leave();
+  });
+
   it("CTRL 1-4 of a scene: the Rig takes them, the footswitch on screen switches the blocks, the save undoes it", { timeout: 20_000 }, async () => {
     const base = dev().saved!;
     await scenes().edit(3);
@@ -207,7 +238,7 @@ describe("scenes store on a modded pedal", () => {
     expect(scenes().current?.record).toBeNull();
   });
 
-  it("follows the pedal: a scene played on the pedal stops the app's edit and the Rig shows its sound", async () => {
+  it("follows the pedal: a scene played on the pedal in scene mode is what the editor edits and saves", { timeout: 20_000 }, async () => {
     const base = dev().saved!;
     dev().setVolume(base.volume + 9);
     await scenes().save(2);
@@ -216,9 +247,36 @@ describe("scenes store on a modded pedal", () => {
     pedal().setSceneMode(true);
     pedal().selectScene(2);
     await until(() => expect(scenes().pedal).toEqual({ sceneMode: true, activeScene: 2 }));
-    expect(scenes().editing).toBeNull();
+    expect(scenes()).toMatchObject({ editing: 2, mode: "scene" });
     await until(() => expect(dev().preset?.volume).toBe(base.volume + 9));
     // The saved preset stays the base: the scene shows as changes, not as the stored preset.
     expect(dev().saved?.volume).toBe(base.volume);
+    // Saved as it plays, without an edit: the scene stays as stored (the pedal reports the buffer unmodified, but the
+    // base is still the stored preset, so the scene isn't diffed against itself and deleted).
+    const stored = decodeSceneRecord(pedal().modScenes(dev().slot!)!).scenes[2];
+    await scenes().save(2);
+    expect(decodeSceneRecord(pedal().modScenes(dev().slot!)!).scenes[2]).toEqual(stored);
+    await until(() => expect(dev().preset?.volume).toBe(base.volume + 9));
+    // An edit while the pedal plays the scene goes into the scene, and the slot keeps its preset.
+    dev().setBpm(97);
+    await scenes().save(scenes().editing!);
+    expect(decodeSceneRecord(pedal().modScenes(dev().slot!)!).scenes[2]).toMatchObject({ volume: base.volume + 9, bpm: 97 });
+    expect(dev().saved).toMatchObject({ volume: base.volume, bpm: base.bpm });
+    expect(scenes().editing).toBe(2);
+    await until(() => expect(dev().preset?.bpm).toBe(97));
+  });
+
+  it("follows the pedal back to the base: pressing the scene again or scene mode off edits the preset", async () => {
+    pedal().selectScene(1);
+    await until(() => expect(scenes().pedal).toEqual({ sceneMode: true, activeScene: 1 }));
+    expect(scenes().editing).toBe(1);
+    pedal().selectScene(1);
+    await until(() => expect(scenes().pedal).toEqual({ sceneMode: true, activeScene: null }));
+    expect(scenes()).toMatchObject({ editing: null, mode: "scene" });
+    pedal().selectScene(2);
+    await until(() => expect(scenes().editing).toBe(2));
+    pedal().setSceneMode(false);
+    await until(() => expect(scenes().pedal).toEqual({ sceneMode: false, activeScene: null }));
+    expect(scenes()).toMatchObject({ editing: null, mode: "preset" });
   });
 });

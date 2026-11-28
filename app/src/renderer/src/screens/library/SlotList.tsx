@@ -23,6 +23,8 @@ import { knownBody, useLibraryActions } from "./actions";
 import { endDrag, hasFiles, LOCAL_MIME, SLOTS_MIME, startDrag } from "./dnd";
 import { writableCollections } from "./LocalPane";
 import { isEmptyName, useLibrary, type SlotFilter } from "./store";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const COLS = "grid grid-cols-[16px_var(--slot-w)_minmax(96px,var(--name-w))_160px_minmax(0,1fr)_96px] items-center gap-3 @max-[660px]/slots:grid-cols-[16px_var(--slot-w)_minmax(80px,var(--name-w))_146px_minmax(0,1fr)_60px] @max-[660px]/slots:gap-2";
 
@@ -182,7 +184,7 @@ export function SlotList({ sheetMode }: { sheetMode: boolean }) {
     } else if (mod && e.key.toLowerCase() === "c" && selected.length) {
       e.preventDefault();
       clipboard = selected;
-      setAnnounce(`Copied ${selected.length === 1 ? `slot ${profile.slotLabel(selected[0])}` : `${selected.length} slots`}. Focus a slot and press Ctrl V to paste.`);
+      setAnnounce(t`Copied ${selected.length === 1 ? t`slot ${profile.slotLabel(selected[0])}` : t`${selected.length} slots`}. Focus a slot and press Ctrl V to paste.`);
     } else if (mod && e.key.toLowerCase() === "v" && clipboard.length && focus !== null && writable) {
       e.preventDefault();
       actions.copySlots(clipboard, focus);
@@ -204,7 +206,7 @@ export function SlotList({ sheetMode }: { sheetMode: boolean }) {
       setOver(slot);
       const row = rows[slot];
       const what = drag?.kind === "local" ? drag.preset.name : drag?.kind === "slots" ? (drag.slots.length === 1 ? rows[drag.slots[0]]?.name : `${drag.slots.length} slots`) : "the file";
-      setAnnounce(`Drop to ${row?.empty ? "write" : "replace"} ${what} ${row?.empty ? "to" : "in"} slot ${profile.slotLabel(slot)}`);
+      setAnnounce(t`Drop to ${row?.empty ? t`write` : t`replace`} ${what} ${row?.empty ? t`to` : t`in`} slot ${profile.slotLabel(slot)}`);
     }
   };
   const onDrop = (e: DragEvent, slot: number) => {
@@ -222,15 +224,15 @@ export function SlotList({ sheetMode }: { sheetMode: boolean }) {
   const loading = !names.length && (status === "connecting" || status === "idle");
   const head = (
     <div className="flex min-h-8 flex-wrap items-center gap-x-3 gap-y-2 px-2">
-      <h2 className="text-[15px] font-[650] whitespace-nowrap text-silkscreen">On {listPedal}</h2>
-      {names.length > 0 && <span className="text-sm whitespace-nowrap text-silkscreen-3">{hasEmpty ? `${used} used, ${rows.length - used} empty` : `${rows.length} slots`}</span>}
+      <h2 className="text-[15px] font-[650] whitespace-nowrap text-silkscreen"><Trans>On {listPedal}</Trans></h2>
+      {names.length > 0 && <span className="text-sm whitespace-nowrap text-silkscreen-3">{hasEmpty ? t`${used} used, ${rows.length - used} empty` : t`${rows.length} slots`}</span>}
       <span className="flex-1" />
       {hasEmpty && (
         <Tabs value={filter} onValueChange={(v) => useLibrary.setState({ slotFilter: v as SlotFilter })}>
-          <TabsList aria-label="Show">
-            <TabsTrigger value="all">All {rows.length || profile.slotCount}</TabsTrigger>
-            <TabsTrigger value="used">Used</TabsTrigger>
-            <TabsTrigger value="empty">Empty</TabsTrigger>
+          <TabsList aria-label={t`Show`}>
+            <TabsTrigger value="all"><Trans>All</Trans> {rows.length || profile.slotCount}</TabsTrigger>
+            <TabsTrigger value="used"><Trans>Used</Trans></TabsTrigger>
+            <TabsTrigger value="empty"><Trans>Empty</Trans></TabsTrigger>
           </TabsList>
         </Tabs>
       )}
@@ -238,20 +240,20 @@ export function SlotList({ sheetMode }: { sheetMode: boolean }) {
         <InputGroupAddon>
           <SearchIcon />
         </InputGroupAddon>
-        <InputGroupInput placeholder="Filter by name or amp" aria-label="Filter slots by name or amp" value={query} onChange={(e) => useLibrary.setState({ slotQuery: e.target.value })} />
+        <InputGroupInput placeholder={t`Filter by name or amp`} aria-label={t`Filter slots by name or amp`} value={query} onChange={(e) => useLibrary.setState({ slotQuery: e.target.value })} />
       </InputGroup>
     </div>
   );
 
   return (
-    <section aria-label={`On ${listPedal}`} className="glass relative flex min-h-0 min-w-0 flex-col @container/slots rounded-xl px-2 pt-3.5 pb-2">
+    <section aria-label={t`On ${listPedal}`} className="glass relative flex min-h-0 min-w-0 flex-col @container/slots rounded-xl px-2 pt-3.5 pb-2">
       {head}
       {status !== "connected" && names.length > 0 && <OfflineBanner />}
       <BulkBar visible={visible.map((r) => r.slot)} visibleSelected={visibleSelected} sheetMode={sheetMode} />
       <div
         ref={gridRef}
         role="grid"
-        aria-label="Preset slots"
+        aria-label={t`Preset slots`}
         aria-multiselectable="true"
         aria-rowcount={visible.length}
         aria-activedescendant={focus !== null ? `slot-row-${focus}` : undefined}
@@ -262,8 +264,8 @@ export function SlotList({ sheetMode }: { sheetMode: boolean }) {
         style={colWidths(profile)}
       >
         <div role="row" className={cn(COLS, "h-[30px] shrink-0 pr-2.5 pl-2 text-xs font-medium tracking-[0.04em] text-silkscreen-3 uppercase")}>
-          <span role="columnheader" aria-label="Selected" />
-          <span role="columnheader">
+          <span role="columnheader" aria-label={t`Selected`} />
+          <Trans><span role="columnheader">
             <span className="@max-[660px]/slots:sr-only">Slot</span>
             <span aria-hidden className="hidden @max-[660px]/slots:inline">
               #
@@ -271,19 +273,19 @@ export function SlotList({ sheetMode }: { sheetMode: boolean }) {
           </span>
           <span role="columnheader">Name</span>
           <span role="columnheader">Chain</span>
-          <span role="columnheader" className="truncate">Amp or SnapTone</span>
-          <span role="columnheader" aria-label="Status" />
+          <span role="columnheader" className="truncate">Amp or SnapTone</span></Trans>
+          <span role="columnheader" aria-label={t`Status`} />
         </div>
         <div className={cn("min-h-0 flex-1 overflow-auto", status !== "connected" && "opacity-60")} onDragLeave={(e) => !e.currentTarget.contains(e.relatedTarget as Node | null) && setOver(null)}>
           {loading && Array.from({ length: 14 }, (_, i) => <Skeleton key={i} className="mx-2 my-1 h-6" />)}
           {!loading && !names.length && (
-            <p className="px-3 py-6 text-sm text-silkscreen-3">Connect the {pedal} to see its {profile.slotCount} slots. Presets on this computer work without it.</p>
+            <p className="px-3 py-6 text-sm text-silkscreen-3"><Trans>Connect the {pedal} to see its {profile.slotCount} slots. Presets on this computer work without it.</Trans></p>
           )}
           {names.length > 0 && !visible.length && (
             <p className="px-3 py-6 text-sm text-silkscreen-3">
-              No slots match “{query || filter}”.{" "}
+              <Trans>No slots match “</Trans>{query || filter}”.{" "}
               <button type="button" className="text-silkscreen underline underline-offset-2" onClick={() => useLibrary.setState({ slotQuery: "", slotFilter: "all" })}>
-                Clear filter
+                <Trans>Clear filter</Trans>
               </button>
             </p>
           )}
@@ -320,13 +322,13 @@ function OfflineBanner() {
   return (
     <Alert className="mx-2 mt-2.5 w-auto">
       <UnplugIcon />
-      <AlertTitle>{busyPort ? `Another app is using the ${pedal}` : `${pedal === "pedal" ? "Pedal" : pedal} not connected`}</AlertTitle>
+      <AlertTitle>{busyPort ? t`Another app is using the ${pedal}` : t`${pedal === "pedal" ? t`Pedal` : pedal} not connected`}</AlertTitle>
       <AlertDescription className="flex flex-wrap items-center gap-x-2">
         {busyPort
-          ? `Close ${editor}, then reconnect. Showing the slots from the last connection.`
-          : `Showing the slots as of the last connection.${status === "connecting" ? " Connecting…" : " Connect the pedal to write."}`}
+          ? t`Close ${editor}, then reconnect. Showing the slots from the last connection.`
+          : t`Showing the slots as of the last connection.${status === "connecting" ? t` Connecting…` : t` Connect the pedal to write.`}`}
         <Button variant="link" size="sm" className="h-auto p-0" onClick={() => useNav.getState().go("device")}>
-          Open Device
+          <Trans>Open Device</Trans>
         </Button>
       </AlertDescription>
     </Alert>
@@ -345,33 +347,33 @@ function BulkBar({ visible, visibleSelected, sheetMode }: { visible: number[]; v
   const allUsedEmpty = selected.every((s) => isEmptyName(names[s]?.name));
   const readable = connected || selected.every((s) => knownBody(s) !== null);
   const checked = visibleSelected === 0 ? false : visibleSelected === visible.length ? true : "indeterminate";
-  const swapTip = n === 2 ? `Swap slots ${slotLabel(selected[0])} and ${slotLabel(selected[1])}` : "Select two slots to swap them";
+  const swapTip = n === 2 ? t`Swap slots ${slotLabel(selected[0])} and ${slotLabel(selected[1])}` : t`Select two slots to swap them`;
 
   return (
-    <div role="toolbar" aria-label="Selected slots" className="mt-2.5 flex h-11 shrink-0 items-center gap-0.5 border-y border-border px-1.5">
+    <div role="toolbar" aria-label={t`Selected slots`} className="mt-2.5 flex h-11 shrink-0 items-center gap-0.5 border-y border-border px-1.5">
       <Checkbox
         className="mr-2 ml-2.5"
-        aria-label="Select all slots in this list"
+        aria-label={t`Select all slots in this list`}
         checked={checked}
         onCheckedChange={() => useLibrary.getState().select(checked === true ? [] : visible)}
       />
-      <span className="mr-1.5 ml-0.5 text-sm font-semibold whitespace-nowrap text-silkscreen">{n ? `${n} selected` : "None selected"}</span>
+      <span className="mr-1.5 ml-0.5 text-sm font-semibold whitespace-nowrap text-silkscreen">{n ? t`${n} selected` : t`None selected`}</span>
       <Button variant="ghost" size="sm" disabled={!n || !readable} onClick={() => void actions.backupSlots(selected)}>
         <HardDriveDownloadIcon data-icon="inline-start" />
-        <span className="@max-[660px]/slots:sr-only">Back up</span>
+        <Trans><span className="@max-[660px]/slots:sr-only">Back up</span></Trans>
       </Button>
       <Button variant="ghost" size="sm" disabled={!n || !readable} onClick={() => void actions.exportSlots(selected)}>
         <DownloadIcon data-icon="inline-start" />
-        <span className="@max-[660px]/slots:sr-only">Export</span>
+        <Trans><span className="@max-[660px]/slots:sr-only">Export</span></Trans>
       </Button>
       <Separator orientation="vertical" className="mx-0.5 my-3 data-[orientation=vertical]:h-5" />
       <Button variant="ghost" size="sm" disabled={!n || !writable || allUsedEmpty} onClick={() => actions.copySlots(selected)}>
         <CopyIcon data-icon="inline-start" />
-        <span className="@max-[660px]/slots:sr-only">Copy to…</span>
+        <Trans><span className="@max-[660px]/slots:sr-only">Copy to…</span></Trans>
       </Button>
       <Button variant="ghost" size="sm" disabled={!n || !writable} onClick={() => actions.moveSlots(selected)}>
         <MoveIcon data-icon="inline-start" />
-        <span className="@max-[660px]/slots:sr-only">Move to…</span>
+        <Trans><span className="@max-[660px]/slots:sr-only">Move to…</span></Trans>
       </Button>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -379,7 +381,7 @@ function BulkBar({ visible, visibleSelected, sheetMode }: { visible: number[]; v
           <span tabIndex={n === 2 && writable ? -1 : 0}>
             <Button variant="ghost" size="sm" disabled={n !== 2 || !writable} onClick={() => actions.swapSlots(selected[0], selected[1])}>
               <ArrowUpDownIcon data-icon="inline-start" />
-              <span className="@max-[660px]/slots:sr-only">Swap</span>
+              <Trans><span className="@max-[660px]/slots:sr-only">Swap</span></Trans>
             </Button>
           </span>
         </TooltipTrigger>
@@ -388,7 +390,7 @@ function BulkBar({ visible, visibleSelected, sheetMode }: { visible: number[]; v
       <span className="flex-1" />
       <Button variant="ghost" size="sm" className="text-led-fault hover:text-led-fault" disabled={!n || !writable || allUsedEmpty} onClick={() => actions.clearSlots(selected)}>
         <Trash2Icon data-icon="inline-start" />
-        <span className="@max-[660px]/slots:sr-only">{emptyName === null ? "Reset to init patch" : "Clear"}</span>
+        <span className="@max-[660px]/slots:sr-only">{emptyName === null ? t`Reset to init patch` : t`Clear`}</span>
       </Button>
       {sheetMode && (
         <>
@@ -401,7 +403,7 @@ function BulkBar({ visible, visibleSelected, sheetMode }: { visible: number[]; v
             onClick={() => useLibrary.setState({ sheetOpen: !useLibrary.getState().sheetOpen })}
           >
             <InfoIcon data-icon="inline-start" />
-            Details
+            <Trans>Details</Trans>
           </Button>
         </>
       )}
@@ -468,7 +470,7 @@ const SlotRow = memo(function SlotRow({ row, selected, focused, active, drop, dr
           )}
         >
           <span role="gridcell" className="flex items-center">
-            <Checkbox checked={selected} aria-label={`Select slot ${slotLabel(slot)}`} tabIndex={-1} onClick={(e) => e.stopPropagation()} onCheckedChange={() => onToggle(slot)} />
+            <Checkbox checked={selected} aria-label={t`Select slot ${slotLabel(slot)}`} tabIndex={-1} onClick={(e) => e.stopPropagation()} onCheckedChange={() => onToggle(slot)} />
           </span>
           <span role="gridcell" className={cn("text-sm font-semibold tabular-nums", selected ? "text-silkscreen" : "text-silkscreen-3", drop && "text-lamp", empty && !drop && "font-medium text-silkscreen-4")}>
             {slotLabel(slot)}
@@ -484,16 +486,16 @@ const SlotRow = memo(function SlotRow({ row, selected, focused, active, drop, dr
               <>
                 <span aria-hidden className={cn("size-2 shrink-0 rounded-[2px]", lead.kind === "snaptone" ? "bg-block-ns" : "bg-block-amp")} />
                 <span className="truncate">{lead.title}</span>
-                {lead.kind === "snaptone" && <span className="text-xs text-silkscreen-3">SnapTone</span>}
+                {lead.kind === "snaptone" && <span className="text-xs text-silkscreen-3"><Trans>SnapTone</Trans></span>}
               </>
             )}
             {/* A read GP-200 body without the effect catalog has no amp name */}
             {!lead && !empty && !incoming && <span className="text-xs text-silkscreen-4">{row.summary ? (
-              "Unknown model"
+              t`Unknown model`
             ) : (
-              <span title="Not read yet">
+              <span title={t`Not read yet`}>
                 <span aria-hidden>–</span>
-                <span className="sr-only">Not read yet</span>
+                <Trans><span className="sr-only">Not read yet</span></Trans>
               </span>
             )}</span>}
           </span>
@@ -505,12 +507,12 @@ const SlotRow = memo(function SlotRow({ row, selected, focused, active, drop, dr
             {drop ? (
               <>
                 {conversion ? <RefreshCwIcon className="size-3.5" aria-hidden /> : <ArrowDownToLineIcon className="size-3.5" aria-hidden />}
-                {empty ? "Drop to write" : "Drop to replace"}
+                {empty ? t`Drop to write` : t`Drop to replace`}
               </>
             ) : active ? (
               <>
                 <span aria-hidden className="size-1.5 rounded-full bg-led-on" />
-                Active
+                <Trans>Active</Trans>
               </>
             ) : (
               draggable && !empty && <GripVerticalIcon className="size-3.5 text-silkscreen-4 opacity-0 group-hover:opacity-100" aria-hidden />
@@ -522,11 +524,11 @@ const SlotRow = memo(function SlotRow({ row, selected, focused, active, drop, dr
         <ContextMenuGroup>
           <ContextMenuItem disabled={!connected || active} onSelect={() => actions.play(slot)}>
             <PlayIcon />
-            Play on pedal
-            <ContextMenuShortcut>Enter</ContextMenuShortcut>
+            <Trans>Play on pedal</Trans>
+            <ContextMenuShortcut><Trans>Enter</Trans></ContextMenuShortcut>
           </ContextMenuItem>
           <ContextMenuItem disabled={!connected || empty} onSelect={() => void actions.openInRig(slot)}>
-            Open in Rig
+            <Trans>Open in Rig</Trans>
           </ContextMenuItem>
           <ContextMenuItem
             disabled={!connected || empty}
@@ -536,7 +538,7 @@ const SlotRow = memo(function SlotRow({ row, selected, focused, active, drop, dr
             }}
           >
             <PencilIcon />
-            {connected ? "Rename" : `Rename (needs the ${pedal})`}
+            {connected ? t`Rename` : t`Rename (needs the ${pedal})`}
             <ContextMenuShortcut>F2</ContextMenuShortcut>
           </ContextMenuItem>
         </ContextMenuGroup>
@@ -544,23 +546,23 @@ const SlotRow = memo(function SlotRow({ row, selected, focused, active, drop, dr
         <ContextMenuGroup>
           <ContextMenuItem disabled={!writable || empty} onSelect={() => actions.copySlots(dragSlots)}>
             <CopyIcon />
-            Copy to…
+            <Trans>Copy to…</Trans>
           </ContextMenuItem>
           <ContextMenuItem disabled={!writable} onSelect={() => actions.moveSlots(dragSlots)}>
             <MoveIcon />
-            Move to…
+            <Trans>Move to…</Trans>
           </ContextMenuItem>
           <ContextMenuItem disabled={!writable || empty} onSelect={() => actions.duplicateSlot(slot)}>
-            Duplicate
+            <Trans>Duplicate</Trans>
           </ContextMenuItem>
           <ContextMenuItem disabled={empty} onSelect={() => void actions.exportSlots(dragSlots)}>
             <DownloadIcon />
-            Export .prst
+            <Trans>Export .prst</Trans>
           </ContextMenuItem>
           <ContextMenuSub>
             <ContextMenuSubTrigger disabled={empty}>
               <FolderPlusIcon />
-              Add to collection
+              <Trans>Add to collection</Trans>
             </ContextMenuSubTrigger>
             <ContextMenuSubContent>
               <ContextMenuGroup>
@@ -570,7 +572,7 @@ const SlotRow = memo(function SlotRow({ row, selected, focused, active, drop, dr
                   </ContextMenuItem>
                 ))}
                 <ContextMenuItem onSelect={() => actions.collectionDialog({ kind: "new", then: (c) => void actions.addSlotsToCollection(dragSlots, c.id) })}>
-                  New collection…
+                  <Trans>New collection…</Trans>
                 </ContextMenuItem>
               </ContextMenuGroup>
             </ContextMenuSubContent>
@@ -580,8 +582,8 @@ const SlotRow = memo(function SlotRow({ row, selected, focused, active, drop, dr
         <ContextMenuGroup>
           <ContextMenuItem variant="destructive" disabled={!writable || empty} onSelect={() => actions.clearSlots(dragSlots)}>
             <Trash2Icon />
-            {emptyName === null ? "Reset to init patch" : "Clear"}
-            <ContextMenuShortcut>Del</ContextMenuShortcut>
+            {emptyName === null ? t`Reset to init patch` : t`Clear`}
+            <ContextMenuShortcut><Trans>Del</Trans></ContextMenuShortcut>
           </ContextMenuItem>
         </ContextMenuGroup>
       </ContextMenuContent>

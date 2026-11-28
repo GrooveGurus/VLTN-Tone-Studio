@@ -15,6 +15,8 @@ import { SUPPORTED_DEVICE_KEYS } from "@/state/driver/types";
 import { restoreEntries, type RestoreSource } from "./restore";
 import { RestoreDialog } from "./RestoreDialog";
 import { useAppSettings } from "./settings-store";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const dirOf = (c: CollectionInfo) => c.id.slice(c.id.indexOf("/") + 1);
 
@@ -53,7 +55,7 @@ export function BackupsPanel({ offline }: { offline: boolean }) {
 
   const openBackup = async (c: CollectionInfo) => {
     if (c.incomplete) {
-      notifyError("This backup can't be restored", new Error("It stopped before every preset was copied. Make a new backup instead."));
+      notifyError(t`This backup can't be restored`, new Error(t`It stopped before every preset was copied. Make a new backup instead.`));
       return;
     }
     setLoading(c.id);
@@ -65,7 +67,7 @@ export function BackupsPanel({ offline }: { offline: boolean }) {
       );
       setRestore({ title: dirOf(c), location: c.path ?? c.id, entries, converted, skipped });
     } catch (e) {
-      notifyError("Couldn't read the backup", e);
+      notifyError(t`Couldn't read the backup`, e);
     } finally {
       setLoading(null);
     }
@@ -77,12 +79,12 @@ export function BackupsPanel({ offline }: { offline: boolean }) {
       if (!picked) return;
       const { entries, converted, skipped } = restoreEntries(picked.files, useDevice.getState().device);
       if (!entries.length) {
-        notifyError("Nothing to restore", new Error(`${picked.name} has no ${listNames(SUPPORTED_DEVICE_KEYS)} presets with a slot number (NN-Name.prst).`));
+        notifyError(t`Nothing to restore`, new Error(t`${picked.name} has no ${listNames(SUPPORTED_DEVICE_KEYS)} presets with a slot number (NN-Name.prst).`));
         return;
       }
       setRestore({ title: picked.name, location: picked.path ?? picked.name, entries, converted, skipped });
     } catch (e) {
-      notifyError("Couldn't read the folder", e);
+      notifyError(t`Couldn't read the folder`, e);
     }
   };
 
@@ -90,25 +92,25 @@ export function BackupsPanel({ offline }: { offline: boolean }) {
     <section aria-labelledby="bk-title" className="flex min-w-0 flex-col gap-4 rounded-lg bg-card px-5 pt-4 pb-5 shadow-[0_0_0_1px_var(--seam)]">
       <div>
         <h2 id="bk-title" className="text-[15px] font-[650] text-balance">
-          Backups
+          <Trans>Backups</Trans>
         </h2>
-        <p className="mt-0.5 text-sm text-pretty text-silkscreen-3">A full backup copies all {slotCount} preset slots from the pedal into .prst files on this computer.</p>
+        <p className="mt-0.5 text-sm text-pretty text-silkscreen-3"><Trans>A full backup copies all {slotCount} preset slots from the pedal into .prst files on this computer.</Trans></p>
       </div>
 
       <div className="flex items-end gap-4 border-b pt-1 pb-4">
         <div className="min-w-0">
           {last ? (
             <>
-              <div className="text-sm text-silkscreen-3">Last full backup</div>
+              <div className="text-sm text-silkscreen-3"><Trans>Last full backup</Trans></div>
               <div className="text-lg leading-tight font-semibold">{madeLabel(last.createdAt, true)}</div>
               <div className="text-sm text-silkscreen-3">
-                {last.count} presets in <b className="font-[550] whitespace-nowrap text-silkscreen-2">backups/{dirOf(last)}</b>
+                <Trans>{last.count} presets in <b className="font-[550] whitespace-nowrap text-silkscreen-2">backups/{dirOf(last)}</b></Trans>
               </div>
             </>
           ) : (
             <>
-              <div className="text-lg leading-tight font-semibold">No backups yet</div>
-              <div className="text-sm text-silkscreen-3">Back up before big changes, so you can always go back.</div>
+              <div className="text-lg leading-tight font-semibold"><Trans>No backups yet</Trans></div>
+              <div className="text-sm text-silkscreen-3"><Trans>Back up before big changes, so you can always go back.</Trans></div>
             </>
           )}
         </div>
@@ -121,10 +123,10 @@ export function BackupsPanel({ offline }: { offline: boolean }) {
           ) : (
             <Button variant={offline ? "secondary" : "default"} disabled={blocked} onClick={() => void runBackupNow()}>
               <HardDriveDownload aria-hidden />
-              Back up now
+              <Trans>Back up now</Trans>
             </Button>
           )}
-          <span className="text-xs text-silkscreen-3">Takes about {backupSeconds} seconds</span>
+          <Trans><span className="text-xs text-silkscreen-3">Takes about {backupSeconds} seconds</span></Trans>
         </div>
       </div>
 
@@ -132,15 +134,15 @@ export function BackupsPanel({ offline }: { offline: boolean }) {
         <Switch
           id="bk-auto"
           checked={backupBeforeWrite}
-          onCheckedChange={(v) => void patchSettings({ backupBeforeWrite: v }).catch((e) => notifyError("Couldn't save the setting", e))}
+          onCheckedChange={(v) => void patchSettings({ backupBeforeWrite: v }).catch((e) => notifyError(t`Couldn't save the setting`, e))}
           aria-labelledby="bk-auto-label"
           className="mt-px"
         />
         <div>
-          <b id="bk-auto-label" className="block font-semibold">
+          <Trans><b id="bk-auto-label" className="block font-semibold">
             Back up before every write
           </b>
-          <span className="block text-sm text-pretty text-silkscreen-3">Before the app saves, renames or writes a slot, it copies what is in that slot now into Replaced presets in the Library.</span>
+          <span className="block text-sm text-pretty text-silkscreen-3">Before the app saves, renames or writes a slot, it copies what is in that slot now into Replaced presets in the Library.</span></Trans>
         </div>
       </div>
 
@@ -149,11 +151,11 @@ export function BackupsPanel({ offline }: { offline: boolean }) {
           <Table className="text-sm">
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-0 text-xs font-medium tracking-[0.04em] text-silkscreen-3 uppercase">Backup</TableHead>
-                <TableHead className="text-xs font-medium tracking-[0.04em] text-silkscreen-3 uppercase">Made</TableHead>
-                <TableHead className="text-right text-xs font-medium tracking-[0.04em] text-silkscreen-3 uppercase">Presets</TableHead>
+                <TableHead className="pl-0 text-xs font-medium tracking-[0.04em] text-silkscreen-3 uppercase"><Trans>Backup</Trans></TableHead>
+                <TableHead className="text-xs font-medium tracking-[0.04em] text-silkscreen-3 uppercase"><Trans>Made</Trans></TableHead>
+                <TableHead className="text-right text-xs font-medium tracking-[0.04em] text-silkscreen-3 uppercase"><Trans>Presets</Trans></TableHead>
                 <TableHead className="pr-0">
-                  <span className="sr-only">Actions</span>
+                  <Trans><span className="sr-only">Actions</span></Trans>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -166,7 +168,7 @@ export function BackupsPanel({ offline }: { offline: boolean }) {
                   <TableCell className="pr-0 text-right">
                     <Button variant="destructive" size="sm" disabled={blocked || loading !== null} onClick={() => void openBackup(c)}>
                       <RotateCcw aria-hidden />
-                      Restore to pedal
+                      <Trans>Restore to pedal</Trans>
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -178,16 +180,16 @@ export function BackupsPanel({ offline }: { offline: boolean }) {
 
       <div className="flex flex-wrap items-center gap-2">
         {isElectron && (
-          <Button variant="ghost" size="sm" onClick={() => void host.files.openBackupsFolder().catch((e) => notifyError("Couldn't open the backups folder", e))}>
+          <Button variant="ghost" size="sm" onClick={() => void host.files.openBackupsFolder().catch((e) => notifyError(t`Couldn't open the backups folder`, e))}>
             <FolderOpen aria-hidden />
-            Open backups folder
+            <Trans>Open backups folder</Trans>
           </Button>
         )}
         <Button variant="destructive" size="sm" disabled={blocked} onClick={() => void openFolder()}>
           <Import aria-hidden />
-          Restore from another folder
+          <Trans>Restore from another folder</Trans>
         </Button>
-        <span className="ml-auto text-xs text-pretty text-silkscreen-3">Before-write copies are in Library › Replaced presets.</span>
+        <Trans><span className="ml-auto text-xs text-pretty text-silkscreen-3">Before-write copies are in Library › Replaced presets.</span></Trans>
       </div>
 
       <RestoreDialog source={restore} onOpenChange={(open) => !open && setRestore(null)} />

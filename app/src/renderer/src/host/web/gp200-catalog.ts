@@ -1,6 +1,7 @@
 import { ALGORITHM_XML, decodeXmlText, parseStoredCatalog, storedCatalogFile, type Gp200CatalogApi } from "@shared/host/gp200-catalog";
 import { HostError } from "@shared/ipc";
 import { pickFiles } from "./pick-files";
+import { t } from "@lingui/core/macro";
 
 // Browser build: no install folders to search; the user picks algorithm.xml and the built catalog is kept in this
 // browser's localStorage (about 190 KB).
@@ -26,7 +27,7 @@ export const webGp200Catalog: Gp200CatalogApi = {
     try {
       localStorage.setItem(KEY, text);
     } catch {
-      throw new HostError("io", `This browser has no room to keep the effect list from ${ALGORITHM_XML}.`);
+      throw new HostError("io", t`This browser has no room to keep the effect list from ${ALGORITHM_XML}.`);
     }
     return kept;
   },

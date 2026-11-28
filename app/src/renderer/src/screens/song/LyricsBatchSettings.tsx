@@ -7,14 +7,16 @@ import { saveLyricsChoice, type LyricsChoice } from "@/song/performance/lyrics-o
 import { downloadMegabytes, findLyricsModel, lyricsMinutes } from "@/song/performance/lyrics-models";
 import type { LyricsWhich } from "@/song/analysis/batch";
 import { LyricsModelPicker, useWebGpu } from "./LyricsModelPicker";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** The song length the estimate assumes. The dialog does not read each song's length. */
 const ASSUMED_SONG_MINUTES = 4;
 
 const WHICH_LABELS: { id: LyricsWhich; label: string }[] = [
-  { id: "empty", label: "Songs with no lyrics" },
-  { id: "transcribed", label: "Songs whose lyrics Tone Studio made" },
-  { id: "older", label: "Lyrics made with a different model than this one" },
+  { id: "empty", get label() { return t`Songs with no lyrics`; } },
+  { id: "transcribed", get label() { return t`Songs whose lyrics Tone Studio made`; } },
+  { id: "older", get label() { return t`Lyrics made with a different model than this one`; } },
 ];
 
 export function LyricsBatchSettings({
@@ -57,7 +59,7 @@ export function LyricsBatchSettings({
           saveLyricsChoice(next);
         }}
       />
-      <RadioGroup aria-label="Which lyrics to replace" value={which} onValueChange={(v) => onWhich(v as LyricsWhich)} disabled={disabled} className="gap-1">
+      <RadioGroup aria-label={t`Which lyrics to replace`} value={which} onValueChange={(v) => onWhich(v as LyricsWhich)} disabled={disabled} className="gap-1">
         {WHICH_LABELS.map((item) => (
           <label key={item.id} className="flex items-center gap-2">
             <RadioGroupItem value={item.id} />
@@ -67,27 +69,27 @@ export function LyricsBatchSettings({
       </RadioGroup>
       <label className="flex items-center gap-2">
         <Checkbox checked={retime} disabled={disabled} onCheckedChange={(value) => onRetime(value === true)} />
-        <span>Time my pasted lyrics again (their text is kept)</span>
+        <Trans><span>Time my pasted lyrics again (their text is kept)</span></Trans>
       </label>
       <div className="space-y-1">
         <label className="flex items-center gap-2">
           <Checkbox checked={unknown} disabled={disabled} onCheckedChange={(value) => onUnknown(value === true)} />
-          <span>Include lyrics from before version 0.9.2</span>
+          <Trans><span>Include lyrics from before version 0.9.2</span></Trans>
         </label>
         <p className="text-[12px] text-silkscreen-3">
-          Tone Studio can&apos;t tell whether you typed these. The old lyrics are kept and can be restored on each song.
+          <Trans>Tone Studio can&apos;t tell whether you typed these. The old lyrics are kept and can be restored on each song.</Trans>
         </p>
       </div>
       <p role="status" className="font-medium text-silkscreen-2">
         {plan}
       </p>
       <p className="text-[12px] text-silkscreen-3">
-        Your own charts are never replaced. About {minutes > 0 ? `${minutes} min` : "under a minute"} for {songs} song{songs === 1 ? "" : "s"} of about{" "}
-        {ASSUMED_SONG_MINUTES} minutes each. A rough guess until measured on this computer.
+        <Trans>Your own charts are never replaced. About</Trans> {minutes > 0 ? t`${minutes} min` : t`under a minute`} <Trans>for {songs} song</Trans>{songs === 1 ? "" : "s"} <Trans>of about{" "}
+        {ASSUMED_SONG_MINUTES} minutes each. A rough guess until measured on this computer.</Trans>
       </p>
       {model && (
         <p className="text-[12px] text-silkscreen-3">
-          Downloads about {downloadMegabytes(model, webgpu)} MB once, the first time this model is used on this computer.
+          <Trans>Downloads about {downloadMegabytes(model, webgpu)} MB once, the first time this model is used on this computer.</Trans>
         </p>
       )}
     </div>

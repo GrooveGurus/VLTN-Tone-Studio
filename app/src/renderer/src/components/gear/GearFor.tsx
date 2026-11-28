@@ -7,6 +7,7 @@ import { AmpHead, Cab } from "./Amp";
 import { Capture, EqPedal, eqControls } from "./EqPedal";
 import { Pedal, pedalControls } from "./Pedal";
 import { knobFromParam, type GearBaseProps, type GearKnob } from "./types";
+import { t as lt } from "@lingui/core/macro";
 
 /**
  * The end of a param's range that reads OFF: the minimum (a low cut at its lowest), except for a GP-200 catalog knob
@@ -25,7 +26,7 @@ export function knobsForBlock(block: BlockState): GearKnob[] {
 
 /** Display name of a block's model (catalog title), or a fallback for fxids missing from the catalog. */
 export function modelTitle(block: BlockState): string {
-  return block.model?.title ?? `Unknown ${block.code} model`;
+  return block.model?.title ?? lt`Unknown ${block.code} model`;
 }
 
 const inTable = (fxid: number, t: SlotTables) => fxid >= t.fxidBase && fxid < t.fxidBase + t.slots;

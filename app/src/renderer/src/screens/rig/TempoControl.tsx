@@ -10,12 +10,14 @@ import { editBpm } from "./edits";
 import { saveOnlyNote, useLiveMode } from "./live-edits";
 import { loadVolume, Metronome } from "./metronome";
 import { tap } from "./tempo";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Where a tempo edit goes: live where the pedal has a tempo command (GP-50 with Experimental pedal commands, GP-200), else with the save. */
 function useTempoNote(): string {
   const pedal = usePedalName();
   const mode = useLiveMode("liveBpm");
-  return mode === "live" ? `Plays on the ${pedal} right away. Save the preset to keep it.` : saveOnlyNote(mode, "The new tempo", pedal);
+  return mode === "live" ? t`Plays on the ${pedal} right away. Save the preset to keep it.` : saveOnlyNote(mode, t`The new tempo`, pedal);
 }
 
 /** Rig header tempo: the preset's BPM with a field and a tap button; taps are averaged in the app. `range`: the model's. */
@@ -43,10 +45,10 @@ export function TempoControl({ bpm, range, disabled }: { bpm: number; range: { m
     try {
       const output = await m.start();
       setClicking(true);
-      notifySuccess("Metronome on", `Playing through ${output}.`);
+      notifySuccess(t`Metronome on`, t`Playing through ${output}.`);
     } catch (e) {
       setClicking(false);
-      notifyError("Couldn't start the metronome", e);
+      notifyError(t`Couldn't start the metronome`, e);
     }
   };
 
@@ -64,19 +66,19 @@ export function TempoControl({ bpm, range, disabled }: { bpm: number; range: { m
 
   return (
     <span className="flex items-center gap-1.5">
-      Tempo
+      <Trans>Tempo</Trans>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button variant="ghost" size="xs" disabled={disabled} aria-label={`Tempo ${bpm} BPM, change`} className="-mx-1 px-1.5 text-sm font-semibold text-silkscreen tabular-nums">
+          <Button variant="ghost" size="xs" disabled={disabled} aria-label={t`Tempo ${bpm} BPM, change`} className="-mx-1 px-1.5 text-sm font-semibold text-silkscreen tabular-nums">
             {bpm} BPM
           </Button>
         </PopoverTrigger>
         <PopoverContent align="start" className="flex w-[260px] flex-col gap-3">
           <label htmlFor={inputId} className="text-sm font-[550] text-silkscreen-2">
-            Tempo ({range.min}–{range.max} BPM)
+            <Trans>Tempo ({range.min}–{range.max} BPM)</Trans>
           </label>
           <div className="flex items-center gap-1.5">
-            <Button variant="outline" size="icon-sm" aria-label="Slower" onClick={() => editBpm(bpm - 1)} disabled={bpm <= range.min}>
+            <Button variant="outline" size="icon-sm" aria-label={t`Slower`} onClick={() => editBpm(bpm - 1)} disabled={bpm <= range.min}>
               <MinusIcon aria-hidden />
             </Button>
             <Input
@@ -91,23 +93,23 @@ export function TempoControl({ bpm, range, disabled }: { bpm: number; range: { m
                 else if (e.key === "Escape") setDraft(String(bpm));
               }}
             />
-            <Button variant="outline" size="icon-sm" aria-label="Faster" onClick={() => editBpm(bpm + 1)} disabled={bpm >= range.max}>
+            <Button variant="outline" size="icon-sm" aria-label={t`Faster`} onClick={() => editBpm(bpm + 1)} disabled={bpm >= range.max}>
               <PlusIcon aria-hidden />
             </Button>
           </div>
           <p className="text-xs text-pretty text-silkscreen-3">{note}</p>
         </PopoverContent>
       </Popover>
-      <Button variant="outline" size="xs" disabled={disabled} onClick={onTap} aria-label="Tap tempo" title="Tap in time: the tempo follows the last few taps">
-        Tap
+      <Button variant="outline" size="xs" disabled={disabled} onClick={onTap} aria-label={t`Tap tempo`} title={t`Tap in time: the tempo follows the last few taps`}>
+        <Trans>Tap</Trans>
       </Button>
-      <Button variant={clicking ? "default" : "outline"} size="icon-xs" aria-label="Metronome" aria-pressed={clicking} onClick={() => void toggleClick()} title="Click track at this tempo, played through the pedal's USB audio when it is connected">
+      <Button variant={clicking ? "default" : "outline"} size="icon-xs" aria-label={t`Metronome`} aria-pressed={clicking} onClick={() => void toggleClick()} title={t`Click track at this tempo, played through the pedal's USB audio when it is connected`}>
         <TimerIcon aria-hidden />
       </Button>
       <Slider
         className="w-20"
-        aria-label="Metronome volume"
-        title={`Metronome volume ${Math.round(volume * 100)}%`}
+        aria-label={t`Metronome volume`}
+        title={t`Metronome volume ${Math.round(volume * 100)}%`}
         min={0}
         max={100}
         step={1}

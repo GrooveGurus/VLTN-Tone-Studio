@@ -6,23 +6,25 @@ import { DEFAULT_BASS_PARTS, type BassPart } from "@/song/band/bass-parts";
 import { STYLE_IDS, STYLES, type StyleId } from "@/song/band/styles";
 import { PartToneChain } from "./PartToneChain";
 import { BASS_PART_LABELS } from "./band-labels";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 /**
  * The track of a band slider. The theme's muted track is nearly the colour of the glass dialog, so at a value of 0 only the thumb showed.
  * A lighter track keeps the full length visible at any value.
  */
 const BAND_TRACK = "bg-white/15";
-const BASS_RANGE_LABELS: Record<(typeof BASS_RANGES)[number], string> = { low: "Low", normal: "Normal", high: "High" };
-const BASS_FROM_LABELS: Record<BassFrom, string> = { original: "Original bass", chords: "Chords" };
+const BASS_RANGE_LABELS: Record<(typeof BASS_RANGES)[number], string> = { get low() { return t`Low`; }, get normal() { return t`Normal`; }, get high() { return t`High`; } };
+const BASS_FROM_LABELS: Record<BassFrom, string> = { get original() { return t`Original bass`; }, get chords() { return t`Chords`; } };
 /** The kit menu's choices. "auto" leaves the kit to the style: the heavier kit for metal, rock and half-time. */
-const KIT_LABELS: Record<DrumKit, string> = { standard: "Standard", rock: "Standard, heavier" };
+const KIT_LABELS: Record<DrumKit, string> = { get standard() { return t`Standard`; }, get rock() { return t`Standard, heavier`; } };
 const AUTO_KIT = "auto";
-const FOLLOW_LABELS: Record<FollowSource, string> = { auto: "Auto", guitar: "Guitar", piano: "Piano", other: "Other", mix: "Mix" };
+const FOLLOW_LABELS: Record<FollowSource, string> = { get auto() { return t`Auto`; }, get guitar() { return t`Guitar`; }, get piano() { return t`Piano`; }, get other() { return t`Other`; }, get mix() { return t`Mix`; } };
 const HUMANISE_LABELS: Record<HumaniseChoice, string> = {
-  style: "Style default",
-  tight: "Tight",
-  natural: "Natural",
-  "laid-back": "Laid back",
-  pushed: "Pushed",
+  get style() { return t`Style default`; },
+  get tight() { return t`Tight`; },
+  get natural() { return t`Natural`; },
+  get "laid-back"() { return t`Laid back`; },
+  get pushed() { return t`Pushed`; },
 };
 
 export interface BandSettingsFormProps {
@@ -39,21 +41,21 @@ export interface BandSettingsFormProps {
 /** The song-wide band settings. Changing one saves it; nothing is generated until Generate. */
 export function BandSettingsForm({ settings, followSources, onChange, onStyle, songSeconds = 0 }: BandSettingsFormProps) {
   return (
-    <section aria-label="Band settings" className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
-      <h3 className="font-semibold sm:col-span-2">Settings</h3>
+    <section aria-label={t`Band settings`} className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
+      <h3 className="font-semibold sm:col-span-2"><Trans>Settings</Trans></h3>
       <div className="flex flex-wrap gap-4">
         <label className="flex items-center gap-2">
-          <Switch aria-label="Generate drums" checked={settings.parts.drums} onCheckedChange={(on) => onChange({ parts: { ...settings.parts, drums: on } })} />
-          Drums
+          <Switch aria-label={t`Generate drums`} checked={settings.parts.drums} onCheckedChange={(on) => onChange({ parts: { ...settings.parts, drums: on } })} />
+          <Trans>Drums</Trans>
         </label>
         <label className="flex items-center gap-3">
-          Kit
+          <Trans>Kit</Trans>
           <Select value={settings.kit ?? AUTO_KIT} onValueChange={(value) => onChange({ kit: value === AUTO_KIT ? undefined : (value as DrumKit) })}>
-            <SelectTrigger aria-label="Drum kit" className="w-44">
+            <SelectTrigger aria-label={t`Drum kit`} className="w-44">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={AUTO_KIT}>Automatic</SelectItem>
+              <SelectItem value={AUTO_KIT}><Trans>Automatic</Trans></SelectItem>
               {DRUM_KITS.map((kit) => (
                 <SelectItem key={kit} value={kit}>
                   {KIT_LABELS[kit]}
@@ -63,10 +65,10 @@ export function BandSettingsForm({ settings, followSources, onChange, onStyle, s
           </Select>
         </label>
         <label className="flex items-center gap-3">
-          Room {Math.round(settings.drumRoom * 100)}%
+          <Trans>Room {Math.round(settings.drumRoom * 100)}%</Trans>
           <Slider
             trackClassName={BAND_TRACK}
-            aria-label="Room"
+            aria-label={t`Room`}
             min={0}
             max={100}
             step={5}
@@ -75,14 +77,14 @@ export function BandSettingsForm({ settings, followSources, onChange, onStyle, s
           />
         </label>
         <label className="flex items-center gap-2">
-          <Switch aria-label="Generate bass" checked={settings.parts.bass} onCheckedChange={(on) => onChange({ parts: { ...settings.parts, bass: on } })} />
-          Bass
+          <Switch aria-label={t`Generate bass`} checked={settings.parts.bass} onCheckedChange={(on) => onChange({ parts: { ...settings.parts, bass: on } })} />
+          <Trans>Bass</Trans>
         </label>
       </div>
       <label className="flex items-center gap-3">
-        Style
+        <Trans>Style</Trans>
         <Select value={settings.style} onValueChange={(value) => onStyle(value as StyleId)}>
-          <SelectTrigger aria-label="Style" className="w-44">
+          <SelectTrigger aria-label={t`Style`} className="w-44">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -95,10 +97,10 @@ export function BandSettingsForm({ settings, followSources, onChange, onStyle, s
         </Select>
       </label>
       <label className="flex items-center gap-3">
-        Complexity {Math.round(settings.complexity * 100)}%
+        <Trans>Complexity {Math.round(settings.complexity * 100)}%</Trans>
         <Slider
           trackClassName={BAND_TRACK}
-          aria-label="Complexity"
+          aria-label={t`Complexity`}
           min={0}
           max={100}
           step={5}
@@ -107,10 +109,10 @@ export function BandSettingsForm({ settings, followSources, onChange, onStyle, s
         />
       </label>
       <label className="flex items-center gap-3">
-        Swing {Math.round(settings.swing * 100)}%
+        <Trans>Swing {Math.round(settings.swing * 100)}%</Trans>
         <Slider
           trackClassName={BAND_TRACK}
-          aria-label="Swing"
+          aria-label={t`Swing`}
           min={0}
           max={75}
           step={5}
@@ -119,10 +121,10 @@ export function BandSettingsForm({ settings, followSources, onChange, onStyle, s
         />
       </label>
       <label className="flex items-center gap-3">
-        Humanise {Math.round(settings.humanise.amount * 100)}%
+        <Trans>Humanise {Math.round(settings.humanise.amount * 100)}%</Trans>
         <Slider
           trackClassName={BAND_TRACK}
-          aria-label="Humanise"
+          aria-label={t`Humanise`}
           min={0}
           max={100}
           step={5}
@@ -131,9 +133,9 @@ export function BandSettingsForm({ settings, followSources, onChange, onStyle, s
         />
       </label>
       <label className="flex items-center gap-3">
-        Feel
+        <Trans>Feel</Trans>
         <Select value={settings.humanise.feel} onValueChange={(value) => onChange({ humanise: { ...settings.humanise, feel: value as HumaniseChoice } })}>
-          <SelectTrigger aria-label="Humanise feel" className="w-44">
+          <SelectTrigger aria-label={t`Humanise feel`} className="w-44">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -146,18 +148,18 @@ export function BandSettingsForm({ settings, followSources, onChange, onStyle, s
         </Select>
       </label>
       <label className="flex items-center gap-2">
-        <Switch aria-label="Ghost notes" checked={settings.ghostNotes} onCheckedChange={(on) => onChange({ ghostNotes: on })} />
-        Ghost notes
+        <Switch aria-label={t`Ghost notes`} checked={settings.ghostNotes} onCheckedChange={(on) => onChange({ ghostNotes: on })} />
+        <Trans>Ghost notes</Trans>
       </label>
       <label className="flex items-center gap-2">
-        <Switch aria-label="Crash on section starts" checked={settings.crashOnSections} onCheckedChange={(on) => onChange({ crashOnSections: on })} />
-        Crash on section starts
+        <Switch aria-label={t`Crash on section starts`} checked={settings.crashOnSections} onCheckedChange={(on) => onChange({ crashOnSections: on })} />
+        <Trans>Crash on section starts</Trans>
       </label>
       {/* The bass sound choice is hidden until a second bass sample set exists. The field stays in BandSettings. */}
       <label className="flex items-center gap-3">
-        Bass range
+        <Trans>Bass range</Trans>
         <Select value={settings.bassRange} onValueChange={(value) => onChange({ bassRange: value as BandSettings["bassRange"] })}>
-          <SelectTrigger aria-label="Bass range" className="w-36">
+          <SelectTrigger aria-label={t`Bass range`} className="w-36">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -171,9 +173,9 @@ export function BandSettingsForm({ settings, followSources, onChange, onStyle, s
       </label>
       <div className="flex flex-col gap-1 sm:col-span-2">
         <label className="flex items-center gap-3">
-          Default bass part
+          <Trans>Default bass part</Trans>
           <Select value={settings.defaultBassPart} onValueChange={(value) => onChange({ defaultBassPart: value as BassPart })}>
-            <SelectTrigger aria-label="Default bass part" className="w-44">
+            <SelectTrigger aria-label={t`Default bass part`} className="w-44">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -185,13 +187,13 @@ export function BandSettingsForm({ settings, followSources, onChange, onStyle, s
             </SelectContent>
           </Select>
         </label>
-        <p className="text-xs text-silkscreen-3">Used where a section is on Auto and has no rule of its own.</p>
+        <p className="text-xs text-silkscreen-3"><Trans>Used where a section is on Auto and has no rule of its own.</Trans></p>
       </div>
       <div className="flex flex-col gap-1 sm:col-span-2">
         <label className="flex items-center gap-3">
-          Bass notes from
+          <Trans>Bass notes from</Trans>
           <Select value={settings.bassFrom} onValueChange={(value) => onChange({ bassFrom: value as BassFrom })}>
-            <SelectTrigger aria-label="Bass notes from" className="w-44">
+            <SelectTrigger aria-label={t`Bass notes from`} className="w-44">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -204,46 +206,46 @@ export function BandSettingsForm({ settings, followSources, onChange, onStyle, s
           </Select>
         </label>
         <p className="text-xs text-silkscreen-3">
-          Original bass plays the notes the song&apos;s bass stem plays, where it has them. Chords plays each chord&apos;s bass.
+          <Trans>Original bass plays the notes the song&apos;s bass stem plays, where it has them. Chords plays each chord&apos;s bass.</Trans>
         </p>
       </div>
       <label className="flex items-center gap-3">
-        Feel
-        <span className="text-xs text-silkscreen-3">Tight</span>
+        <Trans>Feel
+        <span className="text-xs text-silkscreen-3">Tight</span></Trans>
         <Slider
           trackClassName={BAND_TRACK}
-          aria-label="Bass feel"
+          aria-label={t`Bass feel`}
           min={0}
           max={100}
           step={5}
           value={[Math.round(settings.bassFeel * 100)]}
           onValueChange={([percent]) => onChange({ bassFeel: percent / 100 })}
         />
-        <span className="text-xs text-silkscreen-3">Ring</span>
+        <Trans><span className="text-xs text-silkscreen-3">Ring</span></Trans>
       </label>
       <label className="flex items-center gap-2">
-        <Switch aria-label="Lock bass to kick" checked={settings.lockToKick} onCheckedChange={(on) => onChange({ lockToKick: on })} />
-        Lock bass to kick
+        <Switch aria-label={t`Lock bass to kick`} checked={settings.lockToKick} onCheckedChange={(on) => onChange({ lockToKick: on })} />
+        <Trans>Lock bass to kick</Trans>
       </label>
       <label className="flex items-center gap-2">
-        <Switch aria-label="Follow my playing" checked={settings.followPlaying} onCheckedChange={(on) => onChange({ followPlaying: on })} />
-        Follow my playing
+        <Switch aria-label={t`Follow my playing`} checked={settings.followPlaying} onCheckedChange={(on) => onChange({ followPlaying: on })} />
+        <Trans>Follow my playing</Trans>
       </label>
       <label className="flex items-center gap-2">
-        <Switch aria-label="Play with the drummer's timing" checked={settings.followDrummer} onCheckedChange={(on) => onChange({ followDrummer: on })} />
-        <span>
+        <Switch aria-label={t`Play with the drummer's timing`} checked={settings.followDrummer} onCheckedChange={(on) => onChange({ followDrummer: on })} />
+        <Trans><span>
           Play with the drummer's timing
           <span className="block text-xs text-silkscreen-3">Moves each generated hit onto the original drummer's hit, when the song has a drums stem.</span>
-        </span>
+        </span></Trans>
       </label>
       <label className="flex items-center gap-3">
-        Follow source
+        <Trans>Follow source</Trans>
         <Select
           value={followSources.includes(settings.followSource) ? settings.followSource : "auto"}
           disabled={!settings.followPlaying}
           onValueChange={(value) => onChange({ followSource: value as FollowSource })}
         >
-          <SelectTrigger aria-label="Follow source" className="w-36">
+          <SelectTrigger aria-label={t`Follow source`} className="w-36">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

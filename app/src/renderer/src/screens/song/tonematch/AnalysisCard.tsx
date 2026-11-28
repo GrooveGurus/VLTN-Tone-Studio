@@ -4,8 +4,10 @@ import { referenceBandPower, type GuitarAnalysis } from "@/song/tonematch/analys
 import { bandMean } from "@/song/tonematch/ltas";
 import { CurvePlot } from "./CurvePlot";
 import { Confidence, fmtDb, Section } from "./parts";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
-export const GAIN_TEXT = { clean: "Clean", crunch: "Crunch", high: "High gain" } as const;
+export const GAIN_TEXT = { get clean() { return t`Clean`; }, get crunch() { return t`Crunch`; }, get high() { return t`High gain`; } } as const;
 
 function Row({ label, value, detail, confidence }: { label: string; value: ReactNode; detail?: ReactNode; confidence: number }) {
   return (
@@ -29,62 +31,62 @@ function spectrumSeries(a: GuitarAnalysis) {
   const ref = a.ltas.centers.map((fc): [number, number] => [fc, referenceBandPower(fc)]);
   const refOffset = bandMean({ centers: a.ltas.centers, db: ref.map(([, db]) => db) }, 100, 4000);
   return [
-    { label: "Guitar stem", points: power.map(([f, db]): [number, number] => [f, db - offset]), className: "stroke-block-amp" },
-    { label: "Typical guitar", points: ref.map(([f, db]): [number, number] => [f, db - refOffset]), className: "stroke-silkscreen-3", dashed: true },
+    { label: t`Guitar stem`, points: power.map(([f, db]): [number, number] => [f, db - offset]), className: "stroke-block-amp" },
+    { label: t`Typical guitar`, points: ref.map(([f, db]): [number, number] => [f, db - refOffset]), className: "stroke-silkscreen-3", dashed: true },
   ];
 }
 
 export function AnalysisCard({ analysis: a }: { analysis: GuitarAnalysis }) {
   const sparse = a.level.activeShare < 0.08;
   return (
-    <Section title="What the guitar stem shows">
+    <Section title={t`What the guitar stem shows`}>
       {sparse && (
         <p role="note" className="flex items-start gap-2 rounded-md bg-led-warn/10 px-3 py-2 text-[12px] text-pretty text-silkscreen-2">
           <TriangleAlert className="mt-0.5 size-3.5 flex-none text-led-warn" aria-hidden />
-          The guitar plays in only {Math.round(a.level.activeShare * 100)} % of the song, or the separation found little guitar. Every estimate below is rough.
+          <Trans>The guitar plays in only {Math.round(a.level.activeShare * 100)} % of the song, or the separation found little guitar. Every estimate below is rough.</Trans>
         </p>
       )}
       <dl className="flex flex-col">
         <Row
-          label="Gain"
+          label={t`Gain`}
           value={GAIN_TEXT[a.gain.gainClass]}
-          detail={`Saturation score ${a.gain.score.toFixed(2)} of 1: upper harmonics ${fmtDb(a.gain.hfRatioDb)} against the body, ${a.gain.crestDb.toFixed(1)} dB of pick dynamics, spectral flatness ${a.gain.flatness < 0.001 ? "below 0.001" : a.gain.flatness.toFixed(3)}.`}
+          detail={t`Saturation score ${a.gain.score.toFixed(2)} of 1: upper harmonics ${fmtDb(a.gain.hfRatioDb)} against the body, ${a.gain.crestDb.toFixed(1)} dB of pick dynamics, spectral flatness ${a.gain.flatness < 0.001 ? t`below 0.001` : a.gain.flatness.toFixed(3)}.`}
           confidence={a.gain.confidence}
         />
         <Row
-          label="Delay"
-          value={a.delay.detected ? `Echo every ${Math.round(a.delay.timeMs)} ms` : "No clear echo"}
+          label={t`Delay`}
+          value={a.delay.detected ? t`Echo every ${Math.round(a.delay.timeMs)} ms` : t`No clear echo`}
           detail={
             a.delay.detected
-              ? `Each repeat about ${Math.round(a.delay.feedback * 100)} % of the one before; the first ${(-20 * Math.log10(a.delay.level + 1e-6)).toFixed(1)} dB under the guitar${a.delay.dark ? "; repeats lose their highs" : ""}.`
-              : "Searched 60 ms to 1.2 s between pick attacks and their repeats."
+              ? t`Each repeat about ${Math.round(a.delay.feedback * 100)} % of the one before; the first ${(-20 * Math.log10(a.delay.level + 1e-6)).toFixed(1)} dB under the guitar${a.delay.dark ? t`; repeats lose their highs` : ""}.`
+              : t`Searched 60 ms to 1.2 s between pick attacks and their repeats.`
           }
           confidence={a.delay.confidence}
         />
         <Row
-          label="Reverb"
-          value={a.reverb.detected ? `Tail of about ${a.reverb.rt60.toFixed(1)} s` : "No clear tail"}
+          label={t`Reverb`}
+          value={a.reverb.detected ? t`Tail of about ${a.reverb.rt60.toFixed(1)} s` : t`No clear tail`}
           detail={
             a.reverb.detected
-              ? `Measured on ${a.reverb.tails} note endings; the tail starts ${Math.abs(a.reverb.levelDb).toFixed(1)} dB under the note.`
-              : `${a.reverb.dryOffsets} note endings stop dry, ${a.reverb.tails} have a tail.`
+              ? t`Measured on ${a.reverb.tails} note endings; the tail starts ${Math.abs(a.reverb.levelDb).toFixed(1)} dB under the note.`
+              : t`${a.reverb.dryOffsets} note endings stop dry, ${a.reverb.tails} have a tail.`
           }
           confidence={a.reverb.confidence}
         />
         <Row
-          label="Tone"
-          value={`Bass ${fmtDb(a.tone.bassDb)}, mids ${fmtDb(a.tone.midDb)}, treble ${fmtDb(a.tone.trebleDb)}`}
-          detail={`Against a typical guitar through a cabinet. Low mids ${fmtDb(a.tone.lowMidDb)}, presence ${fmtDb(a.tone.presenceDb)}.`}
+          label={t`Tone`}
+          value={t`Bass ${fmtDb(a.tone.bassDb)}, mids ${fmtDb(a.tone.midDb)}, treble ${fmtDb(a.tone.trebleDb)}`}
+          detail={t`Against a typical guitar through a cabinet. Low mids ${fmtDb(a.tone.lowMidDb)}, presence ${fmtDb(a.tone.presenceDb)}.`}
           confidence={a.tone.confidence}
         />
         <Row
-          label="Level"
+          label={t`Level`}
           value={`${a.level.rmsDb.toFixed(1)} dBFS while playing`}
-          detail={`Plays in ${Math.round(a.level.activeShare * 100)} % of the song; peaks at ${a.level.peakDb.toFixed(1)} dBFS.`}
+          detail={t`Plays in ${Math.round(a.level.activeShare * 100)} % of the song; peaks at ${a.level.peakDb.toFixed(1)} dBFS.`}
           confidence={a.level.confidence}
         />
       </dl>
-      <CurvePlot title="Spectrum of the guitar stem against a typical guitar" series={spectrumSeries(a)} />
+      <CurvePlot title={t`Spectrum of the guitar stem against a typical guitar`} series={spectrumSeries(a)} />
     </Section>
   );
 }

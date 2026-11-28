@@ -6,6 +6,8 @@ import { runningSeconds } from "@/song/performance/running-time";
 import { evaluateSmart, validateSmartRules, type SmartRules } from "@shared/library-filter";
 import type { Playlist } from "@shared/song-library";
 import { FilterBuilder } from "./FilterBuilder";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * A smart playlist: its rules, and the songs they pick now. Saving the rules changes what the playlist would pick next time. Playing it
@@ -23,7 +25,7 @@ export function SmartPlaylistEditor({ playlist }: { playlist: Playlist }) {
     try {
       validateSmartRules(draft);
     } catch (e) {
-      return setProblem(e instanceof Error ? e.message : "These rules cannot be saved.");
+      return setProblem(e instanceof Error ? e.message : t`These rules cannot be saved.`);
     }
     setProblem("");
     void library.updatePlaylist(playlist.id, { smart: draft });
@@ -34,10 +36,10 @@ export function SmartPlaylistEditor({ playlist }: { playlist: Playlist }) {
       <FilterBuilder value={draft} folders={library.index.folders} onChange={setDraft} />
       <div className="flex flex-wrap items-center gap-2">
         <Button disabled={!dirty || library.busy} onClick={save}>
-          Save rules
+          <Trans>Save rules</Trans>
         </Button>
         <Button variant="outline" disabled={!dirty} onClick={() => setDraft(saved)}>
-          Discard changes
+          <Trans>Discard changes</Trans>
         </Button>
       </div>
       {problem && (
@@ -47,19 +49,19 @@ export function SmartPlaylistEditor({ playlist }: { playlist: Playlist }) {
       )}
       <p className="text-sm">
         {failed
-          ? "No songs, until the rules are fixed."
-          : `${ids.length} song${ids.length === 1 ? "" : "s"} · ${formatTime(preview.songs.reduce((sum, s) => sum + runningSeconds(s), 0))}`}
-        {!dirty && " · saved"}
+          ? t`No songs, until the rules are fixed.`
+          : t`${ids.length} song${ids.length === 1 ? "" : "s"} · ${formatTime(preview.songs.reduce((sum, s) => sum + runningSeconds(s), 0))}`}
+        {!dirty && t` · saved`}
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <Button disabled={!ids.length || failed || library.busy || dirty} onClick={() => void library.playPlaylist(ids)}>
-          Play playlist
+          <Trans>Play playlist</Trans>
         </Button>
         <Button variant="outline" disabled={!ids.length || failed || library.busy || dirty} onClick={() => void library.load(ids[0], ids, 0)}>
-          Load set paused
+          <Trans>Load set paused</Trans>
         </Button>
         <Button variant="outline" disabled={!ids.length || failed || library.busy} onClick={() => library.addToQueue(ids)}>
-          Queue all
+          <Trans>Queue all</Trans>
         </Button>
       </div>
       <ol className="max-h-64 space-y-1 overflow-auto text-sm">
@@ -69,7 +71,7 @@ export function SmartPlaylistEditor({ playlist }: { playlist: Playlist }) {
           </li>
         ))}
       </ol>
-      {preview.songs.length > 200 && <p className="text-sm text-silkscreen-3">Showing the first 200 of {preview.songs.length}.</p>}
+      {preview.songs.length > 200 && <p className="text-sm text-silkscreen-3"><Trans>Showing the first 200 of {preview.songs.length}.</Trans></p>}
     </div>
   );
 }

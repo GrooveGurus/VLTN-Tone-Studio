@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { AudioWaveform, Speaker, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { requestImage, useTones } from "./store";
+import { Trans } from "@lingui/react/macro";
 
 /** Placeholder glyph by gear type, so the empty tile still says what it holds. */
 export function GearGlyph({ gear, format, className }: { gear: string; format: string; className?: string }) {
@@ -46,7 +47,7 @@ export function ToneImage({
       ) : (
         <>
           <GearGlyph gear={gear} format={format} className={square ? "size-8" : "size-7"} />
-          {caption && <span className="absolute inset-x-0 bottom-2 text-center text-[11px] text-silkscreen-4">Tone image</span>}
+          {caption && <span className="absolute inset-x-0 bottom-2 text-center text-[11px] text-silkscreen-4"><Trans>Tone image</Trans></span>}
         </>
       )}
       {children}

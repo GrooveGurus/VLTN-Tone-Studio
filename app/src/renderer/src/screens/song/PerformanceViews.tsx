@@ -1,15 +1,16 @@
 import { useRef, type KeyboardEvent } from "react";
 import { cn } from "@/lib/utils";
+import { t } from "@lingui/core/macro";
 
 /** The views the Performance tab is split into. Only one is shown at a time; the others stay mounted. */
 export type PerformanceView = "play" | "song" | "lyrics" | "midi" | "setup";
 
 export const PERFORMANCE_VIEWS: { value: PerformanceView; label: string }[] = [
-  { value: "play", label: "Play" },
-  { value: "song", label: "This song" },
-  { value: "lyrics", label: "Lyrics & chords" },
+  { value: "play", get label() { return t`Play`; } },
+  { value: "song", get label() { return t`This song`; } },
+  { value: "lyrics", get label() { return t`Lyrics & chords`; } },
   { value: "midi", label: "MIDI" },
-  { value: "setup", label: "Setup" },
+  { value: "setup", get label() { return t`Setup`; } },
 ];
 
 const STORAGE_KEY = "vltn.performance.view";
@@ -52,7 +53,7 @@ export function PerformanceViewSwitcher({ view, onView }: { view: PerformanceVie
   return (
     <div
       role="tablist"
-      aria-label="Performance view"
+      aria-label={t`Performance view`}
       className="inline-flex w-fit items-center justify-center gap-0.5 rounded-pill bg-white/7 p-[3px] text-silkscreen-2"
     >
       {PERFORMANCE_VIEWS.map((item, index) => {

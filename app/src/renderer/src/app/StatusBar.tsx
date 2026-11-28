@@ -12,17 +12,18 @@ import { keyLabel } from "./keys";
 import { AnalysisChip } from "./AnalysisChip";
 import { ConversionChip } from "./ConversionChip";
 import { SongRunChip } from "./SongRunChip";
+import { t } from "@lingui/core/macro";
 
 const LED: Record<StatusMessage["led"], string> = { on: "bg-led-on", off: "bg-led-off", warn: "bg-led-warn", fault: "bg-led-fault" };
 
 /** Default hints per screen; screens replace them with `useStatusHints`. */
 const DEFAULT_HINTS: Record<string, StatusHint[]> = {
   rig: [
-    { keys: ["Mod", "K"], label: "command palette" },
-    { keys: ["Mod", "S"], label: "save" },
-    { keys: ["F2"], label: "rename slot" },
+    { keys: ["Mod", "K"], get label() { return t`command palette`; } },
+    { keys: ["Mod", "S"], get label() { return t`save`; } },
+    { keys: ["F2"], get label() { return t`rename slot`; } },
   ],
-  other: [{ keys: ["Mod", "K"], label: "command palette" }],
+  other: [{ keys: ["Mod", "K"], get label() { return t`command palette`; } }],
 };
 
 /** 30px status bar: live/offline state and MIDI port on the left, shortcut hints on the right. */
@@ -53,10 +54,10 @@ export function StatusBar() {
         : errorView
           ? { led: errorView.led, text: errorView.statusText }
           : status === "connecting"
-          ? { led: "warn", text: `Connecting to the ${connecting}…` }
+          ? { led: "warn", text: t`Connecting to the ${connecting ?? ""}…` }
           : hadPreset && screen === "rig"
-            ? { led: "off", text: `Offline: the Rig is read-only until the ${pedal} is back. Nothing has been lost.` }
-            : { led: "off", text: `Not connected: presets on the pedal can't be changed until the ${pedal} is back` });
+            ? { led: "off", text: t`Offline: the Rig is read-only until the ${pedal} is back. Nothing has been lost.` }
+            : { led: "off", text: t`Not connected: presets on the pedal can't be changed until the ${pedal} is back` });
 
   return (
     <footer className="flex h-[30px] shrink-0 items-center gap-4 overflow-hidden pr-5 pl-6 text-[11px] whitespace-nowrap text-silkscreen-3">
@@ -67,7 +68,7 @@ export function StatusBar() {
       {live && (
         <>
           <span className="h-3 w-px shrink-0 bg-seam-strong" aria-hidden />
-          <span className="shrink-0">{mode === "mock" ? `Simulated ${pedal}` : portName}</span>
+          <span className="shrink-0">{mode === "mock" ? t`Simulated ${pedal}` : portName}</span>
         </>
       )}
       <span className="flex-1" />

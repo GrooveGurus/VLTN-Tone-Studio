@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { host } from "@/host";
+import { Trans } from "@lingui/react/macro";
 
 /** macOS owns the radio connection; the app selects its resulting system MIDI port. */
 export function SystemBluetoothControls({
@@ -43,18 +44,18 @@ export function SystemBluetoothControls({
     <div className="flex max-w-xl flex-col gap-2 text-sm">
       <div className="flex flex-wrap gap-2">
         <Button variant="outline" disabled={opening || locked} onClick={() => void open()}>
-          Open macOS MIDI setup
+          <Trans>Open macOS MIDI setup</Trans>
         </Button>
         {opening && (
           <Button variant="outline" onClick={() => void host.bluetoothMidi?.cancelSetup().catch((error) => setError(String(error)))}>
-            Cancel Bluetooth setup
+            <Trans>Cancel Bluetooth setup</Trans>
           </Button>
         )}
       </div>
-      {opening && <p role="status">Opening macOS MIDI setup. Playback stays stopped.</p>}
+      {opening && <p role="status"><Trans>Opening macOS MIDI setup. Playback stays stopped.</Trans></p>}
       <p>
-        In Audio MIDI Setup, choose Window → Show MIDI Studio, then MIDI Studio → Open Bluetooth Configuration. Connect your pedal there. Return here, choose
-        its MIDI output and enable Send cues. Reconnection never resumes playback.
+        <Trans>In Audio MIDI Setup, choose Window → Show MIDI Studio, then MIDI Studio → Open Bluetooth Configuration. Connect your pedal there. Return here, choose
+        its MIDI output and enable Send cues. Reconnection never resumes playback.</Trans>
       </p>
       {error && <p role="alert">{error}</p>}
     </div>

@@ -3,6 +3,7 @@
 import type { CaptureRecipe, CaptureSize, Shaping } from "@shared/host/capture";
 import { editableMetadata, inspectNam, withMetadata, withOutputGain, withSize, type NamFile, type NamInfo, type TextField } from "./model";
 import { FLAT_SHAPING, SHAPING_RANGES } from "./shaping";
+import { t } from "@lingui/core/macro";
 
 export const LOUDNESS_TARGETS = [-14, -18, -23] as const;
 export const TRIM_RANGE = { min: -24, max: 24, step: 0.5 };
@@ -30,17 +31,17 @@ export function applyRecipe(file: NamFile, recipe: CaptureRecipe, info: NamInfo 
 export const recipesEqual = (a: CaptureRecipe, b: CaptureRecipe) => JSON.stringify(a) === JSON.stringify(b);
 
 const FIELD_LABEL: Record<TextField | "input_level_dbu" | "output_level_dbu", string> = {
-  name: "name",
-  modeled_by: "modeled by",
-  gear_make: "gear make",
-  gear_model: "gear model",
-  gear_type: "gear type",
-  tone_type: "tone type",
-  input_level_dbu: "input calibration",
-  output_level_dbu: "output calibration",
+  get name() { return t`name`; },
+  get modeled_by() { return t`modeled by`; },
+  get gear_make() { return t`gear make`; },
+  get gear_model() { return t`gear model`; },
+  get gear_type() { return t`gear type`; },
+  get tone_type() { return t`tone type`; },
+  get input_level_dbu() { return t`input calibration`; },
+  get output_level_dbu() { return t`output calibration`; },
 };
 
-export const SIZE_LABEL: Record<CaptureSize, string> = { both: "Both sizes", full: "Full only", lite: "Lite only" };
+export const SIZE_LABEL: Record<CaptureSize, string> = { get both() { return t`Both sizes`; }, get full() { return t`Full only`; }, get lite() { return t`Lite only`; } };
 
 export const fmtDb = (db: number) => `${db > 0 ? "+" : db < 0 ? "−" : ""}${Number(Math.abs(db).toFixed(1))} dB`;
 export const fmtHz = (hz: number) => (hz >= 1000 ? `${Number((hz / 1000).toFixed(1))} kHz` : `${Math.round(hz)} Hz`);
@@ -69,7 +70,7 @@ export function summarize(prev: CaptureRecipe, next: CaptureRecipe): string {
   if (prev.size !== next.size) parts.push(SIZE_LABEL[next.size].toLowerCase());
   const shaping = (Object.keys(SHAPING_LABEL) as (keyof Shaping)[]).filter((k) => prev.shaping[k] !== next.shaping[k]);
   if (shaping.length) parts.push(shaping.map((k) => SHAPING_LABEL[k](next.shaping[k])).join(", "));
-  if (!parts.length) return "No changes";
+  if (!parts.length) return t`No changes`;
   const line = parts.join("; ");
   return line.charAt(0).toUpperCase() + line.slice(1);
 }

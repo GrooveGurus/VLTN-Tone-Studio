@@ -23,6 +23,8 @@ import { profileFor } from "@shared/devices";
 import { readAndBackUp, readSlot, runNative } from "./native";
 import { initPatch, slotsToRead, type NativeOp, type Step } from "./plans";
 import { emptyName, isEmptyName, useLibrary } from "./store";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export interface BulkPlan {
   title: string;
@@ -52,7 +54,7 @@ async function blankPreset(): Promise<Uint8Array> {
   const known = names.find((n) => isEmptyName(n.name) && bodies[n.slot] && presetDevice(bodies[n.slot].prst) === device);
   if (known) return bodies[known.slot].prst;
   const empty = names.find((n) => isEmptyName(n.name));
-  if (!empty) throw new Error(`There's no empty slot on the ${pedalName(device)} to take an empty preset from.`);
+  if (!empty) throw new Error(t`There's no empty slot on the ${pedalName(device)} to take an empty preset from.`);
   return readSlot(empty.slot);
 }
 
@@ -100,7 +102,7 @@ export function BulkWriteDialog({ plan, onOpenChange }: { plan: BulkPlan | null;
       if (plan.native) {
         const job = { op: plan.native, steps, pedal, read: read.current, backedUp: backedUp.current, onStatus: (text: string, f: number) => (setStatus(text), setProgress(f)) };
         await runNative(job).finally(() => (backedUp.current = job.backedUp));
-        notifySuccess(plan.doneTitle, replaced.length ? "The replaced presets are in Replaced presets." : undefined);
+        notifySuccess(plan.doneTitle, replaced.length ? t`The replaced presets are in Replaced presets.` : undefined);
         onOpenChange(false);
         return;
       }
@@ -121,7 +123,7 @@ export function BulkWriteDialog({ plan, onOpenChange }: { plan: BulkPlan | null;
       for (let i = written.current; i < steps.length; i++) {
         const step = steps[i];
         failedAt.slot = step.slot;
-        setStatus(`Writing slot ${slotLabel(step.slot)} (${i + 1} of ${steps.length})`);
+        setStatus(t`Writing slot ${slotLabel(step.slot)} (${i + 1} of ${steps.length})`);
         setProgress((toRead.length + i) / total);
         const prst = read.current.get(step.from)!;
         await useDevice.getState().writePreset(step.slot, prst);
@@ -131,7 +133,7 @@ export function BulkWriteDialog({ plan, onOpenChange }: { plan: BulkPlan | null;
       setProgress(1);
       // Writing verifies by selecting each slot; go back to the preset that was playing.
       if (original !== null && useDevice.getState().slot !== original) await useDevice.getState().selectSlot(original).catch(() => {});
-      notifySuccess(plan.doneTitle, `Verified by reading each slot back.${backedUp.current ? " The replaced presets are in Replaced presets." : ""}`);
+      notifySuccess(plan.doneTitle, t`Verified by reading each slot back.${backedUp.current ? t` The replaced presets are in Replaced presets.` : ""}`);
       onOpenChange(false);
     } catch (e) {
       setError(describeError(e, failedAt.slot));
@@ -147,30 +149,30 @@ export function BulkWriteDialog({ plan, onOpenChange }: { plan: BulkPlan | null;
         <AlertDialogHeader>
           <AlertDialogTitle className="text-balance">{plan.title}</AlertDialogTitle>
           <AlertDialogDescription className="text-pretty">
-            {running ? `Keep the ${pedal} connected until ${plan.native ? "it finishes" : "every slot is checked"}.` : plan.description}
+            {running ? t`Keep the ${pedal} connected until ${plan.native ? t`it finishes` : t`every slot is checked`}.` : plan.description}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         {running ? (
           <div className="flex flex-col gap-2" role="status">
             <span className="text-sm text-silkscreen-2">{status}</span>
-            <Progress value={progress * 100} aria-label="Progress" />
+            <Progress value={progress * 100} aria-label={t`Progress`} />
           </div>
         ) : (
           <>
             <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 rounded-lg bg-well px-3.5 py-3 text-sm">
               {rows.map((s) => (
                 <div key={s.slot} className="contents">
-                  <dt className="text-silkscreen-3 tabular-nums">Slot {slotLabel(s.slot)}</dt>
+                  <dt className="text-silkscreen-3 tabular-nums"><Trans>Slot {slotLabel(s.slot)}</Trans></dt>
                   <dd className="min-w-0 truncate text-silkscreen">
-                    <span className="font-semibold">{s.from !== "blank" ? nameOf(s.from) : pedalEmptyName === null ? "Init patch" : "Empty preset"}</span>
+                    <span className="font-semibold">{s.from !== "blank" ? nameOf(s.from) : pedalEmptyName === null ? t`Init patch` : t`Empty preset`}</span>
                     <span className="text-silkscreen-3">
-                      {isEmptyName(nameOf(s.slot)) ? ", was empty" : `, replaces ${nameOf(s.slot)}`}
+                      {isEmptyName(nameOf(s.slot)) ? t`, was empty` : t`, replaces ${nameOf(s.slot)}`}
                     </span>
                   </dd>
                 </div>
               ))}
-              {plan.steps.length > MAX_ROWS && <dd className="col-span-2 text-silkscreen-3">and {plan.steps.length - MAX_ROWS} more</dd>}
+              {plan.steps.length > MAX_ROWS && <dd className="col-span-2 text-silkscreen-3"><Trans>and</Trans> {plan.steps.length - MAX_ROWS} <Trans>more</Trans></dd>}
             </dl>
             <div className="flex items-start gap-2.5 text-sm">
               <Checkbox
@@ -185,11 +187,11 @@ export function BulkWriteDialog({ plan, onOpenChange }: { plan: BulkPlan | null;
               />
               <Label htmlFor={checkboxId} className="flex flex-col items-start gap-0.5 font-normal text-silkscreen">
                 <span>
-                  {replaced.length ? `Back up the ${replaced.length === 1 ? "replaced slot" : `${replaced.length} replaced slots`} first` : "Back up first (not needed, the slots are empty)"}
+                  {replaced.length ? t`Back up the ${replaced.length === 1 ? t`replaced slot` : t`${replaced.length} replaced slots`} first` : t`Back up first (not needed, the slots are empty)`}
                 </span>
                 {replaced.length > 0 && (
                   <span className="text-xs text-silkscreen-3">
-                    {plan.native ? "Always done before the pedal changes slots itself. Saves them to Replaced presets on this computer" : "Saves them to Replaced presets on this computer"}
+                    {plan.native ? t`Always done before the pedal changes slots itself. Saves them to Replaced presets on this computer` : t`Saves them to Replaced presets on this computer`}
                   </span>
                 )}
               </Label>
@@ -207,14 +209,14 @@ export function BulkWriteDialog({ plan, onOpenChange }: { plan: BulkPlan | null;
           {running ? (
             <Button disabled>
               <Spinner data-icon="inline-start" />
-              {plan.native ? "Working" : "Writing"}
+              {plan.native ? t`Working` : t`Writing`}
             </Button>
           ) : (
             <>
-              <AlertDialogCancel variant="ghost">Cancel</AlertDialogCancel>
+              <AlertDialogCancel variant="ghost"><Trans>Cancel</Trans></AlertDialogCancel>
               <Button variant="destructive" disabled={!connected || !plan.steps.length} onClick={() => void run()}>
                 <ArrowDownToLineIcon data-icon="inline-start" />
-                {error ? "Retry" : plan.action}
+                {error ? t`Retry` : plan.action}
               </Button>
             </>
           )}

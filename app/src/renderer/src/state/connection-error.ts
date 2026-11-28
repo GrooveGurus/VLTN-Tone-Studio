@@ -5,6 +5,7 @@ import { pedalNameOrBoth, vendorApps } from "./device-model";
 import { unsupportedModelError } from "./driver";
 import { hasDriver } from "./driver/types";
 import type { ConnectionError, ConnectionErrorCode } from "./device-types";
+import { t } from "@lingui/core/macro";
 
 const CONNECT_CODES: Record<string, ConnectionErrorCode> = {
   "no-webmidi": "unsupported",
@@ -26,12 +27,12 @@ export function toConnectionError(e: unknown, gotBytes: boolean, device: DeviceK
   const err = e as { code?: string; message?: string; visiblePorts?: string[] };
   if (err?.code && CONNECT_CODES[err.code]) return { code: CONNECT_CODES[err.code], message: err.message ?? String(e), ports: err.visiblePorts };
   if (err?.code === "timeout" && identified)
-    return { code: "unknown", message: `The ${pedal} stopped answering while Tone Studio read it (${err.message ?? "timeout"}). Switch it off and on, then reconnect.` };
+    return { code: "unknown", message: t`The ${pedal} stopped answering while Tone Studio read it (${err.message ?? t`timeout`}). Switch it off and on, then reconnect.` };
   if (err?.code === "timeout")
     return gotBytes
-      ? { code: "timeout", message: `The pedal answered but not like a ${pedal}. Check the firmware or the device.` }
-      : { code: "busy", message: `The ${pedal} port is open but silent. Close ${vendorApps(device).editor}, then reconnect.` };
-  if (err?.code === "length") return { code: "unknown", message: err.message ?? `Unexpected reply length (is this a ${pedal}?)` };
+      ? { code: "timeout", message: t`The pedal answered but not like a ${pedal}. Check the firmware or the device.` }
+      : { code: "busy", message: t`The ${pedal} port is open but silent. Close ${vendorApps(device).editor}, then reconnect.` };
+  if (err?.code === "length") return { code: "unknown", message: err.message ?? t`Unexpected reply length (is this a ${pedal}?)` };
   return { code: "unknown", message: err?.message ?? String(e) };
 }
 
@@ -42,7 +43,7 @@ export function toConnectionError(e: unknown, gotBytes: boolean, device: DeviceK
  */
 export function refineConnectionError(error: ConnectionError, status: DeviceHostStatus | null): ConnectionError {
   if (error.code !== "not-found" && error.code !== "busy" && error.code !== "timeout") return error;
-  if (updaterOnUsb(status)) return { ...error, code: "bootloader", message: "The pedal is in firmware update mode. The app sends nothing until it restarts normally." };
+  if (updaterOnUsb(status)) return { ...error, code: "bootloader", message: t`The pedal is in firmware update mode. The app sends nothing until it restarts normally.` };
   const onUsb = pedalOnUsb(status);
   return onUsb && !hasDriver(profileFor(onUsb).family) ? unsupportedModelError(onUsb) : error;
 }

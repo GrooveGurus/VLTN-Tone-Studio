@@ -6,6 +6,8 @@ import { doubleTempo, halveTempo, nudgeGrid, shiftDownbeat, type BeatGrid } from
 import type { ChordAtBeat } from "@/song/band/harmony";
 import { BandGrid } from "./BandGrid";
 import { BassNoteEditor, BassNoteList, type BassNotesContext } from "./BassNotes";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export interface BandGridSectionProps {
   grid: BeatGrid | null;
@@ -47,42 +49,42 @@ export function BandGridSection({
   // The beat whose bass note is open in the editor. A beat is toggled off by picking it again.
   const [editing, setEditing] = useState<number | null>(null);
   return (
-    <section aria-label="Beat grid" className="flex min-w-0 flex-col gap-3">
-      <h3 className="font-semibold">Beat grid</h3>
+    <section aria-label={t`Beat grid`} className="flex min-w-0 flex-col gap-3">
+      <h3 className="font-semibold"><Trans>Beat grid</Trans></h3>
       <div className="flex flex-wrap items-center gap-2">
         <Button size="sm" variant="outline" disabled={blocked} onClick={onFind}>
-          Find the beat
+          <Trans>Find the beat</Trans>
         </Button>
         {myTempo && (
           <label className="flex items-center gap-1.5 text-xs">
             <Checkbox checked={myTempo.use} disabled={blocked} onCheckedChange={(value) => myTempo.onUse(value === true)} />
-            Use my tempo ({myTempo.bpm} BPM)
+            <Trans>Use my tempo ({myTempo.bpm} BPM)</Trans>
           </label>
         )}
         <Button size="sm" variant="outline" disabled={blocked || !grid} onClick={() => grid && onGrid(halveTempo(grid))}>
-          Half tempo
+          <Trans>Half tempo</Trans>
         </Button>
         <Button size="sm" variant="outline" disabled={blocked || !grid} onClick={() => grid && onGrid(doubleTempo(grid))}>
-          Double tempo
+          <Trans>Double tempo</Trans>
         </Button>
         <Button size="sm" variant="outline" disabled={blocked || !grid} onClick={() => grid && onGrid(shiftDownbeat(grid, -1))}>
-          Downbeat ←
+          <Trans>Downbeat ←</Trans>
         </Button>
         <Button size="sm" variant="outline" disabled={blocked || !grid} onClick={() => grid && onGrid(shiftDownbeat(grid, 1))}>
-          Downbeat →
+          <Trans>Downbeat →</Trans>
         </Button>
         <Button size="sm" variant="outline" disabled={blocked || !grid} onClick={() => grid && onGrid(nudgeGrid(grid, -0.01))}>
-          Nudge −10 ms
+          <Trans>Nudge −10 ms</Trans>
         </Button>
         <Button size="sm" variant="outline" disabled={blocked || !grid} onClick={() => grid && onGrid(nudgeGrid(grid, 0.01))}>
-          Nudge +10 ms
+          <Trans>Nudge +10 ms</Trans>
         </Button>
         <Button size="sm" variant="outline" disabled={blocked} onClick={onFixed}>
-          Use fixed BPM
+          <Trans>Use fixed BPM</Trans>
         </Button>
         {busy && (
           <Button size="sm" variant="ghost" onClick={onCancel}>
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
         )}
       </div>
@@ -95,12 +97,12 @@ export function BandGridSection({
       {grid ? (
         <>
           <p>
-            {grid.bpm.toFixed(1)} BPM, {grid.steady ? "steady" : "drifting"}, {grid.beats.length} beats, {grid.beatsPerBar} per bar.
+            {grid.bpm.toFixed(1)} BPM, {grid.steady ? t`steady` : t`drifting`}<Trans>, {grid.beats.length} beats, {grid.beatsPerBar} per bar.</Trans>
           </p>
           {grid.steady && (
             <div>
               <Button size="sm" variant="outline" disabled={blocked} onClick={onSetTempo}>
-                Set metronome to this tempo
+                <Trans>Set metronome to this tempo</Trans>
               </Button>
             </div>
           )}
@@ -117,7 +119,7 @@ export function BandGridSection({
           {bassNotes && <BassNoteList harmony={harmony} overrides={bassNotes.overrides} disabled={bassNotes.disabled} onChange={bassNotes.onChange} />}
         </>
       ) : (
-        <p className="text-silkscreen-3">No beat grid yet. Find the beat, or use the fixed BPM.</p>
+        <p className="text-silkscreen-3"><Trans>No beat grid yet. Find the beat, or use the fixed BPM.</Trans></p>
       )}
     </section>
   );

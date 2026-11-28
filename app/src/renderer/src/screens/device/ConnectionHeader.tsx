@@ -10,6 +10,8 @@ import { attachedDevice, pedalName, slotLabel, vendorApps } from "@/state/device
 import { BluetoothControls } from "@/bluetooth/BluetoothControls";
 import { bluetoothOffered } from "@/bluetooth/availability";
 import { clock, pedalModelName, requestErrorLine, type ConnectionView, type Led } from "./guidance";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Models the Device screen offers to simulate (registry profiles with a simulator). */
 const SIMULATED = DEVICE_KEYS.filter((k) => profileFor(k).simulator);
@@ -47,13 +49,13 @@ export function ConnectionHeader({ view, onShowFix }: { view: ConnectionView; on
     await d.checkHost();
     lookForPedal();
   };
-  const readAgain = () => void d.sync().catch((e) => notifyError("Couldn't read the pedal", e));
+  const readAgain = () => void d.sync().catch((e) => notifyError(t`Couldn't read the pedal`, e));
 
   return (
     // The actions wrap under the title when both don't fit on one line (five simulators, a long state line).
     <header className="flex flex-wrap items-end gap-x-6 gap-y-4 px-7 pt-[22px] pb-1.5">
       <div className="min-w-0 flex-[1_1_440px]">
-        <h1 className="text-[32px] leading-[1.1] font-bold tracking-[-0.02em] text-balance">Valeton {pedalModelName(d)}</h1>
+        <h1 className="text-[32px] leading-[1.1] font-bold tracking-[-0.02em] text-balance"><Trans>Valeton {pedalModelName(d)}</Trans></h1>
         <div className="mt-2.5 flex flex-wrap items-center gap-x-[18px] gap-y-1.5 text-sm text-silkscreen-3">
           <span className="flex items-center gap-1.5">
             {view.kind === "connecting" ? (
@@ -72,7 +74,7 @@ export function ConnectionHeader({ view, onShowFix }: { view: ConnectionView; on
           )}
           {connected && d.mod && (
             <span>
-              Firmware{" "}
+              <Trans>Firmware{" "}</Trans>
               <b className="font-semibold text-silkscreen">
                 {d.mod.label}
                 {d.firmware ? ` · V${d.firmware}` : ""}
@@ -81,12 +83,12 @@ export function ConnectionHeader({ view, onShowFix }: { view: ConnectionView; on
           )}
           {(connected || view.kind === "connecting") && d.portName && (
             <span>
-              MIDI port <b className="font-semibold text-silkscreen">{d.portName}</b>
+              <Trans>MIDI port</Trans> <b className="font-semibold text-silkscreen">{d.portName}</b>
             </span>
           )}
           {connected && d.activeSlot !== null && (
             <span>
-              Active preset{" "}
+              <Trans>Active preset{" "}</Trans>
               <b className="font-semibold text-silkscreen">
                 {slotLabel(d.device, d.activeSlot)} {d.activeName}
               </b>
@@ -94,13 +96,13 @@ export function ConnectionHeader({ view, onShowFix }: { view: ConnectionView; on
           )}
           {view.kind === "driver" && d.hostStatus?.driver && (
             <span>
-              Driver <b className="font-semibold text-silkscreen">{d.hostStatus.driver}</b>
+              <Trans>Driver</Trans> <b className="font-semibold text-silkscreen">{d.hostStatus.driver}</b>
             </span>
           )}
           {connected && d.mode === "webmidi" && d.hostStatus?.vendorApps && runningPortHolder(d.hostStatus, d.device) === null && (
             <span className="flex items-center gap-1.5">
               <CircleCheck className="size-3.5" aria-hidden />
-              {vendorApps(d.device).editor} is not running
+              <Trans>{vendorApps(d.device).editor} is not running</Trans>
             </span>
           )}
         </div>
@@ -120,7 +122,7 @@ export function ConnectionHeader({ view, onShowFix }: { view: ConnectionView; on
             {errorLine}
             <Button variant="ghost" size="sm" onClick={readAgain} disabled={!!d.busy}>
               <RefreshCw aria-hidden />
-              Retry
+              <Trans>Retry</Trans>
             </Button>
           </p>
         )}
@@ -132,24 +134,24 @@ export function ConnectionHeader({ view, onShowFix }: { view: ConnectionView; on
           <>
             <Button variant="ghost" onClick={readAgain} disabled={!!d.busy}>
               <RefreshCw className={cn(d.busy?.kind === "sync" && "animate-spin motion-reduce:animate-none")} aria-hidden />
-              Read pedal again
+              <Trans>Read pedal again</Trans>
             </Button>
             <Button variant="outline" onClick={() => void d.disconnect()} disabled={!!d.busy && d.busy.kind !== "sync"}>
               <Unlink aria-hidden />
-              Disconnect
+              <Trans>Disconnect</Trans>
             </Button>
           </>
         ) : (
           <>
             {view.kind !== "bootloader" && view.kind !== "connecting" && (
-              <div role="group" aria-label="Simulate a pedal" className="flex flex-wrap items-center gap-1">
-                <span className="mr-1 text-sm text-silkscreen-3">Simulate</span>
+              <div role="group" aria-label={t`Simulate a pedal`} className="flex flex-wrap items-center gap-1">
+                <Trans><span className="mr-1 text-sm text-silkscreen-3">Simulate</span></Trans>
                 {SIMULATED.map((key) => (
                   <Button
                     key={key}
                     size="sm"
                     variant={view.action === "none" ? "outline" : "ghost"}
-                    aria-label={`Simulate a ${pedalName(key)}`}
+                    aria-label={t`Simulate a ${pedalName(key)}`}
                     onClick={() => void d.connect("mock", { mockDevice: key }).catch(() => {})}
                   >
                     {pedalName(key)}
@@ -159,7 +161,7 @@ export function ConnectionHeader({ view, onShowFix }: { view: ConnectionView; on
             )}
             {view.action === "cancel" && (
               <Button variant="ghost" onClick={() => void d.cancelConnect()}>
-                Cancel
+                <Trans>Cancel</Trans>
               </Button>
             )}
             {view.action === "connect" && (

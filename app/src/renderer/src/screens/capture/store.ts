@@ -6,6 +6,7 @@ import { host } from "@/host";
 import { inspectNam, parseNam, serializeNam, type NamFile, type NamInfo } from "./nam/model";
 import { applyRecipe, originalRecipe, recipesEqual, summarize } from "./nam/recipe";
 import type { ClipId } from "./audio/engine";
+import { t } from "@lingui/core/macro";
 
 export type EditTab = "info" | "level" | "size" | "shape";
 export type AuditionSource = ClipId | "live";
@@ -98,8 +99,8 @@ async function openOrDownload(ref: string, modelId: number | null | undefined, o
     const models = await host.tones.models(toneId);
     const pick =
       models.find((m) => m.id === modelId) ?? models.find((m) => m.architecture_version === "2") ?? models.find((m) => m.architecture_version === "1");
-    if (!pick) throw new Error("This tone has no NAM model that can be edited.");
-    onProgress(`Downloading “${pick.name}” from TONE3000`);
+    if (!pick) throw new Error(t`This tone has no NAM model that can be edited.`);
+    onProgress(t`Downloading “${pick.name}” from TONE3000`);
     await host.tones.downloadModel(toneId, pick.id);
     return host.capture.open(ref, pick.id);
   }
@@ -125,7 +126,7 @@ export const useCapture = create<CaptureEditorState>((set, get) => {
     try {
       clearTimeout(draftTimer);
       draftTimer = undefined;
-      const summary = restoredFrom ? `Restored version ${restoredFrom}` : summarize(prev, recipe);
+      const summary = restoredFrom ? t`Restored version ${restoredFrom}` : summarize(prev, recipe);
       const version = await host.capture.saveVersion(loaded.key, { recipe, summary, restoredFrom, file: exportText(loaded, recipe) });
       const cur = get();
       // The screen moved to another capture while saving: the version is stored, nothing to update here.

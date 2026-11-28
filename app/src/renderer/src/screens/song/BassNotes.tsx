@@ -21,14 +21,16 @@ import type { BassLineBeat } from "@/song/analysis/bass-line";
 import type { BeatGrid } from "@/song/band/beat-grid";
 import type { ChordAtBeat } from "@/song/band/harmony";
 import type { Section } from "@/song/performance/sections";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const SCOPE_TEXT: Record<OverrideScope, string> = {
-  beat: "This beat",
-  bar: "This bar",
-  untilChange: "Until the next chord change",
-  sectionChord: "This chord everywhere in this section",
+  get beat() { return t`This beat`; },
+  get bar() { return t`This bar`; },
+  get untilChange() { return t`Until the next chord change`; },
+  get sectionChord() { return t`This chord everywhere in this section`; },
 };
-const OCTAVE_TEXT: Record<string, string> = { "-1": "Down an octave", "0": "Same octave", "1": "Up an octave" };
+const OCTAVE_TEXT: Record<string, string> = { get "-1"() { return t`Down an octave`; }, get "0"() { return t`Same octave`; }, get "1"() { return t`Up an octave`; } };
 
 /** What the bass-note editor and the list need from the panel. */
 export interface BassNotesContext {
@@ -72,24 +74,24 @@ export function BassNoteEditor({ beat, context, onClose }: { beat: number; conte
   const listen = () => onListen(Math.max(0, time - barSeconds), applyScope(overrides, scope, beat, scopeContext, pc, octave));
 
   return (
-    <section aria-label="Bass note editor" className="flex flex-col gap-3 rounded-md border border-seam p-3 text-sm">
+    <section aria-label={t`Bass note editor`} className="flex flex-col gap-3 rounded-md border border-seam p-3 text-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex flex-col gap-0.5">
           <p>
-            Beat {beat + 1} at {seconds(time)}, bar {barNumberAt(grid, beat)}
+            <Trans>Beat</Trans> {beat + 1} <Trans>at {seconds(time)}, bar {barNumberAt(grid, beat)}</Trans>
           </p>
-          <p>Chord: {entry?.chord?.name ?? "none"}</p>
+          <p><Trans>Chord:</Trans> {entry?.chord?.name ?? t`none`}</p>
           <p>
-            The bass plays {playedPc === null ? "nothing" : noteNameOf(playedPc, flats)}, {NOTE_SOURCE_TEXT[source].toLowerCase()}.
+            <Trans>The bass plays</Trans> {playedPc === null ? t`nothing` : noteNameOf(playedPc, flats)}, {NOTE_SOURCE_TEXT[source].toLowerCase()}.
           </p>
         </div>
         <Button size="sm" variant="ghost" onClick={onClose}>
-          Close
+          <Trans>Close</Trans>
         </Button>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <Select value={String(pc)} onValueChange={(value) => setPc(Number(value))} disabled={disabled}>
-          <SelectTrigger aria-label="Bass note" className="w-28">
+          <SelectTrigger aria-label={t`Bass note`} className="w-28">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -101,7 +103,7 @@ export function BassNoteEditor({ beat, context, onClose }: { beat: number; conte
           </SelectContent>
         </Select>
         <Select value={String(octave)} onValueChange={(value) => setOctave(Number(value) as OverrideOctave)} disabled={disabled}>
-          <SelectTrigger aria-label="Octave" className="w-40">
+          <SelectTrigger aria-label={t`Octave`} className="w-40">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -113,7 +115,7 @@ export function BassNoteEditor({ beat, context, onClose }: { beat: number; conte
           </SelectContent>
         </Select>
         <Select value={scope} onValueChange={(value) => setScope(value as OverrideScope)} disabled={disabled}>
-          <SelectTrigger aria-label="Apply to" className="w-64">
+          <SelectTrigger aria-label={t`Apply to`} className="w-64">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -127,13 +129,13 @@ export function BassNoteEditor({ beat, context, onClose }: { beat: number; conte
       </div>
       <div className="flex flex-wrap gap-2">
         <Button size="sm" disabled={disabled} onClick={apply}>
-          Apply
+          <Trans>Apply</Trans>
         </Button>
         <Button size="sm" variant="outline" disabled={disabled} onClick={listen}>
-          Listen
+          <Trans>Listen</Trans>
         </Button>
         <Button size="sm" variant="outline" disabled={disabled || !existing} onClick={() => onChange(clearBassOverrideAt(overrides, time))}>
-          Reset
+          <Trans>Reset</Trans>
         </Button>
       </div>
     </section>
@@ -145,11 +147,11 @@ export function BassNoteList({ harmony, overrides, disabled, onChange }: Pick<Ba
   if (overrides.length === 0) return null;
   const flats = usesFlats(harmony);
   return (
-    <section aria-label="Your bass notes" className="flex flex-col gap-2 text-sm">
+    <section aria-label={t`Your bass notes`} className="flex flex-col gap-2 text-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h4 className="font-semibold">Your bass notes ({overrides.length})</h4>
+        <h4 className="font-semibold"><Trans>Your bass notes ({overrides.length})</Trans></h4>
         <Button size="sm" variant="ghost" disabled={disabled} onClick={() => onChange([])}>
-          Remove all
+          <Trans>Remove all</Trans>
         </Button>
       </div>
       <ul className="flex flex-col gap-1">
@@ -157,16 +159,16 @@ export function BassNoteList({ harmony, overrides, disabled, onChange }: Pick<Ba
           <li key={entry.start} className="flex items-center justify-between gap-2">
             <span>
               {noteNameOf(entry.pc, flats)}
-              {entry.octave ? (entry.octave > 0 ? " up an octave" : " down an octave") : ""}, {seconds(entry.start)} to {seconds(entry.end)}
+              {entry.octave ? (entry.octave > 0 ? t` up an octave` : t` down an octave`) : ""}<Trans>, {seconds(entry.start)} to {seconds(entry.end)}</Trans>
             </span>
             <Button
               size="sm"
               variant="ghost"
               disabled={disabled}
-              aria-label={`Remove the bass note from ${seconds(entry.start)}`}
+              aria-label={t`Remove the bass note from ${seconds(entry.start)}`}
               onClick={() => onChange(overrides.filter((other) => other !== entry))}
             >
-              Remove
+              <Trans>Remove</Trans>
             </Button>
           </li>
         ))}

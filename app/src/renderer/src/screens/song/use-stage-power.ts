@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { host } from "@/host";
+import { t } from "@lingui/core/macro";
 export function useStagePower(active: boolean) {
   const [error, setError] = useState("");
   useEffect(() => {
     setError("");
     if (!active) return;
     if (!host.song.stagePower) {
-      setError("Sleep prevention is available in the desktop app.");
+      setError(t`Sleep prevention is available in the desktop app.`);
       return;
     }
     const token = crypto.randomUUID();
@@ -17,7 +18,7 @@ export function useStagePower(active: boolean) {
           if (live) setError("");
         })
         .catch(() => {
-          if (live) setError("Could not prevent sleep. Check your system power settings.");
+          if (live) setError(t`Could not prevent sleep. Check your system power settings.`);
         });
     };
     renew();

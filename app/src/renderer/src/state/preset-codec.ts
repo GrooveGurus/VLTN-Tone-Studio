@@ -16,6 +16,7 @@ import { gp150DefaultParams, gp150ModelByFxid, gp150ModelsForBlock } from "@/gp1
 import { profileFor, type DeviceKey } from "@shared/devices";
 import { isGp5Family, presetDevice } from "./device-model";
 import type { BlockCode, BlockState, ExpSettings, Gp5FamilyKey, ModelInfo, ParamInfo, PresetEdits, PresetState } from "./device-types";
+import { t } from "@lingui/core/macro";
 
 const isGp150 = (device: DeviceKey) => profileFor(device).family === "gp150";
 
@@ -77,14 +78,14 @@ export function syncParams(p: PresetState, block: number, toggle: ParamInfo, on:
 export function orderError(device: DeviceKey, order: readonly number[]): string | null {
   if (isGp5Family(device)) return gp5.validateOrder(order);
   const valid = isGp150(device) ? gp150.validChain(order) : gp200.validateOrder(order);
-  return valid ? null : `The chain must hold each of the ${profileFor(device).blocks.length} blocks once`;
+  return valid ? null : t`The chain must hold each of the ${profileFor(device).blocks.length} blocks once`;
 }
 
 /** Block indices of a GP-200 CTRL mask (bits 0-10), and back. */
 const blocksOfMask = (mask: number) => GP200_BLOCKS.flatMap((_, k) => (mask & (1 << k) ? [k] : []));
 function maskOf(blocks: readonly number[]): number {
   if (new Set(blocks).size !== blocks.length || !blocks.every((k) => Number.isInteger(k) && k >= 0 && k < GP200_BLOCKS.length))
-    throw new RangeError(`A switch takes distinct blocks 0..${GP200_BLOCKS.length - 1}, got ${JSON.stringify(blocks)}`);
+    throw new RangeError(t`A switch takes distinct blocks 0..${GP200_BLOCKS.length - 1}, got ${JSON.stringify(blocks)}`);
   return blocks.reduce((m, k) => m | (1 << k), 0);
 }
 
@@ -198,13 +199,13 @@ function toPatchEdits({ name, volume, bpm, order, footswitches, blocks, gp200: g
 export function editPrst(prst: Uint8Array, edits: PresetEdits): Uint8Array {
   if (isGp5Family(presetDevice(prst))) {
     const { footswitches, gp200: g, ...rest } = edits;
-    if (g) throw new RangeError("GP-5 family presets have no GP-200 fields");
+    if (g) throw new RangeError(t`GP-5 family presets have no GP-200 fields`);
     return gp5.applyEdits(prst, footswitches ? { ...rest, footswitches: { fs1: footswitches[0], fs2: footswitches[1] } } : rest);
   }
-  if (edits.exp) throw new RangeError("GP-200 and GP-150 presets have no GP-50 EXP settings");
+  if (edits.exp) throw new RangeError(t`GP-200 and GP-150 presets have no GP-50 EXP settings`);
   if (isGp150(presetDevice(prst))) {
     const { name, volume, bpm, order, footswitches, blocks, gp200: g } = edits;
-    if (g) throw new RangeError("GP-150 presets have no GP-200 fields");
+    if (g) throw new RangeError(t`GP-150 presets have no GP-200 fields`);
     return gp150.applyPatchEdits(prst, {
       name,
       volume: volume === undefined ? undefined : Math.max(0, Math.min(100, Math.trunc(volume))),

@@ -86,6 +86,12 @@ describe("Gp200Driver sync", () => {
     expect(d.features).toEqual(expect.arrayContaining(["modScenes", "modSettings", "modGuests", "globalEq"]));
   });
 
+  it("GP-Snap 1.0 (the mod renamed) shows as the pedal's About does; its HELLO still says cenas", async () => {
+    const d = await simulate("gp200", { mod: { version: "1.0.0" } });
+    expect((await d.sync()).mod).toMatchObject({ label: "GP-Snap 1.0.0", name: "cenas", version: "1.0.0" });
+    expect(d.features).toContain("modScenesWrite");
+  });
+
   it("the simulatedMod option runs the mod in the simulator (?mock=gp200mod)", async () => {
     const d = await Gp200Driver.simulate("gp200", { log: () => {}, onDisconnect: () => {}, simulatedMod: true });
     open.push(d);

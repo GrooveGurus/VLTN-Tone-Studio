@@ -13,6 +13,8 @@ import { GROUPS, GROUP_TITLE, chainItems, gapLabel, groupOf, groupsOf, loopRange
 import { DRAG_MIME } from "./Pedalboard";
 import { useRig } from "./rig-store";
 import { snapToneName } from "./snaptone";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const IN_SPEC = { min: -20, max: 20, step: 1, unit: "dB" };
 const OUT_SPEC = { min: 0, max: 100, step: 1 };
@@ -48,13 +50,13 @@ export function ChainOverview({ preset, readOnly }: { preset: PresetState; readO
   };
 
   return (
-    <section aria-label="Signal chain overview" className="glass mx-7 flex items-center gap-3.5 rounded-xl px-[18px] pt-3.5 pb-2.5">
+    <section aria-label={t`Signal chain overview`} className="glass mx-7 flex items-center gap-3.5 rounded-xl px-[18px] pt-3.5 pb-2.5">
       {inputTrim !== undefined && (
         <>
           <Dial
             layout="row"
             size={30}
-            label="In"
+            label={t`In`}
             ariaLabel="Input trim"
             value={inputTrim}
             spec={IN_SPEC}
@@ -99,7 +101,7 @@ export function ChainOverview({ preset, readOnly }: { preset: PresetState; readO
                       );
                     })}
                     {replaced && (
-                      <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-surface-solid px-1.5 text-xs font-semibold whitespace-nowrap text-block-ns">Replaced by SnapTone</span>
+                      <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-surface-solid px-1.5 text-xs font-semibold whitespace-nowrap text-block-ns"><Trans>Replaced by SnapTone</Trans></span>
                     )}
                   </button>
                 </TooltipTrigger>
@@ -114,15 +116,15 @@ export function ChainOverview({ preset, readOnly }: { preset: PresetState; readO
       {isGp5Family(preset.device) && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <span tabIndex={0} aria-label="Fixed order" className="grid size-8 place-items-center rounded-pill text-silkscreen-4">
+            <span tabIndex={0} aria-label={t`Fixed order`} className="grid size-8 place-items-center rounded-pill text-silkscreen-4">
               <LockIcon className="size-[13px]" aria-hidden />
             </span>
           </TooltipTrigger>
-          <TooltipContent>DST, NS, AMP, CAB and EQ keep a fixed order on the {pedal}</TooltipContent>
+          <TooltipContent><Trans>DST, NS, AMP, CAB and EQ keep a fixed order on the {pedal}</Trans></TooltipContent>
         </Tooltip>
       )}
       <div className="h-9 w-px bg-seam-strong" />
-      <Dial layout="row" size={30} label="Out" ariaLabel="Patch volume" value={preset.volume} spec={OUT_SPEC} disabled={readOnly} onChange={editVolume} />
+      <Dial layout="row" size={30} label={t`Out`} ariaLabel="Patch volume" value={preset.volume} spec={OUT_SPEC} disabled={readOnly} onChange={editVolume} />
     </section>
   );
 }
@@ -188,7 +190,7 @@ function FlatChain({ preset, readOnly }: { preset: PresetState; readOnly: boolea
   };
 
   return (
-    <div role="group" aria-label="Signal chain" className="relative flex flex-1 items-center justify-center gap-1.5 before:absolute before:inset-x-0 before:top-1/2 before:h-0.5 before:bg-cable">
+    <div role="group" aria-label={t`Signal chain`} className="relative flex flex-1 items-center justify-center gap-1.5 before:absolute before:inset-x-0 before:top-1/2 before:h-0.5 before:bg-cable">
       {(loop ? chainItems(order, loop) : order.map((b) => ({ block: b }))).map((item) => {
         if ("node" in item)
           return (
@@ -198,7 +200,7 @@ function FlatChain({ preset, readOnly }: { preset: PresetState; readOnly: boolea
               loop={loop!}
               order={order}
               codes={codes}
-              note={saveOnlyNote("save", "The new position", pedal)}
+              note={saveOnlyNote("save", t`The new position`, pedal)}
               readOnly={readOnly}
               onMove={(pos) => moveNode(item.node, pos)}
               onDragStart={() => setDragging({ node: item.node })}
@@ -214,7 +216,7 @@ function FlatChain({ preset, readOnly }: { preset: PresetState; readOnly: boolea
               <button
                 type="button"
                 draggable={!readOnly}
-                aria-label={`${block.code} ${name}, ${block.enabled ? "on" : "off"}`}
+                aria-label={`${block.code} ${name}, ${block.enabled ? t`on` : t`off`}`}
                 aria-current={selected === b || undefined}
                 onClick={() => {
                   useRig.getState().select(b);
@@ -280,7 +282,7 @@ function LoopHandle({ node, loop, order, codes, note, readOnly, onMove, onDragSt
         <button
           type="button"
           role="slider"
-          aria-label={`FX loop ${node}`}
+          aria-label={t`FX loop ${node}`}
           aria-valuemin={lo}
           aria-valuemax={Math.max(lo, hi)}
           aria-valuenow={pos}
@@ -296,10 +298,10 @@ function LoopHandle({ node, loop, order, codes, note, readOnly, onMove, onDragSt
           className="relative flex h-6 cursor-grab items-center gap-1 rounded-pill bg-surface-solid px-2 text-xs font-medium whitespace-nowrap text-silkscreen-2 shadow-[inset_0_0_0_1px_var(--seam-strong)] hover:text-silkscreen"
         >
           <Icon className="size-3" aria-hidden />
-          {node === "send" ? "Send" : "Return"}
+          {node === "send" ? t`Send` : t`Return`}
         </button>
       </TooltipTrigger>
-      <TooltipContent>{`FX loop ${node}, ${where}. Drag it or use the arrow keys. ${note}`}</TooltipContent>
+      <TooltipContent>{t`FX loop ${node}, ${where}. Drag it or use the arrow keys. ${note}`}</TooltipContent>
     </Tooltip>
   );
 }

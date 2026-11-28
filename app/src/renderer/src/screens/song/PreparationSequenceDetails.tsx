@@ -1,12 +1,14 @@
 import type { PreparationCommand } from "@/song/performance/preparation-repeat";
 import type { PreparationSequence } from "@/song/performance/preparation-sequence";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export const preparationSeconds = (ms: number) => Number((ms / 1000).toFixed(3)).toString();
 function message(bytes: number[]): string {
   const kind = bytes[0] & 240,
     channel = (bytes[0] & 15) + 1;
-  if (kind === 192) return `Ch ${channel} · PC ${bytes[1]}`;
-  if (kind === 176) return `Ch ${channel} · CC ${bytes[1]}=${bytes[2]}`;
+  if (kind === 192) return t`Ch ${channel} · PC ${bytes[1]}`;
+  if (kind === 176) return t`Ch ${channel} · CC ${bytes[1]}=${bytes[2]}`;
   return bytes.map((byte) => byte.toString(16).padStart(2, "0").toUpperCase()).join(" ");
 }
 
@@ -33,9 +35,9 @@ export function PreparationSequenceDetails({
         <table className="w-full text-left" aria-label={label}>
           <thead>
             <tr>
-              <th className="p-2">At</th>
-              <th className="p-2">Step</th>
-              <th className="p-2">Details</th>
+              <th className="p-2"><Trans>At</Trans></th>
+              <th className="p-2"><Trans>Step</Trans></th>
+              <th className="p-2"><Trans>Details</Trans></th>
             </tr>
           </thead>
           <tbody>
@@ -53,8 +55,8 @@ export function PreparationSequenceDetails({
             ))}
             <tr className="border-t border-seam">
               <td className="p-2">{preparationSeconds(plan.totalWaitMs)} s</td>
-              <td className="p-2">Ready</td>
-              <td className="p-2">Play starts the count-in and song.</td>
+              <td className="p-2"><Trans>Ready</Trans></td>
+              <td className="p-2"><Trans>Play starts the count-in and song.</Trans></td>
             </tr>
           </tbody>
         </table>

@@ -9,6 +9,8 @@ import { useDevice, usePedalName } from "@/state/device";
 import { pedalName } from "@/state/device-model";
 import { useNav } from "@/state/nav";
 import { Confidence, Section } from "./parts";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const fmtSetting = (s: { name: string; value: number; unit?: string }) => `${s.name} ${Number.isInteger(s.value) ? s.value : s.value.toFixed(1)}${s.unit ? ` ${s.unit}` : ""}`;
 
@@ -22,7 +24,7 @@ function BlockRow({ block }: { block: ProposedBlock }) {
       </span>
       <div className="flex min-w-0 flex-col gap-0.5">
         <b className="text-[13px] font-semibold">
-          {modelChange && block.enabled ? block.title : block.enabled ? "On (model as it is)" : "Off"}
+          {modelChange && block.enabled ? block.title : block.enabled ? t`On (model as it is)` : t`Off`}
           {modelChange && block.enabled && block.settings.length > 0 && (
             <span className="ml-2 text-[12px] font-normal text-silkscreen-2 tabular-nums">{block.settings.map(fmtSetting).join(" · ")}</span>
           )}
@@ -48,23 +50,23 @@ function AuditionControls() {
       <div className="flex flex-wrap items-center gap-2">
         <Button disabled={!connected || busy} onClick={() => void useToneMatch.getState().auditionProposal()}>
           {audition.kind === "applying" ? <Spinner data-icon="inline-start" /> : <Play data-icon="inline-start" />}
-          {audition.kind === "applied" ? "Play it again" : `Play it on the ${pedal}`}
+          {audition.kind === "applied" ? t`Play it again` : t`Play it on the ${pedal}`}
         </Button>
         {audition.kind === "applied" || audition.kind === "restoring" ? (
           <>
             <Button variant="outline" disabled={busy} onClick={() => void useToneMatch.getState().putBack()}>
               {audition.kind === "restoring" ? <Spinner data-icon="inline-start" /> : <RotateCcw data-icon="inline-start" />}
-              Put back what was there
+              <Trans>Put back what was there</Trans>
             </Button>
             <Button variant="ghost" onClick={() => useNav.getState().go("rig")}>
-              Open the Rig
+              <Trans>Open the Rig</Trans>
               <ArrowRight data-icon="inline-end" />
             </Button>
           </>
         ) : null}
         {!connected && (
           <Button variant="ghost" disabled={connecting} onClick={() => void useDevice.getState().connect("mock").catch(() => {})}>
-            Use the simulated pedal
+            <Trans>Use the simulated pedal</Trans>
           </Button>
         )}
       </div>
@@ -72,10 +74,10 @@ function AuditionControls() {
         {audition.kind === "error"
           ? audition.message
           : audition.kind === "applied"
-            ? `Playing on the ${pedal} as unsaved changes to the active preset. To keep it, save it on the Rig; Undo on the Rig steps back block by block.`
+            ? t`Playing on the ${pedal} as unsaved changes to the active preset. To keep it, save it on the Rig; Undo on the Rig steps back block by block.`
             : connected
-              ? "Changes the active preset live, like edits on the Rig. Nothing is saved to a slot unless you save it."
-              : `Connect the ${pedal} to hear the proposal, or try it on the simulated pedal.`}
+              ? t`Changes the active preset live, like edits on the Rig. Nothing is saved to a slot unless you save it.`
+              : t`Connect the ${pedal} to hear the proposal, or try it on the simulated pedal.`}
       </p>
     </div>
   );
@@ -83,7 +85,7 @@ function AuditionControls() {
 
 export function ProposalCard({ proposal }: { proposal: Proposal }) {
   return (
-    <Section title={`Proposed ${pedalName(proposal.device)} preset`} aside={<Confidence value={proposal.confidence} />}>
+    <Section title={t`Proposed ${pedalName(proposal.device)} preset`} aside={<Confidence value={proposal.confidence} />}>
       <p className="text-[13px] text-silkscreen-2">{proposal.summary}</p>
       <ul className="flex flex-col">
         {proposal.blocks.map((b) => (

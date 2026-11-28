@@ -2,6 +2,8 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { getMidiLog, useDevice } from "@/state/device";
 import { formatLogTime } from "@/state/midi-log";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const ROW = 22;
 const HEIGHT = 190;
@@ -27,7 +29,7 @@ export function MidiLog() {
     <div
       ref={ref}
       role="log"
-      aria-label="MIDI messages"
+      aria-label={t`MIDI messages`}
       aria-live="off"
       tabIndex={0}
       onScroll={(e) => {
@@ -39,7 +41,7 @@ export function MidiLog() {
       style={{ height: HEIGHT }}
     >
       {lines.length === 0 ? (
-        <p className="px-3 py-1 text-silkscreen-3">Waiting for MIDI traffic. Turn a dial or switch presets to see messages.</p>
+        <p className="px-3 py-1 text-silkscreen-3"><Trans>Waiting for MIDI traffic. Turn a dial or switch presets to see messages.</Trans></p>
       ) : (
         <div style={{ height: lines.length * ROW, position: "relative" }}>
           {lines.slice(first, last).map((l, i) => (
@@ -50,7 +52,7 @@ export function MidiLog() {
             >
               <span className="text-silkscreen-4 tabular-nums">{formatLogTime(l.at)}</span>
               <span className={cn("font-semibold", l.dir === "bad" || l.dir === "warn" ? "text-led-warn" : "text-silkscreen-3")}>
-                {l.dir === "out" ? "Out" : l.dir === "in" ? "In" : l.dir === "bad" ? "Bad" : "Warn"}
+                {l.dir === "out" ? t`Out` : l.dir === "in" ? t`In` : l.dir === "bad" ? t`Bad` : t`Warn`}
               </span>
               <span className={cn("truncate", l.dir === "in" && !l.ack && "text-silkscreen-2")}>{l.text}</span>
               <span className="text-silkscreen-3">{l.raw}</span>

@@ -8,6 +8,7 @@ import { switchLabel } from "@/state/device-model";
 import type { BlockState, ExpEdit, ExpSettings, Gp200Edit, Gp200Fields, PresetState } from "@/state/device-types";
 import { defaultParamsFor } from "@/state/preset-codec";
 import { invert, useHistory, type BlockSnapshot, type Edit } from "./history";
+import { t as lt } from "@lingui/core/macro";
 
 const dev = () => useDevice.getState();
 
@@ -122,7 +123,7 @@ export function footswitchToggle(p: PresetState, which: number, block: number): 
   if (list.includes(block)) return { next: withList(list.filter((b) => b !== block)) };
   const added = [...list, block].sort((a, b) => a - b);
   if (p.device !== "gp50") return { next: withList(added) };
-  if (list.length >= MAX_FOOTSWITCH_BLOCKS) return { reason: `${switchLabel(p.device, which)} already switches ${MAX_FOOTSWITCH_BLOCKS} blocks, the most it can` };
+  if (list.length >= MAX_FOOTSWITCH_BLOCKS) return { reason: lt`${switchLabel(p.device, which)} already switches ${MAX_FOOTSWITCH_BLOCKS} blocks, the most it can` };
   return { next: p.footswitches.map((l, i) => (i === which ? added : l.filter((b) => b !== block))) };
 }
 
@@ -172,7 +173,7 @@ export async function editBlock(label: string, to: BlockSnapshot) {
 export function resetToDefaults(block: BlockState) {
   const p = dev().preset;
   if (!p) return Promise.resolve();
-  return editBlock("Reset to defaults", { ...snapshot(block), params: defaultParamsFor(p.device, block.index, block.fxid) });
+  return editBlock(lt`Reset to defaults`, { ...snapshot(block), params: defaultParamsFor(p.device, block.index, block.fxid) });
 }
 
 /** Apply an edit as described (redo) — the caller inverts it for undo. */

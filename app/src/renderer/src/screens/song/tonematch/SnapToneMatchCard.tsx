@@ -28,6 +28,8 @@ import { GAIN_TEXT } from "./AnalysisCard";
 import { CurvePlot } from "./CurvePlot";
 import { resultSeries } from "./IrMatchCard";
 import { fmtDb, Section } from "./parts";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const TONE_BANDS = [
   ["bassDb", "bass"],
@@ -46,12 +48,12 @@ function why(fit: CaptureFit, song: GuitarAnalysis): string {
     .slice(0, 2);
   const tone = deltas.length ? `${deltas.map((d) => `${d.label} ${fmtDb(d.db)}`).join(", ")} against the song` : "tone close to the song";
   const cab = fit.includesCab ? "includes its cab" : "through a cab IR matched to the song";
-  return `${gain}; ${tone} (${fit.residualDb.toFixed(1)} dB overall); ${cab}.`;
+  return t`${gain}; ${tone} (${fit.residualDb.toFixed(1)} dB overall); ${cab}.`;
 }
 
 function ResultLine({ result, song }: { result: CaptureResult | undefined; song: GuitarAnalysis }) {
-  if (!result) return <span className="text-silkscreen-3">Not ranked yet</span>;
-  if (result.kind === "running") return <Progress value={result.fraction * 100} className="mt-1 w-48" aria-label="Rendering the capture" />;
+  if (!result) return <span className="text-silkscreen-3"><Trans>Not ranked yet</Trans></span>;
+  if (result.kind === "running") return <Progress value={result.fraction * 100} className="mt-1 w-48" aria-label={t`Rendering the capture`} />;
   if (result.kind === "failed") return <span className="text-led-fault">{result.message}</span>;
   return <span className="text-silkscreen-3">{why(result.fit, song)}</span>;
 }
@@ -60,7 +62,7 @@ function CaptureList({ captures, song, disabled }: { captures: Capture[]; song: 
   const results = useCaptureMatch((s) => s.results);
   const selected = useCaptureMatch((s) => s.selected);
   return (
-    <RadioGroup aria-label="Capture to build the SnapTone from" value={selected ?? ""} onValueChange={(v) => useCaptureMatch.getState().select(v)} disabled={disabled} className="gap-0 border-y border-seam">
+    <RadioGroup aria-label={t`Capture to build the SnapTone from`} value={selected ?? ""} onValueChange={(v) => useCaptureMatch.getState().select(v)} disabled={disabled} className="gap-0 border-y border-seam">
       {rankedCaptures(captures, results).map((c) => {
         const r = results[c.key];
         const id = `capture-${c.key}`;
@@ -77,7 +79,7 @@ function CaptureList({ captures, song, disabled }: { captures: Capture[]; song: 
               <ResultLine result={r} song={song} />
             </span>
             {r?.kind === "done" && (
-              <span className="text-[13px] font-semibold tabular-nums" title="Match score: 100 is identical gain and tone">
+              <span className="text-[13px] font-semibold tabular-nums" title={t`Match score: 100 is identical gain and tone`}>
                 {r.fit.score}
               </span>
             )}
@@ -105,39 +107,39 @@ function Build({ capture, fit }: { capture: Capture; fit: CaptureFit }) {
   const saveIr = async () => {
     if (!ir) return;
     try {
-      const where = await host.song.saveFiles([{ name: irName, bytes: matchedIrWav(ir) }], "Save the matched IR");
-      if (where) notifySuccess("Saved the matched IR", where);
+      const where = await host.song.saveFiles([{ name: irName, bytes: matchedIrWav(ir) }], t`Save the matched IR`);
+      if (where) notifySuccess(t`Saved the matched IR`, where);
     } catch (e) {
-      notifyError("Couldn't save the IR", e);
+      notifyError(t`Couldn't save the IR`, e);
     }
   };
   const writeIr = () => ir && setIrFile({ name: irName, path: null, file: new File([matchedIrWav(ir) as BlobPart], irName, { type: "audio/wav" }) });
 
   const plan = !ir
-    ? `${capture.title} includes its cab, so the SnapTone is the capture as it is.`
+    ? t`${capture.title} includes its cab, so the SnapTone is the capture as it is.`
     : isGp5Family(device)
-      ? `The SnapTone gets the cab IR designed for this capture inside it: an engaged SnapTone replaces AMP and CAB on the ${pedal}.`
-      : `CAB plays after the SnapTone on the ${pedal}, so the SnapTone is the capture alone. Put the matched IR in a User IR slot and pick that slot in CAB.`;
+      ? t`The SnapTone gets the cab IR designed for this capture inside it: an engaged SnapTone replaces AMP and CAB on the ${pedal}.`
+      : t`CAB plays after the SnapTone on the ${pedal}, so the SnapTone is the capture alone. Put the matched IR in a User IR slot and pick that slot in CAB.`;
 
   return (
     <div className="flex flex-col gap-3 border-t border-seam pt-3">
-      {ir && <CurvePlot title={`Correction between ${capture.title} and the song, and the matched IR's response`} series={resultSeries(ir, "this capture")} />}
+      {ir && <CurvePlot title={t`Correction between ${capture.title} and the song, and the matched IR's response`} series={resultSeries(ir, "this capture")} />}
       <p className="text-[12px] text-pretty text-silkscreen-3">{plan}</p>
       {!(mine && build.kind === "built" && send) && (
         <div className="flex flex-wrap items-center gap-2">
           <Button disabled={ranking || build.kind === "building" || hasSignal === false} onClick={() => void useCaptureMatch.getState().buildSnapTone()}>
             {mine && build.kind === "building" ? <Spinner data-icon="inline-start" /> : <Wand2 data-icon="inline-start" />}
-            Build the SnapTone
+            <Trans>Build the SnapTone</Trans>
           </Button>
           {ir && (
             <>
               <Button variant="outline" onClick={() => void saveIr()}>
                 <Download data-icon="inline-start" />
-                Save the IR…
+                <Trans>Save the IR…</Trans>
               </Button>
               <Button variant="outline" onClick={writeIr}>
                 <Send data-icon="inline-start" />
-                Write the IR to a User IR slot…
+                <Trans>Write the IR to a User IR slot…</Trans>
               </Button>
             </>
           )}
@@ -145,11 +147,11 @@ function Build({ capture, fit }: { capture: Capture; fit: CaptureFit }) {
       )}
       {mine && build.kind === "building" && (
         <div role="status" className="flex items-center gap-3 text-[12px] text-silkscreen-2">
-          <span>Making the SnapTone, like Valeton Suite does (about 10 s)</span>
-          <Progress value={build.fraction * 100} className="w-48" aria-label="SnapTone conversion progress" />
+          <Trans><span>Making the SnapTone, like Valeton Suite does (about 10 s)</span></Trans>
+          <Progress value={build.fraction * 100} className="w-48" aria-label={t`SnapTone conversion progress`} />
           <Button size="sm" variant="ghost" onClick={() => useCaptureMatch.getState().cancelBuild()}>
             <X data-icon="inline-start" />
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
         </div>
       )}
@@ -178,25 +180,25 @@ function Refine({ capture }: { capture: Capture }) {
   const busy = useCaptureMatch((s) => s.status.kind === "running" || Object.values(s.refined).some((x) => x.kind === "running"));
   const hasProposal = useToneMatch((s) => s.proposal !== null);
   const useEq = () => {
-    if (useCaptureMatch.getState().applyRefinedEq(capture.key)) notifySuccess("EQ set in the proposal", "The Guitar EQ of the proposal now has the refined bands.");
+    if (useCaptureMatch.getState().applyRefinedEq(capture.key)) notifySuccess(t`EQ set in the proposal`, t`The Guitar EQ of the proposal now has the refined bands.`);
   };
   return (
     <div className="flex flex-col gap-2 border-t border-seam pt-3">
       <p className="text-[12px] text-pretty text-silkscreen-3">
-        Refine: tries input drive and a five-band EQ on this capture and keeps what brings its sound closest to the song's guitar. It plays the test signal through the
-        capture many times, so it takes minutes.
+        <Trans>Refine: tries input drive and a five-band EQ on this capture and keeps what brings its sound closest to the song's guitar. It plays the test signal through the
+        capture many times, so it takes minutes.</Trans>
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="outline" disabled={busy} onClick={() => void useCaptureMatch.getState().refine(capture.key)}>
           {r?.kind === "running" ? <Spinner data-icon="inline-start" /> : <SlidersHorizontal data-icon="inline-start" />}
-          {r?.kind === "done" ? "Refine again" : "Refine against the song"}
+          {r?.kind === "done" ? t`Refine again` : t`Refine against the song`}
         </Button>
         {r?.kind === "running" && (
           <>
-            <Progress value={r.fraction * 100} className="w-48" aria-label="Refinement progress" />
+            <Progress value={r.fraction * 100} className="w-48" aria-label={t`Refinement progress`} />
             <Button size="sm" variant="ghost" onClick={() => useCaptureMatch.getState().cancel()}>
               <X data-icon="inline-start" />
-              Cancel
+              <Trans>Cancel</Trans>
             </Button>
           </>
         )}
@@ -209,16 +211,16 @@ function Refine({ capture }: { capture: Capture }) {
       {r?.kind === "done" && (
         <div className="flex flex-col gap-2 text-[12px] text-silkscreen-2">
           <p className="text-pretty">
-            Distance from the song {r.refined.initial.toFixed(1)} → {r.refined.distance.toFixed(1)}.{" "}
+            <Trans>Distance from the song {r.refined.initial.toFixed(1)} → {r.refined.distance.toFixed(1)}.{" "}</Trans>
             <span className="tabular-nums">EQ {EQ_CENTERS_HZ.map((hz, i) => `${bandLabel(hz)} ${fmtDb(r.refined.settings.eqDb[i])}`).join(" · ")}.</span>
           </p>
           <p className="text-pretty text-silkscreen-3">
-            Drive {fmtDb(r.refined.settings.driveDb)}: how much harder the capture sounded closest to the song when pushed. For information only; the SnapTone and the proposal
-            don't use it.
+            <Trans>Drive {fmtDb(r.refined.settings.driveDb)}: how much harder the capture sounded closest to the song when pushed. For information only; the SnapTone and the proposal
+            don't use it.</Trans>
           </p>
           <div>
             <Button variant="outline" size="sm" disabled={!hasProposal} onClick={useEq}>
-              Use the EQ in the proposal
+              <Trans>Use the EQ in the proposal</Trans>
             </Button>
           </div>
         </div>
@@ -236,13 +238,13 @@ function RankControls({ total }: { total: number }) {
     return (
       <div role="status" className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between text-[12px]">
-          <b className="font-semibold">Playing the test signal through capture {Math.min(status.done + 1, status.total)} of {status.total}</b>
+          <Trans><b className="font-semibold">Playing the test signal through capture {Math.min(status.done + 1, status.total)} of {status.total}</b></Trans>
           <Button size="sm" variant="ghost" onClick={() => useCaptureMatch.getState().cancel()}>
             <X data-icon="inline-start" />
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
         </div>
-        <Progress value={(status.done / status.total) * 100} aria-label="Ranking progress" />
+        <Progress value={(status.done / status.total) * 100} aria-label={t`Ranking progress`} />
       </div>
     );
   return (
@@ -257,7 +259,7 @@ function RankControls({ total }: { total: number }) {
         <div>
           <Button disabled={refining} onClick={rank}>
             {status.kind === "idle" ? <ListOrdered data-icon="inline-start" /> : <RotateCcw data-icon="inline-start" />}
-            {status.kind === "error" ? "Try again" : unranked === total ? `Rank ${total} capture${total === 1 ? "" : "s"}` : `Rank the remaining ${unranked}`}
+            {status.kind === "error" ? t`Try again` : unranked === total ? t`Rank ${total} capture${total === 1 ? "" : "s"}` : t`Rank the remaining ${unranked}`}
           </Button>
         </div>
       )}
@@ -272,7 +274,7 @@ function PickButton() {
     <span className="flex flex-col items-start gap-1">
       <Button variant="outline" size="sm" disabled={pick.kind === "adding"} onClick={() => void useCaptureMatch.getState().pickOnTone3000()}>
         {pick.kind === "adding" ? <Spinner data-icon="inline-start" /> : <Globe data-icon="inline-start" />}
-        {pick.kind === "adding" ? "Downloading the capture…" : "Pick a capture on TONE3000…"}
+        {pick.kind === "adding" ? t`Downloading the capture…` : t`Pick a capture on TONE3000…`}
       </Button>
       {pick.kind === "error" && (
         <span role="alert" className="text-[11px] text-pretty text-led-fault">
@@ -298,23 +300,23 @@ export function SnapToneMatchCard({ analysis }: { analysis: GuitarAnalysis }) {
 
   const capture = captures?.find((c) => c.key === selected);
   return (
-    <Section title="Build a SnapTone from your captures" aside={captures && captures.length > 0 && <PickButton />}>
+    <Section title={t`Build a SnapTone from your captures`} aside={captures && captures.length > 0 && <PickButton />}>
       <p className="text-[12px] text-pretty text-silkscreen-3">
-        Tone Studio plays the guitar part of Valeton's test signal through each NAM capture you have downloaded, puts a capture without a cab through a cab IR designed
+        <Trans>Tone Studio plays the guitar part of Valeton's test signal through each NAM capture you have downloaded, puts a capture without a cab through a cab IR designed
         for this song, and ranks them by gain first, then tone, against the guitar stem. The capture you choose becomes a SnapTone. Nothing goes to the pedal until you
-        press Write.
+        press Write.</Trans>
       </p>
-      {captures === null && <Spinner aria-label="Reading your captures" />}
+      {captures === null && <Spinner aria-label={t`Reading your captures`} />}
       {captures?.length === 0 && (
         <div className="flex flex-col items-start gap-2 text-[12px] text-pretty text-silkscreen-2">
           <p>
-            You have no amp or pedal captures downloaded yet. In Tones, send captures from your TONE3000 favorites or the trending list; each one you download is ranked
-            here. Or pick one on TONE3000 now.
+            <Trans>You have no amp or pedal captures downloaded yet. In Tones, send captures from your TONE3000 favorites or the trending list; each one you download is ranked
+            here. Or pick one on TONE3000 now.</Trans>
           </p>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={() => useNav.getState().go("tones")}>
               <AudioWaveform data-icon="inline-start" />
-              Open Tones
+              <Trans>Open Tones</Trans>
             </Button>
             <PickButton />
           </div>

@@ -1,5 +1,6 @@
 import { FRET_COUNT, noteName } from "@/song/performance/scales";
 import type { NeckNote } from "@/song/performance/scales";
+import { t } from "@lingui/core/macro";
 
 /** A span of frets, both ends included. */
 export interface FretSpan {
@@ -138,10 +139,10 @@ export function NeckDiagram({ notes, labels, flats, highlight, title, fretCount 
           );
         })}
       </svg>
-      <ul className="sr-only" aria-label={`${title}, frets on each string`}>
+      <ul className="sr-only" aria-label={t`${title}, frets on each string`}>
         {tabLines.map((line) => (
           <li key={line.name}>
-            {line.name}: {line.frets.length ? line.frets.join(" ") : "no notes"}
+            {line.name}: {line.frets.length ? line.frets.join(" ") : t`no notes`}
           </li>
         ))}
       </ul>

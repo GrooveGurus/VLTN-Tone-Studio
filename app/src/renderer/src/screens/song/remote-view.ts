@@ -6,6 +6,7 @@ import type { Mix } from "@/song/stems/mix";
 import { toggleMuteGroup, type TrackInfo } from "@/song/tracks";
 import { pdfOnScreen, turnVisiblePdf } from "@/song/performance/pdf/turner";
 import { partKeysOf, type PartChoices } from "@/song/band/part-choice";
+import { t } from "@lingui/core/macro";
 
 /** What the performance screen holds that the remote actions reach: the stage, the click, the mixer and the tap. */
 export interface ViewState {
@@ -46,7 +47,7 @@ export function buildViewHost(state: ViewState): ViewHost {
       const pdf = turnVisiblePdf(direction, pages, state.stage);
       if (pdf) return pdf.hint;
       const reader = visibleReader();
-      if (!reader) return "Lyrics are not on screen.";
+      if (!reader) return t`Lyrics are not on screen.`;
       const step = pages ? reader.clientHeight * 0.9 : SCROLL_STEP_PX;
       reader.scrollBy({ top: direction * step, behavior: "smooth" });
     },
@@ -62,7 +63,7 @@ export function buildViewHost(state: ViewState): ViewHost {
     toggleClick: () => state.setMetronome(state.metronome === "off" ? "playing" : "off"),
     togglePart: (kind) => {
       // Only a part with a generated track has something to switch to; the original is always there to fall back on.
-      if (!partKeysOf(state.tracks, null)[kind]?.generated) return `Generate the ${kind} first.`;
+      if (!partKeysOf(state.tracks, null)[kind]?.generated) return t`Generate the ${kind} first.`;
       state.choosePart({ [kind]: state.partChoices[kind] === "original" ? "generated" : "original" });
     },
     tap: () => state.tap(),

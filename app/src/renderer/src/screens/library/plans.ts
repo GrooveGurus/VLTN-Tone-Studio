@@ -7,6 +7,7 @@ import { buildPrst, encodePatchImage } from "@/gp200/lib/prst.mjs";
 import { blankPrst } from "@/gp150/lib/prst.mjs";
 import { defaultParamsFor, modelsFor } from "@/state/preset-codec";
 import { profileFor, type DeviceKey } from "@shared/devices";
+import { t } from "@lingui/core/macro";
 
 export interface Step {
   /** Slot that gets written */
@@ -60,7 +61,7 @@ export function initPatch(device: DeviceKey, catalog: Gp200Catalog = useGp200Cat
   if (profileFor(device).family === "gp150") return blankPrst(0, INIT_NAME);
   const blocks = profileFor(device).blocks.map((code, k) => {
     const fxid = modelsFor(device, k, catalog)[0]?.fxid;
-    if (fxid === undefined) throw new Error(`The GP-200 effect list has no ${code} model, and the init patch holds a model in every block. Import the list again on the Device screen.`);
+    if (fxid === undefined) throw new Error(t`The GP-200 effect list has no ${code} model, and the init patch holds a model in every block. Import the list again on the Device screen.`);
     return { fxid, enabled: false, params: defaultParamsFor(device, k, fxid, catalog) };
   });
   return buildPrst(encodePatchImage({ name: INIT_NAME, blocks }));

@@ -2,6 +2,7 @@
 // slots get overwritten: if the name in the slot changes, the setlist says so instead of silently playing another sound.
 import { isDeviceKey, type DeviceKey } from "@shared/devices";
 import type { SlotName } from "@/state/device-types";
+import { t } from "@lingui/core/macro";
 
 export interface SetlistItem {
   id: string;
@@ -64,18 +65,18 @@ export function parseImport(text: string): Setlist[] {
   try {
     data = JSON.parse(text);
   } catch {
-    throw new Error("This isn't a setlist file (not valid JSON).");
+    throw new Error(t`This isn't a setlist file (not valid JSON).`);
   }
   const lists = (data as { setlists?: unknown } | null)?.setlists;
-  if (!Array.isArray(lists) || (data as { v?: unknown }).v !== 1) throw new Error("This isn't a Tone Studio setlist file.");
+  if (!Array.isArray(lists) || (data as { v?: unknown }).v !== 1) throw new Error(t`This isn't a Tone Studio setlist file.`);
   return lists.map((raw: Record<string, unknown>) => {
-    if (!raw || !isDeviceKey(raw.device) || !Array.isArray(raw.items)) throw new Error("A setlist in this file is damaged.");
+    if (!raw || !isDeviceKey(raw.device) || !Array.isArray(raw.items)) throw new Error(t`A setlist in this file is damaged.`);
     return {
       id: newId(),
       name: clean(raw.name, NAME_MAX).trim() || "Setlist",
       device: raw.device,
       items: raw.items.slice(0, ITEMS_MAX).map((i: Record<string, unknown>) => {
-        if (!i || !Number.isInteger(i.slot) || (i.slot as number) < 0) throw new Error("A preset in this file has no valid slot.");
+        if (!i || !Number.isInteger(i.slot) || (i.slot as number) < 0) throw new Error(t`A preset in this file has no valid slot.`);
         return { id: newId(), slot: i.slot as number, name: clean(i.name, NAME_MAX), note: clean(i.note, NOTE_MAX) };
       }),
     };

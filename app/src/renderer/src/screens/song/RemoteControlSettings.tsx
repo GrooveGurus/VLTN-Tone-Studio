@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { ACTION_IDS, ACTIONS, actionLabel, type ActionId } from "@/song/performance/actions";
 import { defaultBindings, describeBinding, startLearn, stopLearn, useRemoteLearn, type Binding } from "@/song/performance/bindings";
 import { useMidiConfiguration } from "@/song/performance/midi-configuration";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const GROUPS = [...new Set(ACTION_IDS.map((id) => ACTIONS[id].group))];
 
@@ -25,18 +27,18 @@ export function LearnStatus() {
     const what = target.source === "song" ? "a song's trigger" : actionLabel(target.action, target.index);
     const press =
       target.source === "song"
-        ? "Press a program change or Song Select on the selected MIDI input."
+        ? t`Press a program change or Song Select on the selected MIDI input.`
         : target.source === "midi"
-          ? "Press the pedal or controller on the selected MIDI input."
-          : "Press the key.";
+          ? t`Press the pedal or controller on the selected MIDI input.`
+          : t`Press the key.`;
     return (
       <div role="status" className="flex flex-wrap items-center gap-3 rounded-lg border border-seam p-3 text-[13px]">
-        <span>
+        <Trans><span>
           Learning {what}. {press}
-        </span>
-        <span className="text-silkscreen-2 tabular-nums">{learn.seen ? `Last message: ${learn.seen}` : "Waiting for a message."}</span>
+        </span></Trans>
+        <span className="text-silkscreen-2 tabular-nums">{learn.seen ? t`Last message: ${learn.seen}` : t`Waiting for a message.`}</span>
         <Button variant="outline" size="sm" onClick={() => stopLearn()}>
-          Cancel
+          <Trans>Cancel</Trans>
         </Button>
       </div>
     );
@@ -68,7 +70,7 @@ function ActionRow({ action, bindings, inputReady, number, onNumber, onLearn, on
         {def.number && (
           <Input
             type="number"
-            aria-label={`${def.number.noun} for ${def.label}`}
+            aria-label={t`${def.number.noun} for ${def.label}`}
             min={def.number.min}
             max={def.number.max}
             value={number}
@@ -77,10 +79,10 @@ function ActionRow({ action, bindings, inputReady, number, onNumber, onLearn, on
           />
         )}
         <Button variant="outline" size="sm" disabled={!inputReady} onClick={() => onLearn("midi")}>
-          Learn MIDI
+          <Trans>Learn MIDI</Trans>
         </Button>
         <Button variant="outline" size="sm" onClick={() => onLearn("key")}>
-          Learn key
+          <Trans>Learn key</Trans>
         </Button>
       </div>
       {bindings.length > 0 && (
@@ -92,14 +94,14 @@ function ActionRow({ action, bindings, inputReady, number, onNumber, onLearn, on
                 <span className="tabular-nums">{what}</span>
                 <label className="flex items-center gap-1.5">
                   <Checkbox
-                    aria-label={`Double press for ${what}`}
+                    aria-label={t`Double press for ${what}`}
                     checked={!!binding.doublePress}
                     onCheckedChange={(checked) => onChange(index, { ...binding, doublePress: checked === true ? true : undefined })}
                   />
-                  Double press
+                  <Trans>Double press</Trans>
                 </label>
-                <Button variant="ghost" size="sm" aria-label={`Remove ${what}`} onClick={() => onRemove(index)}>
-                  Remove
+                <Button variant="ghost" size="sm" aria-label={t`Remove ${what}`} onClick={() => onRemove(index)}>
+                  <Trans>Remove</Trans>
                 </Button>
               </li>
             );
@@ -126,17 +128,17 @@ export function RemoteControlSettings({ inputReady }: { inputReady: boolean }) {
   };
   return (
     <SettingsCard
-      title="Remote control"
-      summary={`${bindings.length} binding${bindings.length === 1 ? "" : "s"}`}
+      title={t`Remote control`}
+      summary={t`${bindings.length} binding${bindings.length === 1 ? "" : "s"}`}
       storageKey="remote-control"
       defaultOpen={false}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-[12px] text-silkscreen-3">
-          {bindings.length} binding{bindings.length === 1 ? "" : "s"}. Any action can run from a MIDI message or a key, including a Bluetooth page-turner.
+          <Trans>{bindings.length} binding</Trans>{bindings.length === 1 ? "" : "s"}<Trans>. Any action can run from a MIDI message or a key, including a Bluetooth page-turner.</Trans>
         </p>
         <Button variant="outline" size="sm" aria-expanded={open} onClick={() => setOpen(!open)}>
-          {open ? "Hide remote control" : "Edit remote control"}
+          {open ? t`Hide remote control` : t`Edit remote control`}
         </Button>
       </div>
       {open && (
@@ -171,13 +173,13 @@ function RemoteControlList({
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[12px] text-silkscreen-3">Keys do nothing while you type in a field. Learn captures the next message or key and names any clash.</p>
+        <p className="text-[12px] text-silkscreen-3"><Trans>Keys do nothing while you type in a field. Learn captures the next message or key and names any clash.</Trans></p>
         <Button variant="outline" size="sm" onClick={() => save(defaultBindings())}>
-          Reset to defaults
+          <Trans>Reset to defaults</Trans>
         </Button>
       </div>
       {!inputReady && (
-        <p className="text-[12px] text-silkscreen-3">Choose a MIDI input in MIDI setup to learn pedal messages. Keys can be learned at any time.</p>
+        <p className="text-[12px] text-silkscreen-3"><Trans>Choose a MIDI input in MIDI setup to learn pedal messages. Keys can be learned at any time.</Trans></p>
       )}
       <LearnStatus />
       {GROUPS.map((group) => (

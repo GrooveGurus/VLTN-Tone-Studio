@@ -18,6 +18,8 @@ import type { OpenFile } from "@/state/ui";
 import { CabIrPicker, noCabIrReason } from "./CabIrPicker";
 import { SnapToneSlotPicker, TestSignalNotice } from "./SnapToneSteps";
 import { readSlots, type CabIrChoice } from "./store";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Picked .nam files are read whole; real captures are a few hundred KB (the capture editor's limit). */
 const MAX_NAM_FILE = 64 * 1024 * 1024;
@@ -32,11 +34,11 @@ interface LocalNam {
 
 async function readNam(file: OpenFile): Promise<string> {
   if (file.file) {
-    if (file.file.size > MAX_NAM_FILE) throw new Error(`${file.name} is too large to be a NAM capture.`);
+    if (file.file.size > MAX_NAM_FILE) throw new Error(t`${file.name} is too large to be a NAM capture.`);
     return file.file.text();
   }
   if (file.path) return host.tones.readLocalNam(file.path);
-  throw new Error(`Couldn't read ${file.name}.`);
+  throw new Error(t`Couldn't read ${file.name}.`);
 }
 
 /** A string field of the capture's `metadata` object, or null. */
@@ -56,7 +58,7 @@ function examine(fileName: string, text: string): LocalNam {
 }
 
 /** "NAM A2, standard size, file version 0.7.0" */
-const describe = (c: NamCheck) => `NAM ${c.arch}, ${c.size} size, file version ${c.version}`;
+const describe = (c: NamCheck) => t`NAM ${c.arch}, ${c.size} size, file version ${c.version}`;
 
 type Phase = "idle" | "converting" | "writing";
 
@@ -115,14 +117,14 @@ export function LocalNamDialog({ file, onClose }: { file: OpenFile | null; onClo
   const noCabIr = noCabIrReason(device, nam?.gearType);
   const occupant = slot === null ? null : snapTones?.find((s) => s.slot === slot);
   const replacing = occupant && !isEmptySlot(occupant) ? occupant.name : null;
-  const slotText = slot === null ? "a SnapTone slot" : snapToneLabel(device ?? DEFAULT_DEVICE, slot);
+  const slotText = slot === null ? t`a SnapTone slot` : snapToneLabel(device ?? DEFAULT_DEVICE, slot);
   const working = phase !== "idle";
 
   let blocker: string | null = null;
-  if (!connected) blocker = `Connect the ${pedal} to write it.`;
-  else if (busy) blocker = `Wait until the pedal is free (${busy.label.toLowerCase()}).`;
-  else if (!snapTones) blocker = "Reading the pedal's SnapTone slots…";
-  else if (slot === null) blocker = "Choose a slot.";
+  if (!connected) blocker = t`Connect the ${pedal} to write it.`;
+  else if (busy) blocker = t`Wait until the pedal is free (${busy.label.toLowerCase()}).`;
+  else if (!snapTones) blocker = t`Reading the pedal's SnapTone slots…`;
+  else if (slot === null) blocker = t`Choose a slot.`;
 
   const close = () => {
     if (phase === "writing") return;
@@ -143,7 +145,7 @@ export function LocalNamDialog({ file, onClose }: { file: OpenFile | null; onClo
       setPhase("writing");
       setProgress(0);
       const stored = await useDevice.getState().uploadSnapTone(slot, name, snapTone, { onProgress: setProgress });
-      notifySuccess(`Wrote ${snapToneLabel(useDevice.getState().device ?? DEFAULT_DEVICE, slot)} on your ${pedalName(useDevice.getState().device)}`, `${file.name} is in the slot as ${stored}.`);
+      notifySuccess(t`Wrote ${snapToneLabel(useDevice.getState().device ?? DEFAULT_DEVICE, slot)} on your ${pedalName(useDevice.getState().device)}`, t`${file.name} is in the slot as ${stored}.`);
       onClose();
     } catch (e) {
       if (!signal.aborted) setError(e instanceof Error ? e.message : String(e));
@@ -156,25 +158,25 @@ export function LocalNamDialog({ file, onClose }: { file: OpenFile | null; onClo
     <Dialog open={file !== null} onOpenChange={(o) => !o && close()}>
       <DialogContent className="max-w-[520px]">
         <DialogHeader>
-          <DialogTitle>Write {file?.name} to a SnapTone slot</DialogTitle>
+          <DialogTitle><Trans>Write {file?.name} to a SnapTone slot</Trans></DialogTitle>
           <DialogDescription>
-            Tone Studio turns the capture into a SnapTone (about 10 seconds) and writes it over USB. Nothing changes on the pedal until you press Write.
+            <Trans>Tone Studio turns the capture into a SnapTone (about 10 seconds) and writes it over USB. Nothing changes on the pedal until you press Write.</Trans>
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3 text-[12px]">
-          {nam ? <p className="text-pretty text-silkscreen-3">{describe(nam.check)}.</p> : !error && <Spinner aria-label="Checking the file" />}
+          {nam ? <p className="text-pretty text-silkscreen-3">{describe(nam.check)}.</p> : !error && <Spinner aria-label={t`Checking the file`} />}
           <div className="flex flex-wrap items-center gap-2">
             <label className="flex items-center gap-2 text-silkscreen-2">
-              Name on the pedal
+              <Trans>Name on the pedal</Trans>
               <Input value={name} maxLength={10} disabled={working || !nam} onChange={(e) => setName(sanitizeSlotName(e.target.value.toUpperCase()))} className="h-8 w-36" />
             </label>
             <span className="text-[11px] text-silkscreen-3">{name.length}/10</span>
             <SnapToneSlotPicker value={slot} onChange={setSlot} disabled={working} />
           </div>
           {nam && (noCabIr === null ? <CabIrPicker value={cabIr} onChange={setCabIr} disabled={working} /> : <p className="text-pretty text-silkscreen-3">{noCabIr}</p>)}
-          {replacing && !working && <p className="text-pretty text-silkscreen-2">Replaces {replacing}. A SnapTone can't be read back from the pedal.</p>}
-          {working && <Progress value={progress * 100} className="w-56" aria-label={phase === "converting" ? "SnapTone conversion progress" : "SnapTone write progress"} />}
-          {working && <p className="text-silkscreen-3">{phase === "converting" ? "Making the SnapTone…" : `Writing ${slotText}…`}</p>}
+          {replacing && !working && <p className="text-pretty text-silkscreen-2"><Trans>Replaces {replacing}. A SnapTone can't be read back from the pedal.</Trans></p>}
+          {working && <Progress value={progress * 100} className="w-56" aria-label={phase === "converting" ? t`SnapTone conversion progress` : t`SnapTone write progress`} />}
+          {working && <p className="text-silkscreen-3">{phase === "converting" ? t`Making the SnapTone…` : t`Writing ${slotText}…`}</p>}
           <TestSignalNotice />
           {error && (
             <p role="alert" className="text-pretty text-led-fault">
@@ -185,11 +187,11 @@ export function LocalNamDialog({ file, onClose }: { file: OpenFile | null; onClo
         </div>
         <DialogFooter>
           <Button variant="ghost" disabled={phase === "writing"} onClick={close}>
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
           <Button disabled={!nam || !name || working || blocker !== null || hasSignal === false} onClick={() => void write()}>
             {working && <Spinner data-icon="inline-start" />}
-            {replacing ? `Replace ${replacing} in ${slotText}` : `Write to ${slotText}`}
+            {replacing ? t`Replace ${replacing} in ${slotText}` : t`Write to ${slotText}`}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { useDevice, useProfile } from "@/state/device";
 import type { Step } from "./plans";
 import { emptyName, isEmptyName } from "./store";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export interface SlotPick {
   title: string;
@@ -46,7 +48,7 @@ export function SlotPickerDialog({ pick, onOpenChange }: { pick: SlotPick | null
         <div
           ref={listRef}
           role="listbox"
-          aria-label="Target slot"
+          aria-label={t`Target slot`}
           className="grid min-h-0 flex-1 grid-cols-2 gap-0.5 overflow-auto rounded-lg bg-well p-1.5"
         >
           {Array.from({ length: slotCount }, (_, slot) => {
@@ -68,34 +70,34 @@ export function SlotPickerDialog({ pick, onOpenChange }: { pick: SlotPick | null
                 )}
               >
                 <span className="min-w-5 text-xs font-semibold text-silkscreen-3 tabular-nums">{slotLabel(slot)}</span>
-                <span className={cn("truncate", empty ? "text-silkscreen-4" : "font-semibold text-silkscreen")}>{empty ? "Empty" : nameOf(slot)}</span>
+                <span className={cn("truncate", empty ? "text-silkscreen-4" : "font-semibold text-silkscreen")}>{empty ? t`Empty` : nameOf(slot)}</span>
               </button>
             );
           })}
         </div>
         <div className="min-h-[52px] text-sm" aria-live="polite">
           {steps === null ? (
-            <p className="text-silkscreen-3">{target === null ? "Choose a slot." : `That runs past slot ${slotLabel(slotCount - 1)}. Choose an earlier slot.`}</p>
+            <p className="text-silkscreen-3">{target === null ? t`Choose a slot.` : t`That runs past slot ${slotLabel(slotCount - 1)}. Choose an earlier slot.`}</p>
           ) : steps.length === 0 ? (
-            <p className="text-silkscreen-3">Nothing changes from there. Choose another slot.</p>
+            <p className="text-silkscreen-3"><Trans>Nothing changes from there. Choose another slot.</Trans></p>
           ) : (
             <ul className="flex flex-col gap-0.5">
               {steps.slice(0, 4).map((s) => (
                 <li key={s.slot} className="truncate text-silkscreen-2">
-                  <span className="text-silkscreen-3 tabular-nums">Slot {slotLabel(s.slot)}:</span> {label(s.from)}
-                  {!isEmptyName(nameOf(s.slot)) && <span className="text-silkscreen-3"> (was {nameOf(s.slot)})</span>}
+                  <Trans><span className="text-silkscreen-3 tabular-nums">Slot {slotLabel(s.slot)}:</span> {label(s.from)}</Trans>
+                  {!isEmptyName(nameOf(s.slot)) && <span className="text-silkscreen-3"> <Trans>(was {nameOf(s.slot)})</Trans></span>}
                 </li>
               ))}
-              {steps.length > 4 && <li className="text-silkscreen-3">and {steps.length - 4} more slots</li>}
+              {steps.length > 4 && <li className="text-silkscreen-3"><Trans>and</Trans> {steps.length - 4} <Trans>more slots</Trans></li>}
             </ul>
           )}
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
           <Button disabled={target === null || !steps?.length} onClick={() => target !== null && pick.onPick(target)}>
-            {target === null ? "Choose a slot" : pick.confirmLabel(target)}
+            {target === null ? t`Choose a slot` : pick.confirmLabel(target)}
           </Button>
         </DialogFooter>
       </DialogContent>

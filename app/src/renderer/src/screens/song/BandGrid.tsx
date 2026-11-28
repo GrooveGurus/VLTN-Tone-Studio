@@ -1,6 +1,8 @@
 import type { BeatGrid } from "@/song/band/beat-grid";
 import type { ChordAtBeat } from "@/song/band/harmony";
 import { bassOverrideAt, noteNameOf, usesFlats, type BassOverride } from "@/song/band/bass-overrides";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** The beats of the song, grouped into bars from each downbeat. A bar before the first downbeat is shown as a short bar. */
 function barsOf(grid: BeatGrid): number[][] {
@@ -30,7 +32,7 @@ export interface BandGridProps {
  * with a ring on its beats. It scrolls sideways for a long song, and uses the app's own tokens so it reads in light and dark themes.
  */
 export function BandGrid({ grid, harmony, overrides = [], selected = null, onSelect }: BandGridProps) {
-  if (grid.beats.length === 0) return <p className="text-sm text-silkscreen-3">No beats in the grid.</p>;
+  if (grid.beats.length === 0) return <p className="text-sm text-silkscreen-3"><Trans>No beats in the grid.</Trans></p>;
   const bars = barsOf(grid);
   const flats = usesFlats(harmony);
   const changeAt = (beat: number) => {
@@ -60,9 +62,9 @@ export function BandGrid({ grid, harmony, overrides = [], selected = null, onSel
       </button>
     ) : null;
   return (
-    <div role="list" aria-label="Beat grid" className="flex min-w-0 gap-2 overflow-x-auto pb-2 text-xs">
+    <div role="list" aria-label={t`Beat grid`} className="flex min-w-0 gap-2 overflow-x-auto pb-2 text-xs">
       {bars.map((bar, index) => (
-        <div role="listitem" aria-label={`Bar ${index + 1}`} key={bar[0]} className="flex shrink-0 flex-col gap-1 border-l border-seam pl-1.5">
+        <div role="listitem" aria-label={t`Bar ${index + 1}`} key={bar[0]} className="flex shrink-0 flex-col gap-1 border-l border-seam pl-1.5">
           <div className="flex h-4 items-end gap-1 whitespace-nowrap text-led-on">
             {bar.map((beat) => {
               const chord = changeAt(beat);
@@ -71,7 +73,7 @@ export function BandGrid({ grid, harmony, overrides = [], selected = null, onSel
                 <button
                   key={beat}
                   type="button"
-                  aria-label={`Edit the bass on beat ${beat + 1}, ${chord}`}
+                  aria-label={t`Edit the bass on beat ${beat + 1}, ${chord}`}
                   onClick={() => onSelect(beat)}
                   className="cursor-pointer"
                 >
@@ -87,9 +89,9 @@ export function BandGrid({ grid, harmony, overrides = [], selected = null, onSel
               const down = beat === bar[0] && (beat - grid.downbeat) % grid.beatsPerBar === 0;
               const height = down ? "h-8" : "h-4";
               const colour = overriddenAt(beat) ? "bg-seam ring-2 ring-led-on" : down ? "bg-led-on" : "bg-seam";
-              const title = `Beat ${beat + 1} at ${grid.beats[beat].toFixed(2)} s`;
+              const title = t`Beat ${beat + 1} at ${grid.beats[beat].toFixed(2)} s`;
               return onSelect ? (
-                handle(beat, `Beat ${beat + 1}, ${title}`, `h-8 w-1.5 ${height} ${colour}`)
+                handle(beat, t`Beat ${beat + 1}, ${title}`, `h-8 w-1.5 ${height} ${colour}`)
               ) : (
                 <span key={beat} title={title} className={`w-1.5 rounded-sm ${height} ${colour}`} />
               );
@@ -100,14 +102,14 @@ export function BandGrid({ grid, harmony, overrides = [], selected = null, onSel
               if (startsOverride(beat)) {
                 const note = noteNameOf(overriddenAt(beat)!.pc, flats);
                 return (
-                  <span key={beat} title="Your bass note">
+                  <span key={beat} title={t`Your bass note`}>
                     {note}
                   </span>
                 );
               }
               const bass = bassAt(beat);
               return bass ? (
-                <span key={beat} title="Bass note played under this chord">
+                <span key={beat} title={t`Bass note played under this chord`}>
                   {bass}
                 </span>
               ) : null;

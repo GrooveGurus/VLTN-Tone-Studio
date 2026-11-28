@@ -5,6 +5,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { runningSeconds } from "@/song/performance/running-time";
 import { formatTime } from "@/song/stems/mix";
 import type { LibrarySong } from "@shared/song-library";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const field = "rounded border border-seam bg-transparent p-2";
 
@@ -60,29 +62,29 @@ export function AddSongsDialog({
     >
       <DialogContent className="max-h-[80vh] overflow-hidden sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Add songs</DialogTitle>
-          <DialogDescription>Tick the songs to add. They go where you chose in the playlist.</DialogDescription>
+          <DialogTitle><Trans>Add songs</Trans></DialogTitle>
+          <DialogDescription><Trans>Tick the songs to add. They go where you chose in the playlist.</Trans></DialogDescription>
         </DialogHeader>
-        <input aria-label="Search songs" placeholder="Search by title or artist" className={field} value={search} onChange={(e) => setSearch(e.target.value)} />
+        <input aria-label={t`Search songs`} placeholder={t`Search by title or artist`} className={field} value={search} onChange={(e) => setSearch(e.target.value)} />
         <ul className="max-h-96 space-y-1 overflow-auto">
           {shown.map((song) => (
             <li key={song.id} className="flex items-center gap-2">
-              <Checkbox aria-label={`Add ${song.title}`} checked={picked.has(song.id)} onCheckedChange={(on) => toggle(song.id, on === true)} />
+              <Checkbox aria-label={t`Add ${song.title}`} checked={picked.has(song.id)} onCheckedChange={(on) => toggle(song.id, on === true)} />
               <span className="flex-1 truncate">
                 {song.title} <span className="text-silkscreen-3">{song.artist}</span>
               </span>
-              {inPlaylist.has(song.id) && <span className="text-xs text-silkscreen-3">in playlist</span>}
+              {inPlaylist.has(song.id) && <span className="text-xs text-silkscreen-3"><Trans>in playlist</Trans></span>}
               <span className="text-sm text-silkscreen-3">{formatTime(runningSeconds(song))}</span>
             </li>
           ))}
-          {!shown.length && <li className="text-sm text-silkscreen-3">No songs match.</li>}
+          {!shown.length && <li className="text-sm text-silkscreen-3"><Trans>No songs match.</Trans></li>}
         </ul>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
           <Button disabled={!picked.size} onClick={add}>
-            Add {picked.size || ""} song{picked.size === 1 ? "" : "s"}
+            <Trans>Add</Trans> {picked.size || ""} <Trans>song</Trans>{picked.size === 1 ? "" : "s"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -5,6 +5,7 @@ import { PRST_MODELS, prstName, profileFor, sniffPrst } from "@shared/devices";
 import { isEmptySlotName, prepareForDevice, profileOrDefault, type PreparedPreset } from "@/state/device-model";
 import type { BackupEntry, DeviceKey } from "@/state/device-types";
 import { editPrst } from "@/state/preset-codec";
+import { t } from "@lingui/core/macro";
 
 /** An entry made on the other model, converted for the connected pedal. */
 export interface RestoreConversion {
@@ -94,7 +95,7 @@ export function restoreEntries(files: SourceFile[], target: DeviceKey | null): O
 
 /** "Slots 00–99", "Slots 00–04 and 07", "Slot 12" with the pedal's `label` per slot ("01-A–02-D" on a GP-200). */
 export function describeSlots(slots: number[], label: (slot: number) => string): string {
-  if (!slots.length) return "No slots";
+  if (!slots.length) return t`No slots`;
   const runs: [number, number][] = [];
   for (const s of [...slots].sort((a, b) => a - b)) {
     const last = runs.at(-1);
@@ -112,7 +113,7 @@ export function describeSlots(slots: number[], label: (slot: number) => string):
  */
 export function alreadyMatchesCopy(pedal: string): { title: string; description: string } {
   return {
-    title: `The ${pedal} already matches this backup`,
-    description: "Every slot holds the same preset as this backup, so restoring would change nothing. Choose Write all to replace every slot anyway.",
+    title: t`The ${pedal} already matches this backup`,
+    description: t`Every slot holds the same preset as this backup, so restoring would change nothing. Choose Write all to replace every slot anyway.`,
   };
 }

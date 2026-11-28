@@ -21,6 +21,8 @@ import { editEnabled, editOrder, footswitchToggle, resetToDefaults, shownSwitche
 import { isMovable, nudge } from "./order";
 import { useLiveMode } from "./live-edits";
 import { useRig } from "./rig-store";
+import { t as lt } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Right-click menu of a pedal: on/off, change model, copy/paste settings, FS1/FS2 (CTRL submenu), move, reset. */
 export function BlockMenu({ block, readOnly, children }: { block: BlockState; readOnly: boolean; children: ReactNode }) {
@@ -41,8 +43,8 @@ export function BlockMenu({ block, readOnly, children }: { block: BlockState; re
       <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
       <ContextMenuContent className="w-60">
         <ContextMenuItem disabled={readOnly} onSelect={() => editEnabled(block.index, !block.enabled)}>
-          {block.enabled ? "Turn off" : "Turn on"}
-          <ContextMenuShortcut>Space</ContextMenuShortcut>
+          {block.enabled ? lt`Turn off` : lt`Turn on`}
+          <ContextMenuShortcut><Trans>Space</Trans></ContextMenuShortcut>
         </ContextMenuItem>
         <ContextMenuItem
           disabled={readOnly}
@@ -51,20 +53,20 @@ export function BlockMenu({ block, readOnly, children }: { block: BlockState; re
             useRig.getState().openPicker({ block: block.index });
           }}
         >
-          Change model…
+          <Trans>Change model…</Trans>
           <ContextMenuShortcut>M</ContextMenuShortcut>
         </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem onSelect={() => copyBlock(block)}>Copy settings</ContextMenuItem>
+        <ContextMenuItem onSelect={() => copyBlock(block)}><Trans>Copy settings</Trans></ContextMenuItem>
         <ContextMenuItem disabled={!canPaste} onSelect={() => void pasteBlock(block.index)}>
-          {clip && clip.code === block.code ? `Paste ${clip.title} settings` : "Paste settings"}
+          {clip && clip.code === block.code ? lt`Paste ${clip.title} settings` : lt`Paste settings`}
         </ContextMenuItem>
         <ContextMenuSeparator />
         {preset && switches.length > 2 ? (
           // GP-200 family: up to 8 CTRL, one submenu instead of a checkbox each
           <ContextMenuSub>
             <ContextMenuSubTrigger disabled={readOnly}>
-              Assign to CTRL
+              <Trans>Assign to CTRL</Trans>
               {on.length > 0 && <ContextMenuShortcut>{on.map((i) => i + 1).join(", ")}</ContextMenuShortcut>}
             </ContextMenuSubTrigger>
             <ContextMenuSubContent>
@@ -85,9 +87,9 @@ export function BlockMenu({ block, readOnly, children }: { block: BlockState; re
             const full = "reason" in t;
             return (
               <ContextMenuCheckboxItem key={which} disabled={readOnly || full} checked={assigned} onCheckedChange={() => toggleFootswitch(which, block.index)}>
-                Assign to {switchLabel(preset.device, which)}
-                {full && <ContextMenuShortcut>3 blocks max</ContextMenuShortcut>}
-                {moves && <ContextMenuShortcut>moves from {switchLabel(preset.device, from)}</ContextMenuShortcut>}
+                <Trans>Assign to {switchLabel(preset.device, which)}</Trans>
+                {full && <ContextMenuShortcut><Trans>3 blocks max</Trans></ContextMenuShortcut>}
+                {moves && <ContextMenuShortcut><Trans>moves from {switchLabel(preset.device, from)}</Trans></ContextMenuShortcut>}
               </ContextMenuCheckboxItem>
             );
           })
@@ -97,19 +99,19 @@ export function BlockMenu({ block, readOnly, children }: { block: BlockState; re
           <>
             <ContextMenuSeparator />
             <ContextMenuItem disabled={readOnly || !left} onSelect={() => left && editOrder(left)}>
-              Move earlier in the chain
-              <ContextMenuShortcut>Alt ←</ContextMenuShortcut>
+              <Trans>Move earlier in the chain</Trans>
+              <ContextMenuShortcut><Trans>Alt ←</Trans></ContextMenuShortcut>
             </ContextMenuItem>
             <ContextMenuItem disabled={readOnly || !right} onSelect={() => right && editOrder(right)}>
-              Move later in the chain
-              <ContextMenuShortcut>Alt →</ContextMenuShortcut>
+              <Trans>Move later in the chain</Trans>
+              <ContextMenuShortcut><Trans>Alt →</Trans></ContextMenuShortcut>
             </ContextMenuItem>
             {!readOnly && orderMode !== "live" && <SaveNote pedal={pedal} />}
           </>
         )}
         <ContextMenuSeparator />
         <ContextMenuItem disabled={readOnly || !block.model} onSelect={() => void resetToDefaults(block)}>
-          Reset {block.model ? modelTitle(block) : "model"} to defaults
+          <Trans>Reset</Trans> {block.model ? modelTitle(block) : lt`model`} <Trans>to defaults</Trans>
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
@@ -118,5 +120,5 @@ export function BlockMenu({ block, readOnly, children }: { block: BlockState; re
 
 /** Under the footswitch and move items when the pedal has no live command for them. */
 function SaveNote({ pedal }: { pedal: string }) {
-  return <ContextMenuLabel className="text-xs font-normal text-pretty text-silkscreen-3">Reaches the {pedal} when you save</ContextMenuLabel>;
+  return <ContextMenuLabel className="text-xs font-normal text-pretty text-silkscreen-3"><Trans>Reaches the {pedal} when you save</Trans></ContextMenuLabel>;
 }

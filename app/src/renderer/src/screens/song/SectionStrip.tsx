@@ -4,6 +4,8 @@ import { formatTime } from "@/song/stems/mix";
 import { usePlaybackClock } from "@/song/performance/playback-clock";
 import { useSession, type PerformanceSession, type SessionState } from "@/song/performance/session";
 import { sectionIndexAt, sortedSections, type Section } from "@/song/performance/sections";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * The sentence under the strip: what is armed, or what is decided and when it lands. Pure, so the wording can be tested.
@@ -19,11 +21,11 @@ export function sectionStatus(
   const current = ordered[sectionIndexAt(ordered, position)];
   const name = (id: string | null) => ordered.find((s) => s.id === id)?.name ?? "";
   const countdown = (at: number) => `${formatTime(at)} (in ${Math.max(0, at - position).toFixed(1)} s)`;
-  if (next?.kind === "pause") return `Pauses at ${countdown(next.at)}.`;
-  if (next?.kind === "jump") return `Jumps to ${name(next.target) || "the next section"} at ${countdown(next.at)}.`;
+  if (next?.kind === "pause") return t`Pauses at ${countdown(next.at)}.`;
+  if (next?.kind === "jump") return t`Jumps to ${name(next.target) || t`the next section`} at ${countdown(next.at)}.`;
   if (live.jump) {
     const landing = current ? `at the end of ${current.name}` : "at the next section start";
-    return `${name(live.jump)} is armed. It lands ${landing}. Tap Cancel jump to stop it.`;
+    return t`${name(live.jump)} is armed. It lands ${landing}. Tap Cancel jump to stop it.`;
   }
   return "";
 }
@@ -51,7 +53,7 @@ export function SectionStrip({ session, onSaveDefaults }: { session: Performance
   const playing = ordered[current];
   const looping = !!playing && (live.loop === playing.id || (playing.mode === "loop" && !live.released.includes(playing.id)));
   return (
-    <div aria-label="Song sections" className="flex flex-col gap-2">
+    <div aria-label={t`Song sections`} className="flex flex-col gap-2">
       <div className="flex flex-wrap gap-2">
         {ordered.map((section, i) => {
           const armed = live.jump === section.id;
@@ -61,13 +63,13 @@ export function SectionStrip({ session, onSaveDefaults }: { session: Performance
               size="sm"
               variant={i === current ? "default" : "outline"}
               aria-pressed={i === current}
-              aria-label={`${section.name}, ${formatTime(section.start)} to ${formatTime(section.end)}${armed ? ", jump armed" : ""}`}
+              aria-label={t`${section.name}, ${formatTime(section.start)} to ${formatTime(section.end)}${armed ? t`, jump armed` : ""}`}
               style={section.color ? { borderColor: section.color } : undefined}
               onClick={() => session.tapSection(section.id)}
               onDoubleClick={() => session.jumpSectionNow(section.id)}
             >
               {section.name}
-              {armed ? " (armed)" : ""}
+              {armed ? t` (armed)` : ""}
             </Button>
           );
         })}
@@ -76,21 +78,21 @@ export function SectionStrip({ session, onSaveDefaults }: { session: Performance
         {playing &&
           (looping ? (
             <Button variant="outline" size="sm" onClick={session.releaseSectionLoop}>
-              Exit loop
+              <Trans>Exit loop</Trans>
             </Button>
           ) : (
             <Button variant="outline" size="sm" onClick={() => session.toggleSectionLoop(playing.id)}>
-              Loop {playing.name}
+              <Trans>Loop {playing.name}</Trans>
             </Button>
           ))}
         {live.jump && (
           <Button variant="outline" size="sm" onClick={session.cancelSectionJump}>
-            Cancel jump
+            <Trans>Cancel jump</Trans>
           </Button>
         )}
         {onSaveDefaults && (
           <Button variant="outline" size="sm" onClick={onSaveDefaults}>
-            Save as default
+            <Trans>Save as default</Trans>
           </Button>
         )}
       </div>

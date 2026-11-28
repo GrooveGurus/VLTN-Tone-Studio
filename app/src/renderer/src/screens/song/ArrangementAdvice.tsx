@@ -1,11 +1,13 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 /** Optional arrangement guidance stays visible on demand, separate from playback and MIDI problems. */
 export function ArrangementAdvice({ items }: { items: readonly string[] }) {
   if (!items.length) return null;
   return (
-    <details aria-label="Arrangement advice" className="rounded border border-seam p-2">
-      <summary className="cursor-pointer">Arrangement advice ({items.length})</summary>
+    <details aria-label={t`Arrangement advice`} className="rounded border border-seam p-2">
+      <summary className="cursor-pointer"><Trans>Arrangement advice ({items.length})</Trans></summary>
       <p className="my-2 text-xs text-silkscreen-3">
-        For section navigation and intentional trims. Advice does not change playback or require a change for a straight-through set.
+        <Trans>For section navigation and intentional trims. Advice does not change playback or require a change for a straight-through set.</Trans>
       </p>
       <ul className="max-h-60 list-disc overflow-auto pl-5">
         {items.map((text, index) => (

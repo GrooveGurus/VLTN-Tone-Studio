@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { lineUpLabel } from "@/song/band/rendered";
 import type { RenderedKind, RenderedPart } from "@/song/band/arrangement";
 import { AUDIO_ACCEPT } from "@/song/decode";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export interface PendingLineUp {
   /** What the gap is, for example "The first hit is 300 ms after the first note." */
@@ -28,14 +30,14 @@ export interface RenderedPartRowProps {
 
 export function RenderedPartRow({ kind, rendered, disabled, pending, onFile, onBack }: RenderedPartRowProps) {
   const input = useRef<HTMLInputElement>(null);
-  const label = kind === "drums" ? "drums" : "bass";
+  const label = kind === "drums" ? t`drums` : t`bass`;
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-2">
         <span className="min-w-0 flex-1 text-silkscreen-2">
           {rendered
-            ? `Using your rendered ${label}: ${rendered.name}`
-            : `Your own ${label}, rendered outside the app, can take the place of the generated one.`}
+            ? t`Using your rendered ${label}: ${rendered.name}`
+            : t`Your own ${label}, rendered outside the app, can take the place of the generated one.`}
         </span>
         <input
           ref={input}
@@ -49,11 +51,11 @@ export function RenderedPartRow({ kind, rendered, disabled, pending, onFile, onB
           }}
         />
         <Button variant="outline" size="sm" disabled={disabled} onClick={() => input.current?.click()}>
-          Use my rendered {label}…
+          <Trans>Use my rendered {label}…</Trans>
         </Button>
         {rendered && (
           <Button variant="ghost" size="sm" disabled={disabled} onClick={onBack}>
-            Back to generated
+            <Trans>Back to generated</Trans>
           </Button>
         )}
       </div>
@@ -64,7 +66,7 @@ export function RenderedPartRow({ kind, rendered, disabled, pending, onFile, onB
             {lineUpLabel(pending.shiftSeconds)}
           </Button>
           <Button variant="outline" size="sm" onClick={pending.onUseAsIs}>
-            Use as it is
+            <Trans>Use as it is</Trans>
           </Button>
         </div>
       )}

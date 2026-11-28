@@ -11,12 +11,14 @@ import { runStatusLine } from "@/song/analysis/run-status";
 import { LYRIC_LANGUAGES, loadLyricsChoice, saveLyricsChoice, type LyricsChoice } from "@/song/performance/lyrics-options";
 import { downloadMegabytes, findLyricsModel } from "@/song/performance/lyrics-models";
 import { LyricsModelPicker } from "../LyricsModelPicker";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** What the lyrics step costs, in words: the model's download once, and a few minutes a song. */
 export function lyricsCost(choice: LyricsChoice): string {
   const model = findLyricsModel(choice.model);
   if (!model) return "";
-  return `Lyrics with ${model.label}: about ${downloadMegabytes(model, false)} MB to download once, then a few minutes per song.`;
+  return t`Lyrics with ${model.label}: about ${downloadMegabytes(model, false)} MB to download once, then a few minutes per song.`;
 }
 
 /**
@@ -42,8 +44,8 @@ export function AfterSplitOptions({ className }: { className?: string }) {
   return (
     <div className={cn("flex flex-col gap-3 text-left", className)}>
       <div className="flex flex-col gap-1.5 rounded-lg border border-seam p-3">
-        <p className="text-[13px] font-semibold text-silkscreen">After the split</p>
-        <p className="text-[12px] text-silkscreen-3">Tone Studio works these out for the song as soon as its audio is ready.</p>
+        <p className="text-[13px] font-semibold text-silkscreen"><Trans>After the split</Trans></p>
+        <p className="text-[12px] text-silkscreen-3"><Trans>Tone Studio works these out for the song as soon as its audio is ready.</Trans></p>
         <div className="grid grid-cols-1 gap-2 pt-1 sm:grid-cols-2">
           {AFTER_SPLIT_STEPS.map((step) => {
             const id = `after-split-${step.id}`;
@@ -66,9 +68,9 @@ export function AfterSplitOptions({ className }: { className?: string }) {
           <div className="flex flex-col gap-2 pt-2">
             <LyricsModelPicker choice={lyricsChoice} disabled={busy} onChange={updateLyrics} />
             <label className="flex items-center gap-2 text-[13px]">
-              <span>Language for a song that does not set its own</span>
+              <Trans><span>Language for a song that does not set its own</span></Trans>
               <select
-                aria-label="Lyrics language"
+                aria-label={t`Lyrics language`}
                 className="rounded border border-seam bg-transparent px-2 py-1 text-[13px]"
                 value={after.language}
                 disabled={busy}
@@ -76,7 +78,7 @@ export function AfterSplitOptions({ className }: { className?: string }) {
               >
                 {LYRIC_LANGUAGES.map((value) => (
                   <option key={value} value={value}>
-                    {value === "auto" ? "Detect automatically" : value[0].toUpperCase() + value.slice(1)}
+                    {value === "auto" ? t`Detect automatically` : value[0].toUpperCase() + value.slice(1)}
                   </option>
                 ))}
               </select>
@@ -97,7 +99,7 @@ export function AnalyseSongButton({ className }: { className?: string }) {
   const analysing = songRunner.state((s) => s.step !== null);
   return (
     <Button className={className} variant="outline" size="sm" disabled={!hasSong || busy || playing || analysing} onClick={() => songRunner.analyseNow()}>
-      Analyse this song now
+      <Trans>Analyse this song now</Trans>
     </Button>
   );
 }

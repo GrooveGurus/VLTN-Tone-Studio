@@ -6,6 +6,7 @@ import { notifyBackupDone, notifyError } from "@/app/notify";
 import type { CollectionInfo } from "@shared/host/files";
 import type { BackupEntry } from "@/state/device-types";
 import { useLibrary } from "./store";
+import { t } from "@lingui/core/macro";
 
 /** A finished backup: its folder, and every slot as the pedal held it when read (what a compare or restore checks against). */
 export interface BackupResult {
@@ -17,14 +18,14 @@ export interface BackupResult {
 export async function runBackupNow(): Promise<BackupResult | null> {
   const d = useDevice.getState();
   if (d.status !== "connected") {
-    notifyError("Couldn't start the backup", new Error(`The ${pedalName(d.device)} isn't connected. Connect it and try again.`));
+    notifyError(t`Couldn't start the backup`, new Error(t`The ${pedalName(d.device)} isn't connected. Connect it and try again.`));
     return null;
   }
   if (d.unsavedChanges > 0) {
     const name = d.preset?.name ?? "the current preset";
     notifyError(
-      "Save or discard your changes first",
-      new Error(`A backup steps through every preset on the pedal, which would drop your ${d.unsavedChanges} unsaved changes to ${name}.`),
+      t`Save or discard your changes first`,
+      new Error(t`A backup steps through every preset on the pedal, which would drop your ${d.unsavedChanges} unsaved changes to ${name}.`),
     );
     return null;
   }
@@ -37,7 +38,7 @@ export async function runBackupNow(): Promise<BackupResult | null> {
     notifyBackupDone({ folder: info.id.slice(info.id.indexOf("/") + 1), path: info.path, count: entries.length });
     return { info, entries };
   } catch (e) {
-    notifyError("Backup didn't finish", e, async () => void (await runBackupNow()));
+    notifyError(t`Backup didn't finish`, e, async () => void (await runBackupNow()));
     return null;
   } finally {
     useLibrary.setState({ backupStartedAt: null });

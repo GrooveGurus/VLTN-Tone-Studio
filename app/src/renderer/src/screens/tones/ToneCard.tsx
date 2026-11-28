@@ -14,6 +14,8 @@ import { DEFAULT_DEVICE, pedalName } from "@/state/device-model";
 import type { DeviceKey } from "@/state/device-types";
 import { irSlotLabel, requestImage, useTones } from "./store";
 import { ToneImage } from "./ToneImage";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export function CreatorAvatar({ username, url, className }: { username: string; url: string | null; className?: string }) {
   const data = useTones((s) => (url ? s.images[url] : null));
@@ -36,7 +38,7 @@ export function linkLabel(record: ToneRecord | undefined, device: DeviceKey | nu
   const link = slotLinkOn(record, device);
   if (!link) return null;
   const slot = link.kind === "snaptone" ? snapToneLabel(link.other ?? device ?? DEFAULT_DEVICE, link.slot) : irSlotLabel(link.slot);
-  return link.other ? `Linked to ${slot} on your ${pedalName(link.other)}` : `Linked to ${slot}`;
+  return link.other ? t`Linked to ${slot} on your ${pedalName(link.other)}` : t`Linked to ${slot}`;
 }
 
 /**
@@ -46,15 +48,15 @@ export function linkLabel(record: ToneRecord | undefined, device: DeviceKey | nu
 function verdictReason(kind: string, model: string, irSlots: number): string {
   switch (kind) {
     case "ready":
-      return `This tone has NAM A1 or A2 models. Tone Studio turns them into ${model} SnapTones the way Valeton Suite does.`;
+      return t`This tone has NAM A1 or A2 models. Tone Studio turns them into ${model} SnapTones the way Valeton Suite does.`;
     case "reshape":
-      return "The A1 file is in NAM 0.7 format. Tone Studio converts it to the 0.5 layout Valeton Suite imports, without changing the sound.";
+      return t`The A1 file is in NAM 0.7 format. Tone Studio converts it to the 0.5 layout Valeton Suite imports, without changing the sound.`;
     case "ir":
-      return `Tone Studio writes IRs over USB to one of the ${model}'s ${irSlots} User IR slots. The pedal keeps the first 11.6 ms.`;
+      return t`Tone Studio writes IRs over USB to one of the ${model}'s ${irSlots} User IR slots. The pedal keeps the first 11.6 ms.`;
     case "custom":
-      return "This tone uses a custom NAM layout. Tone Studio can't turn it into a SnapTone.";
+      return t`This tone uses a custom NAM layout. Tone Studio can't turn it into a SnapTone.`;
     default:
-      return `The ${model} takes SnapTones made from NAM captures, and WAV IRs.`;
+      return t`The ${model} takes SnapTones made from NAM captures, and WAV IRs.`;
   }
 }
 
@@ -130,11 +132,11 @@ export function DiscoverCard({ onBrowse }: { onBrowse: () => void }) {
   return (
     <div className="flex min-w-0 flex-col items-start justify-center gap-2 rounded-lg p-5 shadow-[inset_0_0_0_1px_var(--seam-strong)]">
       <Heart className="size-5 text-silkscreen-3" aria-hidden />
-      <b className="text-[15px] font-[650] text-balance">Find more on TONE3000</b>
-      <p className="mb-1 text-[12px] text-pretty text-silkscreen-3">Thousands of NAM captures and IRs of real gear. Favorite one there and it shows up here.</p>
+      <Trans><b className="text-[15px] font-[650] text-balance">Find more on TONE3000</b></Trans>
+      <p className="mb-1 text-[12px] text-pretty text-silkscreen-3"><Trans>Thousands of NAM captures and IRs of real gear. Favorite one there and it shows up here.</Trans></p>
       <Button variant="outline" size="sm" onClick={onBrowse}>
         <ExternalLink data-icon="inline-start" />
-        Browse TONE3000
+        <Trans>Browse TONE3000</Trans>
       </Button>
     </div>
   );

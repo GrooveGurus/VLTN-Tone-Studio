@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { host } from "@/host";
 import { useSongLibrary } from "@/song/library";
 import { CHART_PDF_MAX_BYTES, type ChartView } from "@shared/song-library";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export interface PdfControlsProps {
   songId: string;
@@ -27,7 +29,7 @@ export function PdfControls({ songId, chart, view, stage, onView }: PdfControlsP
   const attach = async (file: File) => {
     if (!library) return;
     if (file.size > CHART_PDF_MAX_BYTES) {
-      setNotice("This PDF is larger than 50 MB, so it was not attached. Choose a smaller file.");
+      setNotice(t`This PDF is larger than 50 MB, so it was not attached. Choose a smaller file.`);
       return;
     }
     setBusy(true);
@@ -37,7 +39,7 @@ export function PdfControls({ songId, chart, view, stage, onView }: PdfControlsP
       await useSongLibrary.getState().refresh();
       onView("pdf");
     } catch (e) {
-      setNotice(e instanceof Error ? e.message : "The PDF could not be attached.");
+      setNotice(e instanceof Error ? e.message : t`The PDF could not be attached.`);
     } finally {
       setBusy(false);
     }
@@ -51,7 +53,7 @@ export function PdfControls({ songId, chart, view, stage, onView }: PdfControlsP
       await library.removeChart(songId);
       await useSongLibrary.getState().refresh();
     } catch (e) {
-      setNotice(e instanceof Error ? e.message : "The PDF could not be removed.");
+      setNotice(e instanceof Error ? e.message : t`The PDF could not be removed.`);
     } finally {
       setBusy(false);
     }
@@ -61,7 +63,7 @@ export function PdfControls({ songId, chart, view, stage, onView }: PdfControlsP
     <>
       {chart && (
         <Button variant="outline" aria-pressed={view === "pdf"} onClick={() => onView(view === "pdf" ? "text" : "pdf")}>
-          {view === "pdf" ? "Show text chart" : "Show PDF chart"}
+          {view === "pdf" ? t`Show text chart` : t`Show PDF chart`}
         </Button>
       )}
       {!stage && library && (
@@ -71,7 +73,7 @@ export function PdfControls({ songId, chart, view, stage, onView }: PdfControlsP
             type="file"
             accept="application/pdf,.pdf"
             className="hidden"
-            aria-label="Choose a PDF chart"
+            aria-label={t`Choose a PDF chart`}
             onChange={(event) => {
               const file = event.currentTarget.files?.[0];
               event.currentTarget.value = "";
@@ -79,11 +81,11 @@ export function PdfControls({ songId, chart, view, stage, onView }: PdfControlsP
             }}
           />
           <Button variant="outline" disabled={busy} onClick={() => input.current?.click()}>
-            {chart ? "Replace PDF chart" : "Attach PDF chart"}
+            {chart ? t`Replace PDF chart` : t`Attach PDF chart`}
           </Button>
           {chart && (
             <Button variant="outline" disabled={busy} onClick={() => void remove()}>
-              Remove PDF chart
+              <Trans>Remove PDF chart</Trans>
             </Button>
           )}
         </>

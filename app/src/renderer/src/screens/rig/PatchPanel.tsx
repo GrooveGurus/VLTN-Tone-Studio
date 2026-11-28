@@ -11,12 +11,14 @@ import { slotNameError } from "@/state/device-model";
 import type { Gp200Edit, Gp200Fields, PatchExp, PatchQuickAccess, PresetState } from "@/state/device-types";
 import { editPatchFields } from "./edits";
 import { EXP_HARDWARE, EXP_SETS, FIELD_RANGE, TEXT_LENGTH, paramOptions, retarget, styleOptions, targetOptions, targetValue, type Option } from "./patch-fields";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const apply = (edit: Gp200Edit) => {
   try {
     editPatchFields(edit);
   } catch (e) {
-    notifyError("Couldn't change the patch setting", e);
+    notifyError(t`Couldn't change the patch setting`, e);
   }
 };
 
@@ -32,14 +34,14 @@ export function PatchPanel({ preset, fields, disabled }: { preset: PresetState; 
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="ghost" size="xs" className="-mx-1 px-1.5 text-sm font-normal text-silkscreen-3">
-          Patch settings
+          <Trans>Patch settings</Trans>
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="w-[440px] gap-0 p-0 sm:max-w-[440px]">
         <SheetHeader className="border-b border-border py-5 pr-12 pl-6">
-          <SheetTitle className="text-lg">Patch settings</SheetTitle>
+          <SheetTitle className="text-lg"><Trans>Patch settings</Trans></SheetTitle>
           <SheetDescription className="text-pretty text-silkscreen-3">
-            Stored with {preset.name}. Changes reach the {pedal} when you save.
+            <Trans>Stored with {preset.name}. Changes reach the {pedal} when you save.</Trans>
           </SheetDescription>
         </SheetHeader>
         <div className="flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto px-6 pt-5 pb-8">
@@ -56,7 +58,7 @@ export function PatchPanel({ preset, fields, disabled }: { preset: PresetState; 
                 <TabsContent key={name} value={String(set)}>
                   <ol className="m-0 flex list-none flex-col gap-4 p-0 pt-2">
                     {fields.exp.slice(set * 3, set * 3 + 3).map((entry, k) => (
-                      <ExpEntry key={k} preset={preset} index={set * 3 + k} title={`Entry ${k + 1}`} name={`${name}, entry ${k + 1}`} entry={entry} disabled={disabled} />
+                      <ExpEntry key={k} preset={preset} index={set * 3 + k} title={t`Entry ${k + 1}`} name={`${name}, entry ${k + 1}`} entry={entry} disabled={disabled} />
                     ))}
                   </ol>
                 </TabsContent>
@@ -64,7 +66,7 @@ export function PatchPanel({ preset, fields, disabled }: { preset: PresetState; 
             </Tabs>
           </Section>
 
-          <Section title="Quick Access" note="What each Quick Access knob turns in this patch.">
+          <Section title={t`Quick Access`} note="What each Quick Access knob turns in this patch.">
             <ol className="m-0 flex list-none flex-col gap-2 p-0">
               {fields.quickAccess.map((knob, i) => (
                 <QuickAccessRow key={i} preset={preset} index={i} knob={knob} disabled={disabled} />
@@ -72,22 +74,22 @@ export function PatchPanel({ preset, fields, disabled }: { preset: PresetState; 
             </ol>
           </Section>
 
-          <Section title="Pan and FX loop" note={`Shown as the preset stores them: what the numbers mean on the ${pedal} isn't confirmed yet.`}>
+          <Section title={t`Pan and FX loop`} note={t`Shown as the preset stores them: what the numbers mean on the ${pedal} isn't confirmed yet.`}>
             <div className="grid grid-cols-2 gap-3">
-              <NumberField label="Pan" value={fields.pan} range={FIELD_RANGE.pan} disabled={disabled} onCommit={(pan) => apply({ pan })} />
-              <NumberField label="FX loop mode" value={fields.loopMode} range={FIELD_RANGE.loopMode} disabled={disabled} onCommit={(loopMode) => apply({ loopMode })} />
-              <NumberField label="FX loop send level" value={fields.sendLevel} range={FIELD_RANGE.sendLevel} disabled={disabled} onCommit={(sendLevel) => apply({ sendLevel })} />
-              <NumberField label="FX loop return level" value={fields.returnLevel} range={FIELD_RANGE.returnLevel} disabled={disabled} onCommit={(returnLevel) => apply({ returnLevel })} />
+              <NumberField label={t`Pan`} value={fields.pan} range={FIELD_RANGE.pan} disabled={disabled} onCommit={(pan) => apply({ pan })} />
+              <NumberField label={t`FX loop mode`} value={fields.loopMode} range={FIELD_RANGE.loopMode} disabled={disabled} onCommit={(loopMode) => apply({ loopMode })} />
+              <NumberField label={t`FX loop send level`} value={fields.sendLevel} range={FIELD_RANGE.sendLevel} disabled={disabled} onCommit={(sendLevel) => apply({ sendLevel })} />
+              <NumberField label={t`FX loop return level`} value={fields.returnLevel} range={FIELD_RANGE.returnLevel} disabled={disabled} onCommit={(returnLevel) => apply({ returnLevel })} />
             </div>
           </Section>
 
-          <Section title="Drum style">
-            <Choice label="Drum style" value={String(fields.style)} options={styleOptions(fields.style)} disabled={disabled} onChange={(v) => apply({ style: Number(v) })} />
+          <Section title={t`Drum style`}>
+            <Choice label={t`Drum style`} value={String(fields.style)} options={styleOptions(fields.style)} disabled={disabled} onChange={(v) => apply({ style: Number(v) })} />
           </Section>
 
-          <Section title="Author and note">
-            <TextField label="Author" value={fields.author} max={TEXT_LENGTH.author} disabled={disabled} onCommit={(author) => apply({ author })} />
-            <TextField label="Note" value={fields.note} max={TEXT_LENGTH.note} disabled={disabled} onCommit={(note) => apply({ note })} />
+          <Section title={t`Author and note`}>
+            <TextField label={t`Author`} value={fields.author} max={TEXT_LENGTH.author} disabled={disabled} onCommit={(author) => apply({ author })} />
+            <TextField label={t`Note`} value={fields.note} max={TEXT_LENGTH.note} disabled={disabled} onCommit={(note) => apply({ note })} />
           </Section>
         </div>
       </SheetContent>
@@ -118,7 +120,7 @@ function ExpEntry(props: { preset: PresetState; index: number; title: string; na
     <li className="flex flex-col gap-2">
       <span className="text-xs text-silkscreen-3">{title}</span>
       <Choice
-        label={`${name} target`}
+        label={t`${name} target`}
         value={targetValue(entry.block)}
         options={targetOptions(preset, "exp", entry.block)}
         disabled={disabled}
@@ -127,12 +129,12 @@ function ExpEntry(props: { preset: PresetState; index: number; title: string; na
       {entry.block !== null && (
         <div className="grid grid-cols-[1fr_4.5rem_4.5rem] items-end gap-2">
           {block !== null ? (
-            <Choice label={`${name} parameter`} value={String(entry.param)} options={paramOptions(preset, block, entry.param)} disabled={disabled} onChange={(v) => apply({ exp: { [index]: { param: Number(v) } } })} />
+            <Choice label={t`${name} parameter`} value={String(entry.param)} options={paramOptions(preset, block, entry.param)} disabled={disabled} onChange={(v) => apply({ exp: { [index]: { param: Number(v) } } })} />
           ) : (
             <span />
           )}
-          <NumberField label="Min" name={`${name} min`} value={entry.min} range={FIELD_RANGE.expEnd} decimals disabled={disabled} onCommit={(min) => apply({ exp: { [index]: { min } } })} />
-          <NumberField label="Max" name={`${name} max`} value={entry.max} range={FIELD_RANGE.expEnd} decimals disabled={disabled} onCommit={(max) => apply({ exp: { [index]: { max } } })} />
+          <NumberField label={t`Min`} name={`${name} min`} value={entry.min} range={FIELD_RANGE.expEnd} decimals disabled={disabled} onCommit={(min) => apply({ exp: { [index]: { min } } })} />
+          <NumberField label={t`Max`} name={`${name} max`} value={entry.max} range={FIELD_RANGE.expEnd} decimals disabled={disabled} onCommit={(max) => apply({ exp: { [index]: { max } } })} />
         </div>
       )}
     </li>
@@ -141,20 +143,20 @@ function ExpEntry(props: { preset: PresetState; index: number; title: string; na
 
 /** One Quick Access knob: Off, a block's param, the patch volume or tempo. */
 function QuickAccessRow({ preset, index, knob, disabled }: { preset: PresetState; index: number; knob: PatchQuickAccess; disabled: boolean }) {
-  const name = `Quick Access ${index + 1}`;
+  const name = t`Quick Access ${index + 1}`;
   const block = knob.block !== null && preset.blocks[knob.block] ? knob.block : null;
   return (
     <li className="grid grid-cols-[3.5rem_1fr_1fr] items-center gap-2">
-      <span className="text-sm font-semibold text-silkscreen">Knob {index + 1}</span>
+      <span className="text-sm font-semibold text-silkscreen"><Trans>Knob</Trans> {index + 1}</span>
       <Choice
-        label={`${name} target`}
+        label={t`${name} target`}
         value={targetValue(knob.block)}
         options={targetOptions(preset, "quickAccess", knob.block)}
         disabled={disabled}
         onChange={(v) => apply({ quickAccess: { [index]: retarget(preset, targetOf(v)) } })}
       />
       {block !== null && (
-        <Choice label={`${name} parameter`} value={String(knob.param)} options={paramOptions(preset, block, knob.param)} disabled={disabled} onChange={(v) => apply({ quickAccess: { [index]: { param: Number(v) } } })} />
+        <Choice label={t`${name} parameter`} value={String(knob.param)} options={paramOptions(preset, block, knob.param)} disabled={disabled} onChange={(v) => apply({ quickAccess: { [index]: { param: Number(v) } } })} />
       )}
     </li>
   );

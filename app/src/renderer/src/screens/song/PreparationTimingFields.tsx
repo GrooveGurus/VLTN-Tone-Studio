@@ -1,5 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { PREPARATION_REPEATS, PREPARATION_REPEAT_LABELS, type PreparationRepeat } from "@/song/performance/preparation-repeat";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** A wait belongs to a whole command line, so bank/preset pairs and macros have one timing control. */
 export function PreparationTimingFields({
@@ -21,13 +23,13 @@ export function PreparationTimingFields({
     <div className="flex flex-wrap items-center gap-2 text-xs">
       {onRepeat && (
         <label>
-          Repeat{" "}
+          <Trans>Repeat{" "}</Trans>
           <select
-            aria-label={name ? `Preparation repeat for ${name}` : "New preparation command repeat"}
+            aria-label={name ? t`Preparation repeat for ${name}` : t`New preparation command repeat`}
             className="rounded border border-seam bg-background p-1"
             disabled={disabled}
             value={repeat}
-            title="Applies to the whole command line, keeping bank/preset pairs together."
+            title={t`Applies to the whole command line, keeping bank/preset pairs together.`}
             onChange={(event) => onRepeat(event.target.value as PreparationRepeat)}
           >
             {PREPARATION_REPEATS.map((value) => (
@@ -40,9 +42,9 @@ export function PreparationTimingFields({
       )}
       {onWait && (
         <label className="flex items-center gap-1">
-          Wait after (s)
+          <Trans>Wait after (s)</Trans>
           <Input
-            aria-label={name ? `Wait after ${name}` : "New preparation command wait after"}
+            aria-label={name ? t`Wait after ${name}` : t`New preparation command wait after`}
             type="number"
             min={0}
             max={10}

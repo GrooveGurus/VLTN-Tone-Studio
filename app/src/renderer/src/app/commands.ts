@@ -9,6 +9,7 @@ import { modKey } from "./keys";
 import { notifyError } from "./notify";
 import { requestPresetSwitch } from "./preset-switch";
 import { checkForUpdates } from "./updates";
+import { t } from "@lingui/core/macro";
 
 /** Reconnect to the pedal in the current mode (simulated stays simulated, same model). */
 export async function reconnect(): Promise<void> {
@@ -19,7 +20,7 @@ export async function reconnect(): Promise<void> {
     const s = useDevice.getState();
     // The pedal on the port that failed (or on USB) before a remembered other model
     const pedal = pedalName(attachedDevice(s));
-    notifyError(`Couldn't connect to the ${pedal}`, s.error ?? new Error(`The ${pedal} didn't answer.`), reconnect);
+    notifyError(t`Couldn't connect to the ${pedal}`, s.error ?? new Error(t`The ${pedal} didn't answer.`), reconnect);
   }
 }
 

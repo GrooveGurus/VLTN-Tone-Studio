@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { preparationSettings, usePreparationDefaults } from "@/song/performance/start-preparation";
 import { readOptions, setSetting } from "@/song/performance/settings";
 import { useSongSettingsRevision } from "@/song/performance/use-song-settings";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Song overrides keep the wait and automatic opening presets separate from the musical timeline. */
 export function SongPreparationSettings({ songKey, locked, session }: { songKey: string; locked: boolean; session: PerformanceSession }) {
@@ -15,20 +17,20 @@ export function SongPreparationSettings({ songKey, locked, session }: { songKey:
   const save = (patch: Partial<typeof settings>) =>
     setSetting(songKey, ":options", JSON.stringify({ ...readOptions(songKey, {}), preparation: { ...settings, ...patch } }));
   return (
-    <section aria-label="Before song preparation" className="space-y-2 rounded border border-seam p-3 text-sm">
-      <h3 className="font-medium">Before song</h3>
+    <section aria-label={t`Before song preparation`} className="space-y-2 rounded border border-seam p-3 text-sm">
+      <h3 className="font-medium"><Trans>Before song</Trans></h3>
       <p>
-        Prepare pedals → presets and your commands → loading wait → song BPM → Ready. Play then starts the count-in and song. Play on its own prepares
-        automatically when enabled. Preparation is off by default; disabled Before song commands are skipped with a warning.
+        <Trans>Prepare pedals → presets and your commands → loading wait → song BPM → Ready. Play then starts the count-in and song. Play on its own prepares
+        automatically when enabled. Preparation is off by default; disabled Before song commands are skipped with a warning.</Trans>
       </p>
       <fieldset disabled={locked} className="flex flex-wrap items-center gap-3">
         <label>
-          <input type="checkbox" checked={settings.enabled} onChange={(event) => save({ enabled: event.target.checked })} /> Prepare pedals before playback
+          <input type="checkbox" checked={settings.enabled} onChange={(event) => save({ enabled: event.target.checked })} /> <Trans>Prepare pedals before playback</Trans>
         </label>
         <label>
-          Preset loading wait (seconds)
+          <Trans>Preset loading wait (seconds)</Trans>
           <Input
-            aria-label="Pedal preparation wait"
+            aria-label={t`Pedal preparation wait`}
             className="w-24"
             type="number"
             min={0}
@@ -41,9 +43,9 @@ export function SongPreparationSettings({ songKey, locked, session }: { songKey:
           />
         </label>
         <label>
-          Gap between setup commands (seconds)
+          <Trans>Gap between setup commands (seconds)</Trans>
           <Input
-            aria-label="Preparation command gap"
+            aria-label={t`Preparation command gap`}
             className="w-24"
             type="number"
             min={0}
@@ -56,43 +58,43 @@ export function SongPreparationSettings({ songKey, locked, session }: { songKey:
           />
         </label>
         <label>
-          <input type="checkbox" checked={settings.openingPresets} onChange={(event) => save({ openingPresets: event.target.checked })} /> Prepare opening
-          preset changes automatically
+          <input type="checkbox" checked={settings.openingPresets} onChange={(event) => save({ openingPresets: event.target.checked })} /> <Trans>Prepare opening
+          preset changes automatically</Trans>
         </label>
         <Button size="sm" variant="outline" onClick={() => usePreparationDefaults.getState().set(settings)}>
-          Use these as defaults
+          <Trans>Use these as defaults</Trans>
         </Button>
         <Button
           size="sm"
           variant="outline"
           onClick={() => setSetting(songKey, ":options", JSON.stringify({ ...readOptions(songKey, {}), preparation: undefined }))}
         >
-          Use default settings
+          <Trans>Use default settings</Trans>
         </Button>
       </fieldset>
       <p>
-        In Song MIDI cues choose When → Before song. Add named pedal commands, raw MIDI or macros; use ↑/↓ to order command lines. Opening Program Change and
-        bank-select messages can run early automatically; drum/looper starts and notes keep their song times.
+        <Trans>In Song MIDI cues choose When → Before song. Add named pedal commands, raw MIDI or macros; use ↑/↓ to order command lines. Opening Program Change and
+        bank-select messages can run early automatically; drum/looper starts and notes keep their song times.</Trans>
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <span>
-          {used} once command line{used === 1 ? "" : "s"} used for this song load.
+          <Trans>{used} once command line</Trans>{used === 1 ? "" : "s"} <Trans>used for this song load.</Trans>
         </span>
         <Button size="sm" variant="outline" disabled={locked || used === 0} onClick={session.resetPreparationCommands}>
-          Reset once commands
+          <Trans>Reset once commands</Trans>
         </Button>
       </div>
       <p>
-        Prepare again respects each command’s Repeat rule. Once commands stay used after sending begins, including cancellation or a lost connection. Reset once
-        commands allows them on the next preparation; it sends nothing by itself.
+        <Trans>Prepare again respects each command’s Repeat rule. Once commands stay used after sending begins, including cancellation or a lost connection. Reset once
+        commands allows them on the next preparation; it sends nothing by itself.</Trans>
       </p>
       <p>
-        Wait after on a command line applies once after its entire bank/preset pair or macro. These waits add to the gap between commands and the final loading
-        wait. Use zero for the global gap or loading wait when you want only individual command waits.
+        <Trans>Wait after on a command line applies once after its entire bank/preset pair or macro. These waits add to the gap between commands and the final loading
+        wait. Use zero for the global gap or loading wait when you want only individual command waits.</Trans>
       </p>
       <p>
-        Automatic GP tempo follows your preparation commands. If your commands set a different tempo, turn off automatic song BPM. Cancel start clears queued
-        commands and prevents the song from starting; commands already received by a pedal cannot be undone.
+        <Trans>Automatic GP tempo follows your preparation commands. If your commands set a different tempo, turn off automatic song BPM. Cancel start clears queued
+        commands and prevents the song from starting; commands already received by a pedal cannot be undone.</Trans>
       </p>
     </section>
   );

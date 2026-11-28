@@ -22,6 +22,8 @@ import {
 import { loadLyricsChoice, type LyricsChoice } from "@/song/performance/lyrics-options";
 import { LyricsBatchSettings } from "./LyricsBatchSettings";
 import { AnalysisJobProgress } from "./AnalysisJobProgress";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export interface AnalyseSongsDialogProps {
   open: boolean;
@@ -74,9 +76,9 @@ export function AnalyseSongsDialog({ open, onOpenChange, songs }: AnalyseSongsDi
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Analyse saved songs</DialogTitle>
+          <DialogTitle><Trans>Analyse saved songs</Trans></DialogTitle>
           <DialogDescription>
-            {running ? "The analysis keeps going if you close this. Its progress shows in the status bar." : selectionText}
+            {running ? t`The analysis keeps going if you close this. Its progress shows in the status bar.` : selectionText}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
@@ -103,11 +105,11 @@ export function AnalyseSongsDialog({ open, onOpenChange, songs }: AnalyseSongsDi
           )}
           <label className="flex items-center gap-2 text-sm">
             <Checkbox checked={onlyNeeded} disabled={running} onCheckedChange={(value) => setOnlyNeeded(value === true)} />
-            <span>Only songs that need it</span>
+            <Trans><span>Only songs that need it</span></Trans>
           </label>
           <label className="flex items-center gap-2 text-sm">
             <Checkbox checked={replaceManual} disabled={running} onCheckedChange={(value) => setReplaceManual(value === true)} />
-            <span>Replace tempos I set by hand</span>
+            <Trans><span>Replace tempos I set by hand</span></Trans>
           </label>
         </div>
         {running && <AnalysisJobProgress job={job} now={now} />}
@@ -131,7 +133,7 @@ export function AnalyseSongsDialog({ open, onOpenChange, songs }: AnalyseSongsDi
                   {o.title}: {o.tempoChange?.from} → {o.tempoChange?.to}
                 </span>
                 <Button variant="outline" size="sm" onClick={() => openSong(o.id)}>
-                  Open
+                  <Trans>Open</Trans>
                 </Button>
               </p>
             ))}
@@ -141,15 +143,15 @@ export function AnalyseSongsDialog({ open, onOpenChange, songs }: AnalyseSongsDi
           {running ? (
             <>
               <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Run in background
+                <Trans>Run in background</Trans>
               </Button>
               {job.phase === "waiting" && job.waitingFor === "playlist" && (
                 <Button variant="outline" onClick={() => job.releaseWait()}>
-                  Run anyway
+                  <Trans>Run anyway</Trans>
                 </Button>
               )}
               <Button variant="outline" onClick={() => job.stop()}>
-                Stop
+                <Trans>Stop</Trans>
               </Button>
             </>
           ) : (
@@ -161,10 +163,10 @@ export function AnalyseSongsDialog({ open, onOpenChange, songs }: AnalyseSongsDi
                   onOpenChange(false);
                 }}
               >
-                {ended ? "Done" : "Close"}
+                {ended ? t`Done` : t`Close`}
               </Button>
               <Button disabled={run.length === 0} onClick={start}>
-                Analyse {run.length} song{run.length === 1 ? "" : "s"}
+                <Trans>Analyse {run.length} song</Trans>{run.length === 1 ? "" : "s"}
               </Button>
             </>
           )}

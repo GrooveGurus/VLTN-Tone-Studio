@@ -4,6 +4,8 @@
 import { Progress } from "@/components/ui/progress";
 import { describeTimeLeft, jobFraction, secondsLeft, type AnalysisJobState } from "@/song/analysis/analysis-job";
 import { describeLyricsOutcome, type BatchOutcome } from "@/song/analysis/batch";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** One line for a finished song: its tempo change, its lyrics, or why it was left alone. */
 export function describeOutcome(outcome: BatchOutcome): string {
@@ -15,11 +17,11 @@ export function describeOutcome(outcome: BatchOutcome): string {
     case "lyrics":
       return describeLyricsOutcome(outcome.lyrics);
     case "current":
-      return "up to date";
+      return t`up to date`;
     case "skipped":
-      return "open, skipped";
+      return t`open, skipped`;
     case "failed":
-      return `failed: ${outcome.reason}`;
+      return t`failed: ${outcome.reason}`;
   }
 }
 
@@ -33,22 +35,22 @@ export function AnalysisJobProgress({ job, now }: { job: AnalysisJobState; now: 
   const left = job.startedAt === null ? null : secondsLeft(now, job.startedAt, job.done, job.total);
   const elapsed = job.startedAt === null ? 0 : Math.floor((now - job.startedAt) / 1000);
   const current = job.current;
-  const position = `Song ${Math.min(job.done + 1, job.total)} of ${job.total}`;
+  const position = t`Song ${Math.min(job.done + 1, job.total)} of ${job.total}`;
   const step = current && current.steps > 0 ? ` · step ${current.stepIndex + 1} of ${current.steps}${current.step ? ` (${current.step})` : ""}` : "";
-  const waiting = job.waitingFor === "song" ? "Waiting for playback to stop." : "Waiting for the playlist to stop.";
+  const waiting = job.waitingFor === "song" ? t`Waiting for playback to stop.` : t`Waiting for the playlist to stop.`;
   return (
     <div className="space-y-2 text-sm">
-      <Progress value={Math.round(jobFraction(job) * 100)} aria-label="Analysis progress" />
+      <Progress value={Math.round(jobFraction(job) * 100)} aria-label={t`Analysis progress`} />
       <p role="status">
         {position}
         {step}
         {current?.title && job.phase !== "loading" ? `: ${current.title}` : ""}
       </p>
       {job.phase === "waiting" && <p className="text-silkscreen-3">{waiting}</p>}
-      {job.phase === "loading" && <p className="text-silkscreen-3">Loading {current?.title}…</p>}
+      {job.phase === "loading" && <p className="text-silkscreen-3"><Trans>Loading {current?.title}…</Trans></p>}
       <p className="text-xs text-silkscreen-3">
-        Elapsed {clock(elapsed)}
-        {left !== null ? ` · ${describeTimeLeft(left)} left` : ""}
+        <Trans>Elapsed {clock(elapsed)}</Trans>
+        {left !== null ? t` · ${describeTimeLeft(left)} left` : ""}
       </p>
       {job.outcomes.length > 0 && (
         <ul className="max-h-40 space-y-0.5 overflow-auto">

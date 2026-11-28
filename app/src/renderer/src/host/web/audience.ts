@@ -1,5 +1,6 @@
 import { AUDIENCE_CHANNEL, mergeAudienceState, parseAudienceUpdate, type AudienceState, type AudienceUpdate } from "@shared/audience";
 import type { AudienceHostApi, AudienceStatus } from "@shared/host/audience";
+import { t } from "@lingui/core/macro";
 
 // Browser build (spec 43): the audience view is a pop-up window of this page. A browser cannot choose a display or go full screen by
 // itself, so the performer moves the pop-up to the audience screen and makes it full screen (F11). The pop-up gets the state over a
@@ -32,7 +33,7 @@ function status(): AudienceStatus {
     mode: open ? "window" : null,
     displayId: null,
     displays: [],
-    message: note || (open ? "Open in a pop-up window. Move it to the audience screen and press F11 to fill the screen." : "Audience display is off."),
+    message: note || (open ? t`Open in a pop-up window. Move it to the audience screen and press F11 to fill the screen.` : t`Audience display is off.`),
   };
 }
 
@@ -71,7 +72,7 @@ export const webAudience: AudienceHostApi = {
     const url = new URL(window.location.href);
     url.search = "?view=audience";
     const opened = window.open(url.toString(), POPUP, POPUP_SIZE);
-    note = opened ? "" : "The browser blocked the pop-up. Allow pop-ups for this site and try again.";
+    note = opened ? "" : t`The browser blocked the pop-up. Allow pop-ups for this site and try again.`;
     popup = opened;
     if (opened) watch();
     post();

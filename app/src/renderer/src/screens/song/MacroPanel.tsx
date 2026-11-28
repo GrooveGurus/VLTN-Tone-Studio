@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { lrcTime } from "@/song/performance/chart";
 import { removeMacro, useMidiConfiguration } from "@/song/performance/midi-configuration";
 import { expandCommand, macroProblems } from "@/song/performance/midi-macros";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** The saved macros: insert one into the song at a time, send it now, or remove it. Macros are shared by every song. */
 export function MacroPanel({
@@ -30,13 +32,13 @@ export function MacroPanel({
     }
   };
   if (!macros.length)
-    return <p className="text-sm text-silkscreen-3">No macros yet. Save a pedal command or a raw command as a macro to reuse it in any song.</p>;
+    return <p className="text-sm text-silkscreen-3"><Trans>No macros yet. Save a pedal command or a raw command as a macro to reuse it in any song.</Trans></p>;
   return (
-    <div aria-label="MIDI macros" className="space-y-2 text-sm">
+    <div aria-label={t`MIDI macros`} className="space-y-2 text-sm">
       <div className="flex flex-wrap items-center gap-3">
         <label>
-          Macro{" "}
-          <select aria-label="MIDI macro" className="rounded border border-seam bg-background p-2" value={chosen?.code ?? ""} onChange={(e) => setCode(e.target.value)}>
+          <Trans>Macro{" "}</Trans>
+          <select aria-label={t`MIDI macro`} className="rounded border border-seam bg-background p-2" value={chosen?.code ?? ""} onChange={(e) => setCode(e.target.value)}>
             {macros.map((macro) => (
               <option key={macro.code} value={macro.code}>
                 {macro.label} ($${macro.code})
@@ -45,17 +47,17 @@ export function MacroPanel({
           </select>
         </label>
         <Button disabled={!chosen} onClick={() => chosen && run(() => onAdd(`${lrcTime(time)} {midi:$${chosen.code}}`))}>
-          Add macro cue
+          <Trans>Add macro cue</Trans>
         </Button>
         <Button
           variant="outline"
           disabled={!chosen || !canTest}
           onClick={() => chosen && run(() => expandCommand(`$${chosen.code}`, macros).forEach(onTest))}
         >
-          Send macro now
+          <Trans>Send macro now</Trans>
         </Button>
         <Button variant="outline" disabled={!chosen} onClick={() => chosen && run(() => removeMacro(chosen.code))}>
-          Remove macro
+          <Trans>Remove macro</Trans>
         </Button>
       </div>
       {chosen && <p className="font-mono text-xs text-silkscreen-3">{chosen.commands.join(" → ")}</p>}

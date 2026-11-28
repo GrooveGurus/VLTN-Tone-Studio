@@ -1,4 +1,6 @@
 import { createRoot } from "react-dom/client";
+import { I18nProvider } from "@lingui/react";
+import { i18n, initI18n } from "@/i18n";
 import "./follower.css";
 import { FollowerApp } from "./FollowerApp";
 import { FollowerClient, sessionTokens, socketOf } from "./follower-client";
@@ -15,6 +17,13 @@ const client = new FollowerClient({
   clearTimer: (handle) => window.clearTimeout(handle as number),
 });
 
-createRoot(document.getElementById("root")!).render(<FollowerApp client={client} />);
-client.start();
+// The phone's language (or the one picked on this device), before the first render.
+void initI18n().then(() => {
+  createRoot(document.getElementById("root")!).render(
+    <I18nProvider i18n={i18n}>
+      <FollowerApp client={client} />
+    </I18nProvider>,
+  );
+  client.start();
+});
 window.addEventListener("pagehide", () => client.stop());

@@ -3,35 +3,37 @@ import { Button } from "@/components/ui/button";
 import { FILTER_FIELDS, SORT_KEYS, SORT_LABELS, ruleProblem, type FilterField, type FilterOp, type FilterRule, type SmartRules } from "@shared/library-filter";
 import type { LibraryFolder } from "@shared/song-library";
 import { readRecentFilters, withRecentFilter, writeRecentFilters } from "@/song/recent-filters";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const field = "rounded border border-seam bg-transparent p-2";
 
 const FIELD_LABELS: Record<FilterField, string> = {
-  title: "Title",
-  artist: "Artist",
-  notes: "Notes",
-  key: "Key",
-  keyword: "Keyword",
-  colour: "Colour",
-  folder: "Folder",
+  get title() { return t`Title`; },
+  get artist() { return t`Artist`; },
+  get notes() { return t`Notes`; },
+  get key() { return t`Key`; },
+  get keyword() { return t`Keyword`; },
+  get colour() { return t`Colour`; },
+  get folder() { return t`Folder`; },
   bpm: "BPM",
-  year: "Year",
-  playCount: "Play count",
-  duration: "Length (seconds)",
-  added: "Date added",
-  lastPlayed: "Last played",
+  get year() { return t`Year`; },
+  get playCount() { return t`Play count`; },
+  get duration() { return t`Length (seconds)`; },
+  get added() { return t`Date added`; },
+  get lastPlayed() { return t`Last played`; },
 };
 const OP_LABELS: Record<FilterOp, string> = {
-  contains: "contains",
-  is: "is",
-  has: "has",
-  in: "is in",
-  lt: "is less than",
-  gt: "is more than",
-  between: "is between",
-  before: "is before",
-  after: "is after",
-  never: "has never happened",
+  get contains() { return t`contains`; },
+  get is() { return t`is`; },
+  get has() { return t`has`; },
+  get in() { return t`is in`; },
+  get lt() { return t`is less than`; },
+  get gt() { return t`is more than`; },
+  get between() { return t`is between`; },
+  get before() { return t`is before`; },
+  get after() { return t`is after`; },
+  get never() { return t`has never happened`; },
 };
 
 /** A rule that is new, for a field: its first operator and an empty value of the right kind. */
@@ -84,13 +86,13 @@ export function FilterBuilder({
     onChange(filter);
   };
   return (
-    <div className="space-y-3" aria-label="Filter">
+    <div className="space-y-3" aria-label={t`Filter`}>
       <div className="flex flex-wrap items-center gap-2">
         <label className="text-sm">
-          Songs that match{" "}
-          <select aria-label="Match" className={field} value={value.match} onChange={(e) => onChange({ ...value, match: e.target.value as "all" | "any" })}>
-            <option value="all">all of these rules</option>
-            <option value="any">any of these rules</option>
+          <Trans>Songs that match{" "}</Trans>
+          <select aria-label={t`Match`} className={field} value={value.match} onChange={(e) => onChange({ ...value, match: e.target.value as "all" | "any" })}>
+            <option value="all"><Trans>all of these rules</Trans></option>
+            <option value="any"><Trans>any of these rules</Trans></option>
           </select>
         </label>
       </div>
@@ -99,7 +101,7 @@ export function FilterBuilder({
         return (
           <div key={index} className="flex flex-wrap items-center gap-2" data-testid="filter-rule">
             <select
-              aria-label={`Rule ${index + 1} field`}
+              aria-label={t`Rule ${index + 1} field`}
               className={field}
               value={rule.field}
               onChange={(e) => setRule(index, newRule(e.target.value as FilterField))}
@@ -111,7 +113,7 @@ export function FilterBuilder({
               ))}
             </select>
             <select
-              aria-label={`Rule ${index + 1} operator`}
+              aria-label={t`Rule ${index + 1} operator`}
               className={field}
               value={rule.op}
               onChange={(e) => setRule(index, { ...rule, op: e.target.value as FilterOp, value: rule.op === "between" ? undefined : rule.value })}
@@ -124,7 +126,7 @@ export function FilterBuilder({
             </select>
             {kind === "text" && (
               <input
-                aria-label={`Rule ${index + 1} value`}
+                aria-label={t`Rule ${index + 1} value`}
                 className={field}
                 value={String(rule.value ?? "")}
                 onChange={(e) => setRule(index, { ...rule, value: e.target.value })}
@@ -133,7 +135,7 @@ export function FilterBuilder({
             {kind === "number" && (
               <input
                 type="number"
-                aria-label={`Rule ${index + 1} value`}
+                aria-label={t`Rule ${index + 1} value`}
                 className={field}
                 value={numberValue(rule.value)}
                 onChange={(e) => setRule(index, { ...rule, value: e.target.valueAsNumber })}
@@ -143,14 +145,14 @@ export function FilterBuilder({
               <>
                 <input
                   type="number"
-                  aria-label={`Rule ${index + 1} from`}
+                  aria-label={t`Rule ${index + 1} from`}
                   className={field}
                   value={numberValue(rangeOf(rule.value)[0])}
                   onChange={(e) => setRule(index, { ...rule, value: [e.target.valueAsNumber, rangeOf(rule.value)[1]] })}
                 />
                 <input
                   type="number"
-                  aria-label={`Rule ${index + 1} to`}
+                  aria-label={t`Rule ${index + 1} to`}
                   className={field}
                   value={numberValue(rangeOf(rule.value)[1])}
                   onChange={(e) => setRule(index, { ...rule, value: [rangeOf(rule.value)[0], e.target.valueAsNumber] })}
@@ -160,7 +162,7 @@ export function FilterBuilder({
             {kind === "colour" && (
               <input
                 type="color"
-                aria-label={`Rule ${index + 1} colour`}
+                aria-label={t`Rule ${index + 1} colour`}
                 value={String(rule.value)}
                 onChange={(e) => setRule(index, { ...rule, value: e.target.value })}
               />
@@ -168,7 +170,7 @@ export function FilterBuilder({
             {kind === "date" && (
               <input
                 type="date"
-                aria-label={`Rule ${index + 1} date`}
+                aria-label={t`Rule ${index + 1} date`}
                 className={field}
                 value={String(rule.value ?? "")}
                 onChange={(e) => setRule(index, { ...rule, value: e.target.value })}
@@ -176,12 +178,12 @@ export function FilterBuilder({
             )}
             {kind === "folder" && (
               <select
-                aria-label={`Rule ${index + 1} folder`}
+                aria-label={t`Rule ${index + 1} folder`}
                 className={field}
                 value={Array.isArray(rule.value) ? (rule.value[0] ?? "") : ""}
                 onChange={(e) => setRule(index, { ...rule, value: e.target.value ? [e.target.value] : [] })}
               >
-                <option value="">Choose a folder…</option>
+                <option value=""><Trans>Choose a folder…</Trans></option>
                 {folders.map((folder) => (
                   <option key={folder.id} value={folder.id}>
                     {folder.name}
@@ -191,23 +193,23 @@ export function FilterBuilder({
             )}
             <Button
               variant="outline"
-              aria-label={`Remove rule ${index + 1}`}
+              aria-label={t`Remove rule ${index + 1}`}
               onClick={() => onChange({ ...value, rules: value.rules.filter((_, i) => i !== index) })}
             >
-              Remove
+              <Trans>Remove</Trans>
             </Button>
           </div>
         );
       })}
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="outline" disabled={value.rules.length >= 20} onClick={() => onChange({ ...value, rules: [...value.rules, newRule("title")] })}>
-          Add rule
+          <Trans>Add rule</Trans>
         </Button>
         {showSort && (
           <label className="text-sm">
-            Sort by{" "}
+            <Trans>Sort by{" "}</Trans>
             <select
-              aria-label="Sort by"
+              aria-label={t`Sort by`}
               className={field}
               value={value.sort}
               onChange={(e) => onChange({ ...value, sort: e.target.value as SmartRules["sort"] })}
@@ -222,11 +224,11 @@ export function FilterBuilder({
         )}
         {showSort && (
           <label className="text-sm">
-            Limit to{" "}
+            <Trans>Limit to{" "}</Trans>
             <input
               type="number"
-              aria-label="Song limit"
-              placeholder="No limit"
+              aria-label={t`Song limit`}
+              placeholder={t`No limit`}
               className={field + " w-24"}
               value={value.limit ?? ""}
               min={1}
@@ -237,15 +239,15 @@ export function FilterBuilder({
       </div>
       {problems.map(({ index, problem }) => (
         <p key={index} role="alert" className="text-sm text-red-400">
-          Rule {index + 1}: {problem}
+          <Trans>Rule</Trans> {index + 1}: {problem}
         </p>
       ))}
       {recent.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-silkscreen-3">Recent filters:</span>
+          <Trans><span className="text-silkscreen-3">Recent filters:</span></Trans>
           {recent.map((filter, index) => (
             <Button key={index} variant="outline" onClick={() => apply(filter)}>
-              {filter.rules.length ? `${filter.rules.length} rule${filter.rules.length === 1 ? "" : "s"}` : "Everything"} · {SORT_LABELS[filter.sort]}
+              {filter.rules.length ? t`${filter.rules.length} rule${filter.rules.length === 1 ? "" : "s"}` : t`Everything`} · {SORT_LABELS[filter.sort]}
             </Button>
           ))}
         </div>

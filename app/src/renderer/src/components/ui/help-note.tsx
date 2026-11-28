@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 import { Info } from "lucide-react";
+import { t } from "@lingui/core/macro";
 
 /**
  * A short explanation that stays closed until someone asks for it. The text is still in the page (for search and screen readers), just folded.
  */
-export function HelpNote({ children, label = "How this works" }: { children: ReactNode; label?: string }) {
+export function HelpNote({ children, label = t`How this works` }: { children: ReactNode; label?: string }) {
   return (
     <details className="group text-xs text-muted-foreground">
       <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 select-none hover:text-foreground [&::-webkit-details-marker]:hidden">

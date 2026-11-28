@@ -1,6 +1,7 @@
 import { EXP_TARGETS } from "@/gp5/lib/protocol.mjs";
 import { expTargetParams } from "@/state/device-model";
 import type { BlockCode, ExpSettings, Gp200Fields, ParamInfo, PresetState } from "@/state/device-types";
+import { t } from "@lingui/core/macro";
 
 /** One row of the unsaved-changes table (overlays.md B): Block, Parameter, Saved, Now. */
 export interface ChangeRow {
@@ -21,24 +22,24 @@ export const formatParamValue = (info: ParamInfo | undefined, v: number): string
 
 const EXP_ROWS: { field: keyof ExpSettings; label: string; show: (e: ExpSettings, p: PresetState) => string }[] = [
   { field: "on", label: "EXP", show: (e) => (e.on ? "On" : "Off") },
-  { field: "targetModule", label: "EXP target", show: (e) => EXP_TARGETS[e.targetModule] ?? String(e.targetModule) },
-  { field: "targetParam", label: "EXP parameter", show: (e, p) => expTargetParams(p, e.targetModule)[e.targetParam]?.name ?? `Parameter ${e.targetParam + 1}` },
-  { field: "paramMin", label: "EXP minimum", show: (e) => `${e.paramMin}%` },
-  { field: "paramMax", label: "EXP maximum", show: (e) => `${e.paramMax}%` },
-  { field: "volPosition", label: "EXP volume position", show: (e) => (e.volPosition === 1 ? "Post" : "Pre") },
-  { field: "volMin", label: "EXP volume minimum", show: (e) => `${e.volMin}%` },
-  { field: "volMax", label: "EXP volume maximum", show: (e) => `${e.volMax}%` },
+  { field: "targetModule", get label() { return t`EXP target`; }, show: (e) => EXP_TARGETS[e.targetModule] ?? String(e.targetModule) },
+  { field: "targetParam", get label() { return t`EXP parameter`; }, show: (e, p) => expTargetParams(p, e.targetModule)[e.targetParam]?.name ?? `Parameter ${e.targetParam + 1}` },
+  { field: "paramMin", get label() { return t`EXP minimum`; }, show: (e) => `${e.paramMin}%` },
+  { field: "paramMax", get label() { return t`EXP maximum`; }, show: (e) => `${e.paramMax}%` },
+  { field: "volPosition", get label() { return t`EXP volume position`; }, show: (e) => (e.volPosition === 1 ? "Post" : "Pre") },
+  { field: "volMin", get label() { return t`EXP volume minimum`; }, show: (e) => `${e.volMin}%` },
+  { field: "volMax", get label() { return t`EXP volume maximum`; }, show: (e) => `${e.volMax}%` },
 ];
 
 /** GP-200 family patch fields shown with their values. */
 const GP200_ROWS: { field: "pan" | "style" | "loopMode" | "sendLevel" | "returnLevel" | "author" | "note"; label: string }[] = [
-  { field: "pan", label: "Pan" },
-  { field: "style", label: "Drum style" },
-  { field: "loopMode", label: "FX loop mode" },
-  { field: "sendLevel", label: "FX loop send level" },
-  { field: "returnLevel", label: "FX loop return level" },
-  { field: "author", label: "Author" },
-  { field: "note", label: "Note" },
+  { field: "pan", get label() { return t`Pan`; } },
+  { field: "style", get label() { return t`Drum style`; } },
+  { field: "loopMode", get label() { return t`FX loop mode`; } },
+  { field: "sendLevel", get label() { return t`FX loop send level`; } },
+  { field: "returnLevel", get label() { return t`FX loop return level`; } },
+  { field: "author", get label() { return t`Author`; } },
+  { field: "note", get label() { return t`Note`; } },
 ];
 
 /** Rows for the GP-200 family's own fields; the structured ones (FX loop position, EXP, Quick Access) as "Changed". */
@@ -47,9 +48,9 @@ function gp200Rows(s: Gp200Fields, n: Gp200Fields): ChangeRow[] {
   const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
   return [
     ...GP200_ROWS.filter((r) => s[r.field] !== n[r.field]).map((r) => ({ block: null, parameter: r.label, saved: String(s[r.field]), now: String(n[r.field]) })),
-    ...(s.sendPos !== n.sendPos || s.returnPos !== n.returnPos ? [changed("FX loop position")] : []),
-    ...s.exp.flatMap((e, i) => (same(e, n.exp[i]) ? [] : [changed(`EXP ${["1A", "1B", "2"][Math.floor(i / 3)]}, entry ${(i % 3) + 1}`)])),
-    ...s.quickAccess.flatMap((q, i) => (same(q, n.quickAccess[i]) ? [] : [changed(`Quick Access ${i + 1}`)])),
+    ...(s.sendPos !== n.sendPos || s.returnPos !== n.returnPos ? [changed(t`FX loop position`)] : []),
+    ...s.exp.flatMap((e, i) => (same(e, n.exp[i]) ? [] : [changed(t`EXP ${["1A", "1B", "2"][Math.floor(i / 3)]}, entry ${(i % 3) + 1}`)])),
+    ...s.quickAccess.flatMap((q, i) => (same(q, n.quickAccess[i]) ? [] : [changed(t`Quick Access ${i + 1}`)])),
   ];
 }
 

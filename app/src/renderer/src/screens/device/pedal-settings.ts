@@ -4,6 +4,7 @@ import { globalSpecsFor, visibleGlobals } from "@/state/device-model";
 import type { DeviceKey, Globals, SettingSpec } from "@/state/device-types";
 import { GP200_GLOBAL_SPECS } from "@/state/driver/gp200-globals";
 import { profileFor } from "@shared/devices";
+import { t } from "@lingui/core/macro";
 
 export type SettingsGroupKey = SettingSpec["group"];
 
@@ -17,12 +18,12 @@ export interface SettingsGroup {
 }
 
 const GROUP_TITLES: Readonly<Record<SettingsGroupKey, string>> = {
-  audio: "Audio",
-  recording: "Recording",
-  controls: "Controls",
+  get audio() { return t`Audio`; },
+  get recording() { return t`Recording`; },
+  get controls() { return t`Controls`; },
   midi: "MIDI",
-  display: "Display",
-  power: "Power",
+  get display() { return t`Display`; },
+  get power() { return t`Power`; },
 };
 
 const GROUP_ORDER = Object.keys(GROUP_TITLES) as SettingsGroupKey[];
@@ -42,7 +43,7 @@ export function controlKind(spec: SettingSpec): ControlKind {
 /** Caption under a dial: "−20 to 20 dB", "0 to 100". */
 export function rangeCaption(spec: SettingSpec): string {
   const min = `${spec.min < 0 ? "−" : ""}${Math.abs(spec.min)}`;
-  return `${min} to ${spec.max}${spec.unit ? ` ${spec.unit}` : ""}`;
+  return t`${min} to ${spec.max}${spec.unit ? ` ${spec.unit}` : ""}`;
 }
 
 /**

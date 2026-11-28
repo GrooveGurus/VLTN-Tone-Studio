@@ -10,6 +10,7 @@ import { postFilters, preFilters, type FilterSpec } from "../nam/shaping";
 import diGuitarUrl from "./di-guitar.flac?url";
 import { connectChain, tailFrames, type CaptureStage, type GraphStage } from "./chain-graph";
 import { irLevelGain } from "./ir-level";
+import { t as lt } from "@lingui/core/macro";
 
 export const SAMPLE_RATE = 48000;
 /** Below the 0.5 breakpoint selects the Lite submodel; negative = the full model (NAM core semantics). */
@@ -26,13 +27,13 @@ export interface ChainSettings {
   gainDb: Record<string, number>;
 }
 
-export const CLIPS = [{ id: "di-guitar", label: "Guitar DI", url: diGuitarUrl }] as const;
+export const CLIPS = [{ id: "di-guitar", get label() { return lt`Guitar DI`; }, url: diGuitarUrl }] as const;
 export type ClipId = (typeof CLIPS)[number]["id"];
 
 let wasmBytes: Promise<ArrayBuffer> | null = null;
 const fetchWasm = () =>
   (wasmBytes ??= fetch(wasmUrl).then((r) => {
-    if (!r.ok) throw new Error(`The audio engine couldn't be loaded (${r.status})`);
+    if (!r.ok) throw new Error(lt`The audio engine couldn't be loaded (${r.status})`);
     return r.arrayBuffer();
   }));
 
@@ -49,7 +50,7 @@ const registered = new WeakMap<BaseAudioContext, Promise<void>>();
 function registerWorklet(ctx: BaseAudioContext): Promise<void> {
   let p = registered.get(ctx);
   if (!p) {
-    if (!ctx.audioWorklet) return Promise.reject(new Error("Audio worklets aren't available here (they need a secure context)."));
+    if (!ctx.audioWorklet) return Promise.reject(new Error(lt`Audio worklets aren't available here (they need a secure context).`));
     p = ctx.audioWorklet.addModule(workletUrl);
     registered.set(ctx, p);
   }
@@ -114,7 +115,7 @@ class Chain {
 
 async function decodeClip(ctx: BaseAudioContext, url: string): Promise<AudioBuffer> {
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`The DI clip couldn't be loaded (${res.status})`);
+  if (!res.ok) throw new Error(lt`The DI clip couldn't be loaded (${res.status})`);
   return ctx.decodeAudioData(await res.arrayBuffer());
 }
 
@@ -161,7 +162,7 @@ export class Audition {
   async playClip(clipId: ClipId): Promise<{ duration: number }> {
     await this.loading;
     const ctx = this.ctx;
-    if (!ctx || !this.chain) throw new Error("The capture isn't loaded yet");
+    if (!ctx || !this.chain) throw new Error(lt`The capture isn't loaded yet`);
     await ctx.resume();
     this.stop();
     const clip = CLIPS.find((c) => c.id === clipId)!;
@@ -184,8 +185,8 @@ export class Audition {
   async playLive(): Promise<void> {
     await this.loading;
     const ctx = this.ctx;
-    if (!ctx || !this.chain) throw new Error("The capture isn't loaded yet");
-    if (!navigator.mediaDevices?.getUserMedia) throw new Error("Live input isn't available here.");
+    if (!ctx || !this.chain) throw new Error(lt`The capture isn't loaded yet`);
+    if (!navigator.mediaDevices?.getUserMedia) throw new Error(lt`Live input isn't available here.`);
     await ctx.resume();
     this.stop();
     this.stream = await navigator.mediaDevices.getUserMedia({

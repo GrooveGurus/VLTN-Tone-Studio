@@ -1,5 +1,6 @@
 import type { CaptureApi, CaptureDraft, CaptureKey, CaptureVersion } from "@shared/host/capture";
 import { HostError } from "@shared/ipc";
+import { t } from "@lingui/core/macro";
 
 // Browser build: captures opened from dropped files live in IndexedDB (one key-value store).
 // TONE3000 tones are downloaded by the desktop app only, so tone refs are unsupported here.
@@ -12,7 +13,7 @@ function db(): Promise<IDBDatabase> {
     const req = indexedDB.open(DB, 1);
     req.onupgradeneeded = () => req.result.createObjectStore(STORE);
     req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(new HostError("io", req.error?.message ?? "The browser storage can't be opened"));
+    req.onerror = () => reject(new HostError("io", req.error?.message ?? t`The browser storage can't be opened`));
   });
   return dbPromise;
 }
@@ -22,7 +23,7 @@ async function tx<T>(mode: IDBTransactionMode, run: (store: IDBObjectStore) => I
   return new Promise((resolve, reject) => {
     const req = run(store);
     req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(new HostError("io", req.error?.message ?? "Browser storage failed"));
+    req.onerror = () => reject(new HostError("io", req.error?.message ?? t`Browser storage failed`));
   });
 }
 
@@ -37,7 +38,7 @@ async function sha256(text: string): Promise<string> {
 
 function fileRef(ref: string): string {
   if (/^file-[0-9a-f]{16}$/.test(ref)) return ref;
-  if (/^\d+$/.test(ref)) throw new HostError("unsupported", "Editing TONE3000 captures needs the desktop app");
+  if (/^\d+$/.test(ref)) throw new HostError("unsupported", t`Editing TONE3000 captures needs the desktop app`);
   throw new HostError("invalid", "Unknown capture");
 }
 
@@ -60,13 +61,13 @@ function download(fileName: string, text: string) {
 
 export const webCapture: CaptureApi = {
   importFile: async () => {
-    throw new HostError("unsupported", "Opening files by path needs the desktop app");
+    throw new HostError("unsupported", t`Opening files by path needs the desktop app`);
   },
   importText: async (fileName, text) => {
     try {
       JSON.parse(text);
     } catch {
-      throw new HostError("invalid", "This file isn't valid JSON, so it can't be a NAM capture.");
+      throw new HostError("invalid", t`This file isn't valid JSON, so it can't be a NAM capture.`);
     }
     const ref = `file-${(await sha256(text)).slice(0, 16)}`;
     if (!(await get(`${ref}/original`))) await put(`${ref}/original`, { fileName, text });
@@ -75,7 +76,7 @@ export const webCapture: CaptureApi = {
   open: async (ref) => {
     const r = fileRef(ref);
     const original = await get<{ fileName: string; text: string }>(`${r}/original`);
-    if (!original) throw new HostError("not-found", "This capture isn't stored in this browser anymore. Open the .nam file again.");
+    if (!original) throw new HostError("not-found", t`This capture isn't stored in this browser anymore. Open the .nam file again.`);
     const key = { ref: r, modelId: null };
     return {
       source: { ...key, kind: "file", fileName: original.fileName, sha256: await sha256(original.text), text: original.text },
@@ -86,7 +87,7 @@ export const webCapture: CaptureApi = {
   saveVersion: async (key, input) => {
     const p = prefix(key);
     const original = await get<{ text: string }>(`${p}original`);
-    if (!original) throw new HostError("not-found", "This capture isn't stored in this browser anymore.");
+    if (!original) throw new HostError("not-found", t`This capture isn't stored in this browser anymore.`);
     const index = (await get<number[]>(`${p}versions`)) ?? [];
     const n = index.reduce((max, v) => Math.max(max, v), 0) + 1;
     const version: CaptureVersion = {
@@ -115,7 +116,7 @@ export const webCapture: CaptureApi = {
     else await put(`${prefix(key)}draft`, draft);
   },
   showFiles: async () => {
-    throw new HostError("unsupported", "Showing files needs the desktop app");
+    throw new HostError("unsupported", t`Showing files needs the desktop app`);
   },
   exportFile: async (suggestedName, text) => {
     download(suggestedName.endsWith(".nam") ? suggestedName : `${suggestedName}.nam`, text);

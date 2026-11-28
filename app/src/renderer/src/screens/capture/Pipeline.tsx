@@ -25,6 +25,8 @@ import { isFlat } from "./nam/shaping";
 import { exportText, useCapture } from "./store";
 import { Led, PANEL, useCaptureTitle, useToneRecord } from "./parts";
 import { verdictOf } from "./Head";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 type StepStatus = "done" | "current" | "pending" | "fault";
 
@@ -45,7 +47,7 @@ function Step({ n, status, title, children }: { n: number; status: StepStatus; t
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5 pt-px text-[12px]">
         <b className={cn("font-semibold", status === "pending" ? "text-silkscreen-2" : "text-silkscreen")}>
-          <span className="sr-only">{`Step ${n}, ${status === "fault" ? "can't run" : status}: `}</span>
+          <span className="sr-only">{t`Step ${n}, ${status === "fault" ? t`can't run` : status}: `}</span>
           {title}
         </b>
         {children}
@@ -93,12 +95,12 @@ export function Pipeline() {
   const model = usePedalNameOrBoth();
   const verdict = verdictOf(info, linkedSlotOn(record, "snaptone", device), device);
   const blocked = info.unsupported !== null;
-  const versionLabel = base === 0 ? "Original" : `Version ${base}`;
+  const versionLabel = base === 0 ? t`Original` : t`Version ${base}`;
   const liteOnly = recipe.size === "lite" || (info.arch.kind === "A2" && !info.arch.submodels.some((s) => s.size === "full"));
 
   return (
     <section
-      aria-label={`Make it ${model} ready`}
+      aria-label={t`Make it ${model} ready`}
       className={cn(
         PANEL,
         "relative col-start-2 row-span-2 row-start-1 flex flex-col overflow-hidden shadow-[var(--glass-shine),0_0_0_1px_rgb(255_255_255/0.2)] min-[1421px]:col-start-3",
@@ -106,9 +108,9 @@ export function Pipeline() {
       )}
     >
       <div className="px-5 pt-4 pb-2">
-        <p className="m-0 mb-1 text-[12px] text-silkscreen-2">{model} version · user SnapTone</p>
-        <h2 className="m-0 mb-1.5 text-[24px] leading-[1.1] font-bold tracking-[-0.01em]">Make it {model} ready</h2>
-        <p className="m-0 text-[12px] text-pretty text-silkscreen-3">Tone Studio turns this capture into a SnapTone the way Valeton Suite does and writes it to the pedal.</p>
+        <p className="m-0 mb-1 text-[12px] text-silkscreen-2"><Trans>{model} version · user SnapTone</Trans></p>
+        <h2 className="m-0 mb-1.5 text-[24px] leading-[1.1] font-bold tracking-[-0.01em]"><Trans>Make it {model} ready</Trans></h2>
+        <p className="m-0 text-[12px] text-pretty text-silkscreen-3"><Trans>Tone Studio turns this capture into a SnapTone the way Valeton Suite does and writes it to the pedal.</Trans></p>
       </div>
 
       {blocked ? (
@@ -156,7 +158,7 @@ function Gp5Pipeline({ title, image, versionLabel, info, liteOnly, shaped, expor
   const linkedText = linked === null ? null : snapToneLabel(device ?? DEFAULT_DEVICE, linked);
   const isA2 = info.arch.kind === "A2";
   const a1Size = info.arch.kind === "A1" ? info.arch.size : "";
-  const stopTitle = isA2 ? (liteOnly ? "A2-Lite" : "A2-Full") : `A1 ${a1Size}`;
+  const stopTitle = isA2 ? (liteOnly ? t`A2-Lite` : t`A2-Full`) : `A1 ${a1Size}`;
   const [picked, setCabIr] = useState<CabIrChoice | null>(null);
   // The file's own gear type or TONE3000's can say the cab is in the capture; the GP-200 family keeps CAB as a block
   const gearType = useCapture((s) => s.recipe?.metadata.gear_type);
@@ -172,19 +174,19 @@ function Gp5Pipeline({ title, image, versionLabel, info, liteOnly, shaped, expor
 
   return (
     <>
-      <div className="mx-5 grid grid-cols-[1fr_auto_1fr] items-start gap-1 rounded-lg bg-well px-1.5 py-2.5" aria-label="Chain of approximations">
+      <div className="mx-5 grid grid-cols-[1fr_auto_1fr] items-start gap-1 rounded-lg bg-well px-1.5 py-2.5" aria-label={t`Chain of approximations`}>
         <Stop name={title} title={stopTitle} sub={versionLabel} lit caption={isA2 ? "NAM A2" : "NAM A1"} image={image} />
         <Hop top="Tone Studio" bottom="converts" note={cabIr ? `with ${cabIr.name}` : undefined} />
-        <Stop name={linkedText ?? "SnapTone"} title="SnapTone" sub={linkedText !== null ? `On your ${pedal}` : "Can't be measured here"} lit={linkedText !== null} />
+        <Stop name={linkedText ?? "SnapTone"} title={t`SnapTone`} sub={linkedText !== null ? t`On your ${pedal}` : t`Can't be measured here`} lit={linkedText !== null} />
       </div>
       <ol className="m-0 min-h-0 flex-1 list-none overflow-auto px-5 pt-3 pb-3">
-        <Step n={1} status="done" title={isA2 ? `A2: the ${liteOnly ? "Lite" : "Full"} size becomes the SnapTone` : `Already NAM A1 ${a1Size}`}>
-          {isA2 && <Sub>Valeton Suite renders an A2's largest size into a SnapTone, and so does Tone Studio.</Sub>}
-          <Sub>{shaped ? `Your shaping isn't in the file sent to the ${pedal}: baking it in needs the capture trainer, which this version doesn't include.` : "No conversion needed. Your level and info edits go with it."}</Sub>
+        <Step n={1} status="done" title={isA2 ? t`A2: the ${liteOnly ? t`Lite` : t`Full`} size becomes the SnapTone` : t`Already NAM A1 ${a1Size}`}>
+          {isA2 && <Sub><Trans>Valeton Suite renders an A2's largest size into a SnapTone, and so does Tone Studio.</Trans></Sub>}
+          <Sub>{shaped ? t`Your shaping isn't in the file sent to the ${pedal}: baking it in needs the capture trainer, which this version doesn't include.` : t`No conversion needed. Your level and info edits go with it.`}</Sub>
         </Step>
         {toneId !== null ? (
-          <Step n={2} status={linked !== null ? "done" : "current"} title={linkedText !== null ? `Linked to ${linkedText} on your ${pedal}` : `Send to the ${pedal}`}>
-            <Sub>Tone Studio turns your version into a SnapTone, writes it to a user slot over USB and links the slot to this tone.</Sub>
+          <Step n={2} status={linked !== null ? "done" : "current"} title={linkedText !== null ? t`Linked to ${linkedText} on your ${pedal}` : t`Send to the ${pedal}`}>
+            <Sub><Trans>Tone Studio turns your version into a SnapTone, writes it to a user slot over USB and links the slot to this tone.</Trans></Sub>
             {noCabIr !== null ? (
               <Sub>{noCabIr}</Sub>
             ) : (
@@ -194,7 +196,7 @@ function Gp5Pipeline({ title, image, versionLabel, info, liteOnly, shaped, expor
             )}
             <Button variant={linked !== null ? "outline" : "default"} size="sm" className="mt-2 self-start" onClick={sendViaTones}>
               <Send className="size-3.5" aria-hidden />
-              {linked !== null ? "Send again" : `Send to the ${pedal}…`}
+              {linked !== null ? t`Send again` : t`Send to the ${pedal}…`}
             </Button>
           </Step>
         ) : (
@@ -264,7 +266,7 @@ function LocalSend({
       setProgress(0);
       const stored = await useDevice.getState().uploadSnapTone(slot, name, file, { onProgress: setProgress });
       setWritten({ slot, name: stored });
-      notifySuccess(`Wrote ${slotText} on your ${pedalName(useDevice.getState().device)}`, `The pedal calls it ${stored}.`);
+      notifySuccess(t`Wrote ${slotText ?? ""} on your ${pedalName(useDevice.getState().device)}`, t`The pedal calls it ${stored}.`);
     } catch (e) {
       if (!abort.current.signal.aborted) setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -275,12 +277,12 @@ function LocalSend({
   const working = phase !== "idle";
   return (
     <>
-      <Step n={2} status={written ? "done" : error ? "fault" : "current"} title={written ? `Wrote ${snapToneLabel(device ?? DEFAULT_DEVICE, written.slot)} as ${written.name}` : `Write it to the ${pedal}`}>
-        <Sub>Tone Studio turns it into a SnapTone (about 10 seconds) and writes a user slot over USB. Slot names hold 10 characters.</Sub>
+      <Step n={2} status={written ? "done" : error ? "fault" : "current"} title={written ? t`Wrote ${snapToneLabel(device ?? DEFAULT_DEVICE, written.slot)} as ${written.name}` : t`Write it to the ${pedal}`}>
+        <Sub><Trans>Tone Studio turns it into a SnapTone (about 10 seconds) and writes a user slot over USB. Slot names hold 10 characters.</Trans></Sub>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <InputGroup className="w-36">
             <InputGroupInput
-              aria-label={`Name on the ${pedal}`}
+              aria-label={t`Name on the ${pedal}`}
               value={name}
               maxLength={10}
               disabled={working}
@@ -295,9 +297,9 @@ function LocalSend({
           {noCabIr === null && <CabIrPicker value={cabIr} onChange={onCabIr} disabled={working} />}
         </div>
         {noCabIr !== null && <Sub>{noCabIr}</Sub>}
-        {replacing && !working && written?.slot !== slot && <Sub>Replaces {replacing}. A SnapTone can't be read back from the pedal.</Sub>}
-        {working && <Progress value={progress * 100} className="mt-2 w-56" aria-label={phase === "converting" ? "SnapTone conversion progress" : "SnapTone write progress"} />}
-        {working && <Sub>{phase === "converting" ? "Making the SnapTone…" : `Writing ${slotText}…`}</Sub>}
+        {replacing && !working && written?.slot !== slot && <Sub><Trans>Replaces {replacing}. A SnapTone can't be read back from the pedal.</Trans></Sub>}
+        {working && <Progress value={progress * 100} className="mt-2 w-56" aria-label={phase === "converting" ? t`SnapTone conversion progress` : t`SnapTone write progress`} />}
+        {working && <Sub>{phase === "converting" ? t`Making the SnapTone…` : t`Writing ${slotText ?? ""}…`}</Sub>}
         <Button
           variant="default"
           size="sm"
@@ -306,9 +308,9 @@ function LocalSend({
           onClick={() => void send()}
         >
           {working ? <Spinner className="size-3.5" /> : <Send className="size-3.5" aria-hidden />}
-          {replacing ? `Replace ${replacing} in ${slotText}` : slotText !== null ? `Write to ${slotText}` : `Write to the ${pedal}`}
+          {replacing ? t`Replace ${replacing} in ${slotText ?? ""}` : slotText !== null ? t`Write to ${slotText}` : t`Write to the ${pedal}`}
         </Button>
-        {!connected && <Sub>Connect the {pedal} to write it.</Sub>}
+        {!connected && <Sub><Trans>Connect the {pedal} to write it.</Trans></Sub>}
         <TestSignalNotice />
         {error && (
           <span className="text-led-fault" role="alert">
@@ -316,8 +318,8 @@ function LocalSend({
           </span>
         )}
       </Step>
-      <Step n={3} status={written ? "done" : "pending"} title="Use it in a preset">
-        <Sub>Files opened from disk aren't TONE3000 tones, so there's nothing to link back. Pick the slot in a preset's NS block.</Sub>
+      <Step n={3} status={written ? "done" : "pending"} title={t`Use it in a preset`}>
+        <Sub><Trans>Files opened from disk aren't TONE3000 tones, so there's nothing to link back. Pick the slot in a preset's NS block.</Trans></Sub>
         {written && <UseOnGp5 isIr={false} slot={written.slot} />}
       </Step>
     </>

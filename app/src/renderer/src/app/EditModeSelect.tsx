@@ -2,6 +2,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { notifyError } from "./notify";
 import { useDevice } from "@/state/device";
 import { useScenes } from "@/state/scenes";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * Next to the preset switcher on a pedal running the GrooveGurus mod: edit the preset, or its scenes (the footswitches
@@ -18,7 +20,7 @@ export function EditModeSelect() {
     try {
       await useScenes.getState().setMode(next === "scene" ? "scene" : "preset");
     } catch (e) {
-      notifyError("Couldn't go back to the base", e);
+      notifyError(t`Couldn't go back to the base`, e);
     }
   };
 
@@ -26,15 +28,15 @@ export function EditModeSelect() {
     <Select value={mode} onValueChange={(v) => void change(v)} disabled={busy || writing}>
       <SelectTrigger
         size="sm"
-        aria-label="Edit mode"
-        className="no-drag glass-float w-[132px] bg-transparent font-medium text-silkscreen shadow-[var(--glass-shine),0_0_0_1px_var(--glass-edge),0_4px_16px_rgb(0_0_0/0.3)] hover:bg-white/6 dark:bg-transparent dark:hover:bg-white/6"
+        aria-label={t`Edit mode`}
+        className="no-drag glass-float w-fit min-w-[132px] bg-transparent font-medium text-silkscreen shadow-[var(--glass-shine),0_0_0_1px_var(--glass-edge),0_4px_16px_rgb(0_0_0/0.3)] hover:bg-white/6 dark:bg-transparent dark:hover:bg-white/6"
       >
-        <span className="text-silkscreen-3">Edit</span>
+        <Trans><span className="text-silkscreen-3">Edit</span></Trans>
         <SelectValue />
       </SelectTrigger>
       <SelectContent position="popper" sideOffset={8}>
-        <SelectItem value="preset">Preset</SelectItem>
-        <SelectItem value="scene">Scenes</SelectItem>
+        <SelectItem value="preset"><Trans>Preset</Trans></SelectItem>
+        <SelectItem value="scene"><Trans>Scenes</Trans></SelectItem>
       </SelectContent>
     </Select>
   );

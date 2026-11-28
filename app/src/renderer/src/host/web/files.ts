@@ -23,6 +23,7 @@ import {
   uniqueFileName,
 } from "@shared/files-naming";
 import { pickFiles } from "./pick-files";
+import { t } from "@lingui/core/macro";
 
 interface CollectionRow {
   id: string;
@@ -49,15 +50,15 @@ interface PresetRow {
 
 const DB_NAME = "gp5-library";
 const FIXED: Record<string, { title: string; kind: "imported" | "replaced" }> = {
-  [IMPORTED_ID]: { title: "Imported files", kind: "imported" },
-  [REPLACED_ID]: { title: "Replaced presets", kind: "replaced" },
+  [IMPORTED_ID]: { get title() { return t`Imported files`; }, kind: "imported" },
+  [REPLACED_ID]: { get title() { return t`Replaced presets`; }, kind: "replaced" },
 };
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 
 function db(): Promise<IDBDatabase> {
   dbPromise ??= new Promise((resolve, reject) => {
-    if (typeof indexedDB === "undefined") return reject(new HostError("unsupported", "This browser has no IndexedDB storage"));
+    if (typeof indexedDB === "undefined") return reject(new HostError("unsupported", t`This browser has no IndexedDB storage`));
     const req = indexedDB.open(DB_NAME, 1);
     req.onupgradeneeded = () => {
       const d = req.result;
@@ -65,7 +66,7 @@ function db(): Promise<IDBDatabase> {
       d.createObjectStore("presets", { keyPath: "key" }).createIndex("collection", "collectionId");
     };
     req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(new HostError("io", req.error?.message ?? "Couldn't open the browser library"));
+    req.onerror = () => reject(new HostError("io", req.error?.message ?? t`Couldn't open the browser library`));
   });
   return dbPromise;
 }
@@ -73,14 +74,14 @@ function db(): Promise<IDBDatabase> {
 function done<T>(req: IDBRequest<T>): Promise<T> {
   return new Promise((resolve, reject) => {
     req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(new HostError("io", req.error?.message ?? "Browser storage failed"));
+    req.onerror = () => reject(new HostError("io", req.error?.message ?? t`Browser storage failed`));
   });
 }
 
 function finished(tx: IDBTransaction): Promise<void> {
   return new Promise((resolve, reject) => {
     tx.oncomplete = () => resolve();
-    tx.onerror = tx.onabort = () => reject(new HostError("io", tx.error?.message ?? "Browser storage failed"));
+    tx.onerror = tx.onabort = () => reject(new HostError("io", tx.error?.message ?? t`Browser storage failed`));
   });
 }
 
@@ -118,12 +119,12 @@ async function info(row: CollectionRow): Promise<CollectionInfo> {
 
 async function requireLibrary(id: string): Promise<CollectionRow> {
   const parsed = parseCollectionId(id);
-  if (!parsed) throw new HostError("invalid", `Unknown collection ${id}`);
-  if (parsed.root !== "library") throw new HostError("invalid", "Backups are read-only");
+  if (!parsed) throw new HostError("invalid", t`Unknown collection ${id}`);
+  if (parsed.root !== "library") throw new HostError("invalid", t`Backups are read-only`);
   const row = await getCollection(id);
   if (row) return row;
   const fixed = FIXED[id];
-  if (!fixed) throw new HostError("not-found", "This collection no longer exists");
+  if (!fixed) throw new HostError("not-found", t`This collection no longer exists`);
   const created: CollectionRow = { id, ...fixed, createdAt: new Date().toISOString() };
   const tx = (await db()).transaction("collections", "readwrite");
   tx.objectStore("collections").put(created);
@@ -160,8 +161,8 @@ async function putPresets(collectionId: string, items: NewPreset[]): Promise<Loc
 async function readFiles(files: File[]): Promise<PickedFile[]> {
   return Promise.all(
     files.map(async (f): Promise<PickedFile> => {
-      if (!/\.prst$/i.test(f.name)) return { fileName: f.name, path: null, bytes: null, error: "Not a .prst preset file." };
-      if (f.size > MAX_PRST_BYTES) return { fileName: f.name, path: null, bytes: null, error: `Not a ${PRST_MODELS} preset.` };
+      if (!/\.prst$/i.test(f.name)) return { fileName: f.name, path: null, bytes: null, error: t`Not a .prst preset file.` };
+      if (f.size > MAX_PRST_BYTES) return { fileName: f.name, path: null, bytes: null, error: t`Not a ${PRST_MODELS} preset.` };
       return { fileName: f.name, path: null, bytes: new Uint8Array(await f.arrayBuffer()), error: null };
     }),
   );
@@ -176,7 +177,7 @@ function download(fileName: string, bytes: Uint8Array) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-const desktopOnly = (what: string) => Promise.reject(new HostError("unsupported", `${what} needs the desktop app. In the browser, presets live in this browser's storage.`));
+const desktopOnly = (what: string) => Promise.reject(new HostError("unsupported", t`${what} needs the desktop app. In the browser, presets live in this browser's storage.`));
 
 export const webFiles: FilesApi = {
   async listCollections() {
@@ -187,20 +188,20 @@ export const webFiles: FilesApi = {
   },
 
   async listPresets(id) {
-    if (!parseCollectionId(id)) throw new HostError("invalid", `Unknown collection ${id}`);
+    if (!parseCollectionId(id)) throw new HostError("invalid", t`Unknown collection ${id}`);
     return (await presetRows(id)).map(toPreset);
   },
 
   async saveBackup(slots, sourceDevice) {
-    if (!slots.length) throw new HostError("invalid", "Nothing to back up");
+    if (!slots.length) throw new HostError("invalid", t`Nothing to back up`);
     const device = commonModel(slots.map((s) => s.prst), sourceDevice);
-    if (!device) throw new HostError("invalid", "A backup holds the presets of one pedal model");
+    if (!device) throw new HostError("invalid", t`A backup holds the presets of one pedal model`);
     const now = new Date();
     const dirs = (await allCollections()).filter((c) => c.kind === "backup").map((c) => parseCollectionId(c.id)!.dir);
     const row: CollectionRow = {
       id: `backups/${backupDirName(now, dirs, device)}`,
       kind: "backup",
-      title: `${profileFor(device).name} backup`,
+      title: t`${profileFor(device).name} backup`,
       createdAt: now.toISOString(),
       device,
     };
@@ -216,7 +217,7 @@ export const webFiles: FilesApi = {
 
   async createCollection(title) {
     const clean = title.trim();
-    if (!clean) throw new HostError("invalid", "A collection needs a name");
+    if (!clean) throw new HostError("invalid", t`A collection needs a name`);
     const dirs = (await allCollections()).filter((c) => c.id.startsWith("library/")).map((c) => parseCollectionId(c.id)!.dir);
     const row: CollectionRow = { id: `library/${collectionDirName(clean, dirs)}`, kind: "collection", title: clean, createdAt: new Date().toISOString() };
     const tx = (await db()).transaction("collections", "readwrite");
@@ -227,7 +228,7 @@ export const webFiles: FilesApi = {
 
   async renameCollection(id, title) {
     const clean = title.trim();
-    if (!clean) throw new HostError("invalid", "A collection needs a name");
+    if (!clean) throw new HostError("invalid", t`A collection needs a name`);
     const row = await requireLibrary(id);
     if (row.kind !== "collection") throw new HostError("invalid", `${row.title} can't be renamed`);
     const next = { ...row, title: clean };
@@ -239,7 +240,7 @@ export const webFiles: FilesApi = {
 
   async deleteCollection(id) {
     const row = await requireLibrary(id);
-    if (row.kind !== "collection") throw new HostError("invalid", "Only your own collections can be deleted");
+    if (row.kind !== "collection") throw new HostError("invalid", t`Only your own collections can be deleted`);
     const keys = (await presetRows(id)).map((r) => r.key);
     const tx = (await db()).transaction(["collections", "presets"], "readwrite");
     tx.objectStore("collections").delete(id);
@@ -261,7 +262,7 @@ export const webFiles: FilesApi = {
 
   async setBackupPinned(id, pinned) {
     const row = await getCollection(id);
-    if (!row || row.kind !== "backup") throw new HostError("not-found", "This backup no longer exists");
+    if (!row || row.kind !== "backup") throw new HostError("not-found", t`This backup no longer exists`);
     const next = { ...row, pinned };
     const tx = (await db()).transaction("collections", "readwrite");
     tx.objectStore("collections").put(next);
@@ -281,16 +282,16 @@ export const webFiles: FilesApi = {
     return { path: null, name: folder, files: await readFiles(files) };
   },
 
-  readPaths: () => desktopOnly("Opening files by path"),
+  readPaths: () => desktopOnly(t`Opening files by path`),
 
   readDropped: (files) => readFiles(files),
 
   async exportPresets(items) {
-    if (!items.length) throw new HostError("invalid", "Nothing to export");
+    if (!items.length) throw new HostError("invalid", t`Nothing to export`);
     for (const item of items) download(item.fileName, item.prst);
     return "Downloads";
   },
 
-  openBackupsFolder: () => desktopOnly("Opening the backups folder"),
+  openBackupsFolder: () => desktopOnly(t`Opening the backups folder`),
   revealCollection: () => desktopOnly("Showing folders"),
 };

@@ -15,6 +15,8 @@ import { useUi } from "@/state/ui";
 import { describeError } from "../notify";
 import { switchNow } from "../preset-switch";
 import { diffPresets, type ChangeRow } from "@/state/unsaved-diff";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const MAX_ROWS = 5;
 
@@ -51,7 +53,7 @@ export function UnsavedSwitchDialog() {
       await switchNow(target);
       setTarget(null);
     } catch (e) {
-      setError(kind === "save" ? `Couldn't save slot ${slotLabel(preset.slot)}. ${describeError(e)}` : describeError(e));
+      setError(kind === "save" ? t`Couldn't save slot ${slotLabel(preset.slot)}. ${describeError(e)}` : describeError(e));
     } finally {
       setRunning(null);
     }
@@ -71,19 +73,19 @@ export function UnsavedSwitchDialog() {
         {view && (
           <>
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-lg font-semibold text-balance">Save your changes to {view.name}?</AlertDialogTitle>
+              <AlertDialogTitle className="text-lg font-semibold text-balance"><Trans>Save your changes to {view.name}?</Trans></AlertDialogTitle>
               <AlertDialogDescription className="text-[13px] text-pretty text-silkscreen-2">
-                You're switching to {slotLabel(view.target)} {view.targetName}. These changes only live in the pedal's buffer and are lost if you switch now.
+                <Trans>You're switching to {slotLabel(view.target)} {view.targetName}. These changes only live in the pedal's buffer and are lost if you switch now.</Trans>
               </AlertDialogDescription>
             </AlertDialogHeader>
             {view.rows.length > 0 && (
               <table className="w-full text-xs tabular-nums">
                 <thead>
                   <tr className="border-b border-seam text-left text-silkscreen-3">
-                    <th className="py-1.5 pr-3 font-medium">Block</th>
-                    <th className="py-1.5 pr-3 font-medium">Parameter</th>
-                    <th className="py-1.5 pr-3 text-right font-medium">Saved</th>
-                    <th className="py-1.5 text-right font-medium">Now</th>
+                    <th className="py-1.5 pr-3 font-medium"><Trans>Block</Trans></th>
+                    <th className="py-1.5 pr-3 font-medium"><Trans>Parameter</Trans></th>
+                    <th className="py-1.5 pr-3 text-right font-medium"><Trans>Saved</Trans></th>
+                    <th className="py-1.5 text-right font-medium"><Trans>Now</Trans></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -97,7 +99,7 @@ export function UnsavedSwitchDialog() {
                             <span className="truncate text-silkscreen-3">{r.block.model}</span>
                           </span>
                         ) : (
-                          <span className="text-silkscreen-3">Preset</span>
+                          <span className="text-silkscreen-3"><Trans>Preset</Trans></span>
                         )}
                       </td>
                       <td className="py-2 pr-3 text-silkscreen">{r.parameter}</td>
@@ -108,7 +110,7 @@ export function UnsavedSwitchDialog() {
                 </tbody>
               </table>
             )}
-            {view.rows.length > MAX_ROWS && <p className="-mt-2 text-xs text-silkscreen-3">and {view.rows.length - MAX_ROWS} more</p>}
+            {view.rows.length > MAX_ROWS && <p className="-mt-2 text-xs text-silkscreen-3"><Trans>and</Trans> {view.rows.length - MAX_ROWS} <Trans>more</Trans></p>}
             {error && (
               <p role="alert" className="text-xs text-led-fault">
                 {error}
@@ -117,13 +119,13 @@ export function UnsavedSwitchDialog() {
             <AlertDialogFooter className="items-center sm:justify-start">
               <Button variant="ghost" className="-ml-2.5 px-2.5 text-led-fault hover:text-led-fault" disabled={!!running} onClick={() => void finish("discard")}>
                 {running === "discard" && <Spinner />}
-                Discard
+                <Trans>Discard</Trans>
               </Button>
               <span className="flex-1" />
-              <AlertDialogCancel disabled={!!running}>Cancel</AlertDialogCancel>
+              <AlertDialogCancel disabled={!!running}><Trans>Cancel</Trans></AlertDialogCancel>
               <Button ref={saveRef} disabled={!!running} onClick={() => void finish("save")}>
                 {running === "save" && <Spinner />}
-                {running === "save" ? `Saving slot ${slotLabel(view.slot)}` : `Save to slot ${slotLabel(view.slot)}`}
+                {running === "save" ? t`Saving slot ${slotLabel(view.slot)}` : t`Save to slot ${slotLabel(view.slot)}`}
               </Button>
             </AlertDialogFooter>
           </>

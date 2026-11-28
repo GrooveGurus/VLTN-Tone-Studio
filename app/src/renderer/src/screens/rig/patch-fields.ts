@@ -2,6 +2,7 @@
 // of the number fields. Where the pedal's own ranges aren't known, a field takes what its record in the patch holds.
 import { STYLE_COUNT, TARGET } from "@/gp200/lib/protocol.mjs";
 import type { DeviceKey, PresetState } from "@/state/device-types";
+import { t as lt } from "@lingui/core/macro";
 
 /** The three EXP sets in PresetState.gp200.exp order, three entries each. */
 export const EXP_SETS = ["EXP 1A", "EXP 1B", "EXP 2"] as const;
@@ -40,7 +41,7 @@ export interface Option {
 export function styleOptions(current: number): Option[] {
   const styles = Array.from({ length: STYLE_COUNT }, (_, i) => i);
   if (!styles.includes(current)) styles.push(current);
-  return styles.map((i) => ({ value: String(i), label: `Style ${i + 1}` }));
+  return styles.map((i) => ({ value: String(i), label: lt`Style ${i + 1}` }));
 }
 
 /** Select value of an EXP or Quick Access target: "off" for none, else its byte. */
@@ -48,11 +49,11 @@ export const targetValue = (target: number | null): string => (target === null ?
 
 /** Name of a target: a block with its model ("DLY · <model>"), the patch volume or tempo, or the raw byte. */
 export function targetLabel(p: PresetState, target: number | null): string {
-  if (target === null) return "Off";
-  if (target === TARGET.PATCH_VOL) return "Patch volume";
-  if (target === TARGET.PATCH_TEMPO) return "Patch tempo";
+  if (target === null) return lt`Off`;
+  if (target === TARGET.PATCH_VOL) return lt`Patch volume`;
+  if (target === TARGET.PATCH_TEMPO) return lt`Patch tempo`;
   const b = p.blocks[target];
-  if (!b) return `Target ${target}`;
+  if (!b) return lt`Target ${target}`;
   return b.model ? `${b.code} · ${b.model.title}` : b.code;
 }
 
@@ -71,7 +72,7 @@ export function targetOptions(p: PresetState, kind: "exp" | "quickAccess", curre
 export function paramOptions(p: PresetState, block: number, current: number): Option[] {
   const params = p.blocks[block]?.model?.params ?? [];
   const options = params.map((x) => ({ value: String(x.index), label: x.name }));
-  return params.some((x) => x.index === current) ? options : [...options, { value: String(current), label: `Parameter ${current + 1}` }];
+  return params.some((x) => x.index === current) ? options : [...options, { value: String(current), label: lt`Parameter ${current + 1}` }];
 }
 
 /** The edit pointing an EXP entry or Quick Access knob at `target`: a block starts on its first param. */

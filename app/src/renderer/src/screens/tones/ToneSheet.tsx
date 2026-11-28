@@ -20,6 +20,8 @@ import { noCabIrReason } from "./CabIrPicker";
 import { UserIrSteps, UseOnGp5 } from "./SendSteps";
 import { SnapToneSteps } from "./SnapToneSteps";
 import { ToneImage } from "./ToneImage";
+import { t as lt } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Tone detail (TONE3000 requirement 6) with the model picker and the Send to the pedal flow. */
 export function ToneSheet() {
@@ -67,7 +69,7 @@ function SheetBody({ toneId, initial }: { toneId: number; initial: T3kTone | nul
   }, [toneId, initial, signedIn]);
 
   // Without TONE3000 data (signed out), the local record still describes the tone.
-  const title = tone?.title ?? record?.title ?? "Tone";
+  const title = tone?.title ?? record?.title ?? lt`Tone`;
   const gear = tone?.gear ?? record?.gear ?? "amp";
   const format = tone?.format ?? record?.format ?? "nam";
   const isIr = format === "ir";
@@ -112,9 +114,9 @@ function SheetBody({ toneId, initial }: { toneId: number; initial: T3kTone | nul
               <Badge variant="outline">{gearLabel(gear)}</Badge>
               <Badge variant="outline">{isIr ? "IR" : format.toUpperCase()}</Badge>
               {url && (
-                <Button variant="link" size="sm" className="h-8 px-1" onClick={() => host.app.openExternal(url).catch((e) => notifyError("Couldn't open the tone page", e))}>
+                <Button variant="link" size="sm" className="h-8 px-1" onClick={() => host.app.openExternal(url).catch((e) => notifyError(lt`Couldn't open the tone page`, e))}>
                   <ExternalLink data-icon="inline-start" />
-                  Tone page
+                  <Trans>Tone page</Trans>
                 </Button>
               )}
             </div>
@@ -124,16 +126,16 @@ function SheetBody({ toneId, initial }: { toneId: number; initial: T3kTone | nul
 
       <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-auto px-6 pt-4 pb-5 [@media(max-height:800px)]:gap-3.5 [@media(max-height:800px)]:pt-3">
         <dl className="grid grid-cols-[1.4fr_1fr_1fr] gap-x-5 gap-y-2.5">
-          <Fact label="License" value={licenseLabel(tone?.license ?? record?.license ?? "")} />
-          <Fact label="Updated" value={tone ? tone.updated_at.slice(0, 10) : record ? record.savedAt.slice(0, 10) : "—"} />
-          <Fact label="Downloads" value={tone ? tone.downloads_count.toLocaleString() : "—"} />
+          <Fact label={lt`License`} value={licenseLabel(tone?.license ?? record?.license ?? "")} />
+          <Fact label={lt`Updated`} value={tone ? tone.updated_at.slice(0, 10) : record ? record.savedAt.slice(0, 10) : "—"} />
+          <Fact label={lt`Downloads`} value={tone ? tone.downloads_count.toLocaleString() : "—"} />
         </dl>
         {gearIncludesCab(gear) && !isIr && (
           <p className="-mt-1.5 flex gap-2 text-[12px] text-pretty text-silkscreen-3">
             <Info className="mt-0.5 size-3.5 flex-none" aria-hidden />
             {isGp5Family(device ?? DEFAULT_DEVICE)
-              ? `This capture includes the cab. On the ${model} a SnapTone replaces both AMP and CAB, so it plays complete.`
-              : `This capture includes the cab. On the ${model} CAB still plays after the SnapTone, so turn CAB off where the SnapTone plays.`}
+              ? lt`This capture includes the cab. On the ${model} a SnapTone replaces both AMP and CAB, so it plays complete.`
+              : lt`This capture includes the cab. On the ${model} CAB still plays after the SnapTone, so turn CAB off where the SnapTone plays.`}
           </p>
         )}
         {tone?.description && (
@@ -141,7 +143,7 @@ function SheetBody({ toneId, initial }: { toneId: number; initial: T3kTone | nul
             <p className={cn("whitespace-pre-line text-pretty", !expanded && "line-clamp-3")}>{tone.description}</p>
             {tone.description.length > 220 && (
               <Button variant="link" size="sm" className="h-8 px-0" onClick={() => setExpanded((v) => !v)}>
-                {expanded ? "Show less" : "Read more"}
+                {expanded ? lt`Show less` : lt`Read more`}
               </Button>
             )}
           </div>
@@ -149,10 +151,10 @@ function SheetBody({ toneId, initial }: { toneId: number; initial: T3kTone | nul
 
         {!signedIn ? (
           <section className="flex flex-col items-start gap-2 text-[12px] text-silkscreen-2">
-            <p>{account?.status === "expired" ? "Your TONE3000 sign-in expired." : `Sign in to TONE3000 to see this tone's models and send one to the ${pedal}.`}</p>
+            <p>{account?.status === "expired" ? lt`Your TONE3000 sign-in expired.` : lt`Sign in to TONE3000 to see this tone's models and send one to the ${pedal}.`}</p>
             {account?.configured && (
               <Button size="sm" onClick={() => browse({ prompt: "load_tone", toneId })}>
-                {account?.status === "expired" ? "Sign in again" : "Sign in to TONE3000"}
+                {account?.status === "expired" ? lt`Sign in again` : lt`Sign in to TONE3000`}
               </Button>
             )}
             {linkedSlot !== undefined && <UseOnGp5 isIr={isIr} slot={linkedSlot} />}
@@ -162,10 +164,10 @@ function SheetBody({ toneId, initial }: { toneId: number; initial: T3kTone | nul
             {error}
           </p>
         ) : (
-          <section aria-label="Models" className="flex flex-col gap-2.5">
+          <section aria-label={lt`Models`} className="flex flex-col gap-2.5">
             <div className="flex items-baseline justify-between gap-3 text-[11px]">
-              <h3 className="text-[12px] font-semibold text-silkscreen-2">Models in this tone</h3>
-              <span className="text-silkscreen-3">{isIr ? "WAV impulse responses" : "A1 and A2 become SnapTones"}</span>
+              <h3 className="text-[12px] font-semibold text-silkscreen-2"><Trans>Models in this tone</Trans></h3>
+              <span className="text-silkscreen-3">{isIr ? lt`WAV impulse responses` : lt`A1 and A2 become SnapTones`}</span>
             </div>
             {!models ? (
               <div className="flex flex-col gap-2">
@@ -173,10 +175,10 @@ function SheetBody({ toneId, initial }: { toneId: number; initial: T3kTone | nul
                 <Skeleton className="h-8" />
               </div>
             ) : models.length === 0 ? (
-              <p className="text-[12px] text-silkscreen-3">This tone has no models you can download.</p>
+              <p className="text-[12px] text-silkscreen-3"><Trans>This tone has no models you can download.</Trans></p>
             ) : (
               <RadioGroup
-                aria-label="Model to send"
+                aria-label={lt`Model to send`}
                 value={send ? String(send.modelId) : ""}
                 onValueChange={(v) => {
                   const m = models.find((x) => String(x.id) === v);
@@ -201,7 +203,7 @@ function SheetBody({ toneId, initial }: { toneId: number; initial: T3kTone | nul
                       <RadioGroupItem id={id} value={String(m.id)} disabled={!ok} />
                       <span className="min-w-0 grow truncate">{m.name}</span>
                       {!isIr && <span className={cn("w-[92px]", ok ? "text-silkscreen-2" : "text-silkscreen-4")}>{ARCH_LABEL(m)}</span>}
-                      <span className={cn("min-w-[104px]", ok ? "text-silkscreen-2" : "text-silkscreen-4")}>{ok ? `Works on ${model}` : `Not for ${model}`}</span>
+                      <span className={cn("min-w-[104px]", ok ? "text-silkscreen-2" : "text-silkscreen-4")}>{ok ? lt`Works on ${model}` : lt`Not for ${model}`}</span>
                     </label>
                   );
                 })}
@@ -212,7 +214,7 @@ function SheetBody({ toneId, initial }: { toneId: number; initial: T3kTone | nul
                 {verdict?.kind === "not-loadable" && <span className="grow">{verdictLabel(verdict, model)}.</span>}
                 <Button variant="ghost" size="sm" onClick={editCapture}>
                   <Wand2 data-icon="inline-start" />
-                  Edit capture
+                  <Trans>Edit capture</Trans>
                 </Button>
               </div>
             )}
@@ -220,12 +222,12 @@ function SheetBody({ toneId, initial }: { toneId: number; initial: T3kTone | nul
         )}
 
         {signedIn && send && (
-          <section aria-label={`Send to ${model}`} className="flex flex-col gap-2.5">
+          <section aria-label={lt`Send to ${model}`} className="flex flex-col gap-2.5">
             <div className="flex items-baseline justify-between gap-3 text-[11px]">
-              <h3 className="text-[12px] font-semibold text-silkscreen-2">Send to {model}</h3>
-              <span className="text-silkscreen-3">Step {stepNo} of 5</span>
+              <h3 className="text-[12px] font-semibold text-silkscreen-2"><Trans>Send to {model}</Trans></h3>
+              <Trans><span className="text-silkscreen-3">Step {stepNo} of 5</span></Trans>
             </div>
-            {send.text && <p className="text-[12px] text-silkscreen-2">Sends your edited version from the capture editor, made from the selected model.</p>}
+            {send.text && <p className="text-[12px] text-silkscreen-2"><Trans>Sends your edited version from the capture editor, made from the selected model.</Trans></p>}
             {isIr ? <UserIrSteps send={send} model={selected} /> : <SnapToneSteps send={send} model={selected} noCabIr={noCabIrReason(device, gear)} />}
           </section>
         )}
@@ -233,11 +235,11 @@ function SheetBody({ toneId, initial }: { toneId: number; initial: T3kTone | nul
 
       <SheetFooter className="mt-0 flex-row items-center gap-4 border-t border-border py-3 pr-5 pl-6 text-[11px] [@media(max-height:800px)]:py-2.5">
         <span className="flex-1 text-pretty text-silkscreen-3">
-          {isIr ? "Tone Studio writes the IR to a User IR slot over USB. Valeton Suite isn't needed." : "Tone Studio writes the SnapTone over USB. Valeton Suite isn't needed."}
+          {isIr ? lt`Tone Studio writes the IR to a User IR slot over USB. Valeton Suite isn't needed.` : lt`Tone Studio writes the SnapTone over USB. Valeton Suite isn't needed.`}
         </span>
         {send && send.phase !== "idle" && send.phase !== "linked" && (
           <Button variant="ghost" size="sm" disabled={send.phase === "running" || send.phase === "writing"} onClick={() => cancelSend(toneId)}>
-            Cancel send
+            <Trans>Cancel send</Trans>
           </Button>
         )}
       </SheetFooter>

@@ -5,6 +5,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { audioUnsaved, useSongLibrary } from "@/song/library";
 import { mountLeaveGuard, useLeaveGuard } from "@/song/leave-guard";
 import { selectWholeSongStems, useSong } from "@/song/store";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 export type SaveIndicatorState =
   { kind: "saved" } | { kind: "saving"; step: string } | { kind: "unsaved"; inLibrary: boolean } | { kind: "failed"; message: string };
@@ -46,28 +48,28 @@ export function SaveIndicator() {
   const save = () => void useSongLibrary.getState().save(saved?.title ?? defaultTitle(source.name), saved?.artist ?? "");
   return (
     <span role="status" className="flex items-center gap-2 text-[12px]">
-      {state.kind === "saved" && <span className="text-silkscreen-3">Saved</span>}
+      {state.kind === "saved" && <span className="text-silkscreen-3"><Trans>Saved</Trans></span>}
       {state.kind === "saving" && (
         <span className="flex items-center gap-1.5 text-silkscreen-3">
           <Loader2 className="size-3 animate-spin" aria-hidden />
-          Saving… {state.step}
+          <Trans>Saving… {state.step}</Trans>
         </span>
       )}
       {state.kind === "unsaved" && (
         <>
-          <span className="text-amber-400">Not saved</span>
+          <span className="text-amber-400"><Trans>Not saved</Trans></span>
           <Button size="sm" variant="outline" onClick={save}>
-            {state.inLibrary ? "Save" : "Save to library"}
+            {state.inLibrary ? t`Save` : t`Save to library`}
           </Button>
         </>
       )}
       {state.kind === "failed" && (
         <>
           <span className="text-red-400" title={state.message}>
-            Couldn't save
+            <Trans>Couldn't save</Trans>
           </span>
           <Button size="sm" variant="outline" title={state.message} onClick={save}>
-            Try again
+            <Trans>Try again</Trans>
           </Button>
         </>
       )}
@@ -99,12 +101,12 @@ export function SaveBeforeLeaving() {
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => asking?.answer("cancel")}>
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
           <Button variant="outline" onClick={() => asking?.answer("discard")}>
-            Don't save
+            <Trans>Don't save</Trans>
           </Button>
-          <Button onClick={() => asking?.answer("save")}>Save and continue</Button>
+          <Button onClick={() => asking?.answer("save")}><Trans>Save and continue</Trans></Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

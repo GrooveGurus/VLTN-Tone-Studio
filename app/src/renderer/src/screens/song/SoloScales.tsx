@@ -6,6 +6,8 @@ import type { ScaleId, SoloScaleChoice } from "@/song/performance/scales";
 import { readOptions, setSetting } from "@/song/performance/settings";
 import { keyParts, keySpelling } from "@/song/performance/speed";
 import { NeckDiagram } from "./NeckDiagram";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const field = "rounded border border-seam bg-transparent p-2";
 const LABELS_KEY = "vltn.soloScale.labels";
@@ -97,8 +99,8 @@ export function SoloScales({
 
   if (!parts) {
     return (
-      <div aria-label="Solo scale" className="rounded border border-seam p-3">
-        <p className="text-sm text-silkscreen-3">Set the song's key to see the scale.</p>
+      <div aria-label={t`Solo scale`} className="rounded border border-seam p-3">
+        <p className="text-sm text-silkscreen-3"><Trans>Set the song's key to see the scale.</Trans></p>
       </div>
     );
   }
@@ -106,16 +108,16 @@ export function SoloScales({
   const name = `${noteName(shownRoot, flats)} ${def.name.toLowerCase()}`;
   let caption = `${name}.`;
   if (relative) {
-    caption = `${name}: the same notes as ${noteName(parts.pitch + shift, flats)} major pentatonic, the song's key.`;
+    caption = t`${name}: the same notes as ${noteName(parts.pitch + shift, flats)} major pentatonic, the song's key.`;
   }
-  if (capo > 0) caption += ` Frets are counted from the capo (capo ${capo}).`;
+  if (capo > 0) caption += t` Frets are counted from the capo (capo ${capo}).`;
   const title = `${name}, ${chosen ? `position ${chosen.number}` : "whole neck"}`;
 
   return (
-    <div aria-label="Solo scale" className="flex flex-col gap-3 rounded border border-seam p-3">
+    <div aria-label={t`Solo scale`} className="flex flex-col gap-3 rounded border border-seam p-3">
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1">
-          Scale
+          <Trans>Scale</Trans>
           <select className={field} value={scale} onChange={(e) => chooseScale(e.target.value as ScaleId)}>
             {SCALES.map((s) => (
               <option key={s.id} value={s.id}>
@@ -125,9 +127,9 @@ export function SoloScales({
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          Root
+          <Trans>Root</Trans>
           <select className={field} value={choice.root === undefined ? FROM_KEY : String(choice.root)} onChange={(e) => chooseRoot(e.target.value)}>
-            <option value={FROM_KEY}>From the song key</option>
+            <option value={FROM_KEY}><Trans>From the song key</Trans></option>
             {KEY_NAMES.map((_, pc) => (
               <option key={pc} value={pc}>
                 {noteName(pc + shift, flats)}
@@ -136,27 +138,27 @@ export function SoloScales({
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          Position
+          <Trans>Position</Trans>
           <select className={field} value={chosen ? position : WHOLE_NECK} onChange={(e) => setPosition(e.target.value)}>
-            <option value={WHOLE_NECK}>Whole neck</option>
+            <option value={WHOLE_NECK}><Trans>Whole neck</Trans></option>
             {positions.map((p) => (
               <option key={p.number} value={p.number}>
-                Position {p.number}
+                <Trans>Position {p.number}</Trans>
               </option>
             ))}
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          Show
+          <Trans>Show</Trans>
           <select className={field} value={labels} onChange={(e) => chooseLabels(e.target.value === "note" ? "note" : "fret")}>
-            <option value="fret">Frets</option>
-            <option value="note">Notes</option>
+            <option value="fret"><Trans>Frets</Trans></option>
+            <option value="note"><Trans>Notes</Trans></option>
           </select>
         </label>
       </div>
       <p className="text-sm">{caption}</p>
       <NeckDiagram notes={notes} labels={labels} flats={flats} highlight={highlight} title={title} />
-      <p className="text-xs text-silkscreen-3">Standard tuning E A D G B e.</p>
+      <p className="text-xs text-silkscreen-3"><Trans>Standard tuning E A D G B e.</Trans></p>
       {note && (
         <p role="status" className="text-sm text-silkscreen-3">
           {note}
@@ -191,8 +193,8 @@ export function SoloScalesDialog({
         }}
       >
         <DialogHeader>
-          <DialogTitle>Solo scale</DialogTitle>
-          <DialogDescription>Where to solo on the neck, for the key as you will play it.</DialogDescription>
+          <DialogTitle><Trans>Solo scale</Trans></DialogTitle>
+          <DialogDescription><Trans>Where to solo on the neck, for the key as you will play it.</Trans></DialogDescription>
         </DialogHeader>
         <SoloScales {...panel} />
       </DialogContent>

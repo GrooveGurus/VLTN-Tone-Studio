@@ -25,6 +25,8 @@ import { Tuner } from "./Tuner";
 import { VariationMenu } from "./Variation";
 import { useHistory } from "./history";
 import { useRig } from "./rig-store";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 interface Props {
   preset: PresetState;
@@ -72,7 +74,7 @@ export function RigHeader({ preset, connected }: Props) {
         await playPreset(d.saved);
       }
     } catch (e) {
-      notifyError("Couldn't compare with the saved preset", e);
+      notifyError(t`Couldn't compare with the saved preset`, e);
     } finally {
       useRig.setState({ comparing: false });
     }
@@ -85,16 +87,16 @@ export function RigHeader({ preset, connected }: Props) {
       await useDevice.getState().discard();
       useHistory.getState().clear();
     } catch (e) {
-      notifyError("Couldn't discard the changes", e, discard);
+      notifyError(t`Couldn't discard the changes`, e, discard);
     }
   };
 
   const exportPrst = async () => {
     try {
       const where = await host.files.exportPresets([{ fileName: `${profile.slotLabel(preset.slot)}-${preset.name.trim() || "Preset"}.prst`, prst: preset.prst }]);
-      if (where) notifySuccess(`Exported ${preset.name}`, where);
+      if (where) notifySuccess(t`Exported ${preset.name}`, where);
     } catch (e) {
-      notifyError("Couldn't export the preset", e);
+      notifyError(t`Couldn't export the preset`, e);
     }
   };
 
@@ -116,13 +118,14 @@ export function RigHeader({ preset, connected }: Props) {
     target === null
       ? ""
       : target === preset.slot
-        ? `Overwrite ${saved?.name ?? preset.name} in slot ${profile.slotLabel(target)}?`
-        : `Write ${preset.name} to slot ${profile.slotLabel(target)}?`;
+        ? t`Overwrite ${saved?.name ?? preset.name} in slot ${profile.slotLabel(target)}?`
+        : t`Write ${preset.name} to slot ${profile.slotLabel(target)}?`;
   const replacingName = target === null ? "" : target === preset.slot ? (saved?.name ?? preset.name) : (names[target]?.name ?? "");
 
   return (
-    <div className="flex items-center gap-6 px-7 pt-4 pb-3 max-[1320px]:gap-4 [@media(max-height:820px)]:pt-2.5 [@media(max-height:820px)]:pb-2">
-      <div className="min-w-0">
+    // Two rows: the title beside the actions, then the preset's info across the whole width (it wraps rather than run
+    // under the buttons when a narrow window or a longer language leaves no room).
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-2 px-7 pt-4 pb-3 max-[1320px]:gap-x-4 [@media(max-height:820px)]:pt-2.5 [@media(max-height:820px)]:pb-2">
         <div className="flex min-w-0 items-center gap-5">
           {renaming ? (
             <RenameField preset={preset} onDone={() => setRenaming(false)} />
@@ -137,33 +140,14 @@ export function RigHeader({ preset, connected }: Props) {
             </h1>
           )}
         </div>
-        <div className="mt-2 flex items-center gap-[18px] text-sm whitespace-nowrap text-silkscreen-3 max-[1320px]:gap-3.5">
-          {shownChanges > 0 ? (
-            <span className="flex items-center gap-1.5 font-semibold text-silkscreen">
-              <span className="size-1.5 rounded-full bg-led-warn" aria-hidden />
-              {shownChanges === 1 ? "1 unsaved change" : `${shownChanges} unsaved changes`}
-              {compare && <span className="font-normal text-silkscreen-3">· playing the saved version</span>}
-            </span>
-          ) : (
-            <span className="flex items-center gap-1.5">
-              <span className="size-1.5 rounded-full bg-silkscreen-4" aria-hidden />
-              No unsaved changes
-            </span>
-          )}
-          <TempoControl bpm={preset.bpm} range={profile.tempo} disabled={!editable} />
-          <FootswitchControl preset={preset} disabled={!editable} />
-          {preset.exp && <ExpControl preset={preset} exp={preset.exp} disabled={!editable} />}
-          {preset.gp200 && <PatchPanel preset={preset} fields={preset.gp200} disabled={!editable} />}
-        </div>
-      </div>
       <div className="ml-auto flex shrink-0 items-center gap-2">
-        <IconTip label="Undo" keys={["Mod", "Z"]}>
-          <Button variant="ghost" size="icon-sm" aria-label="Undo" disabled={!editable || !canUndo} onClick={() => void undo()}>
+        <IconTip label={t`Undo`} keys={["Mod", "Z"]}>
+          <Button variant="ghost" size="icon-sm" aria-label={t`Undo`} disabled={!editable || !canUndo} onClick={() => void undo()}>
             <Undo2Icon aria-hidden />
           </Button>
         </IconTip>
-        <IconTip label="Redo" keys={["Mod", "Shift", "Z"]}>
-          <Button variant="ghost" size="icon-sm" aria-label="Redo" disabled={!editable || !canRedo} onClick={() => void redo()}>
+        <IconTip label={t`Redo`} keys={["Mod", "Shift", "Z"]}>
+          <Button variant="ghost" size="icon-sm" aria-label={t`Redo`} disabled={!editable || !canRedo} onClick={() => void redo()}>
             <Redo2Icon aria-hidden />
           </Button>
         </IconTip>
@@ -174,30 +158,30 @@ export function RigHeader({ preset, connected }: Props) {
           <TooltipTrigger asChild>
             <Button
               variant="outline"
-              aria-label="Compare with saved"
+              aria-label={t`Compare with saved`}
               aria-pressed={!!compare}
               disabled={!live || comparing || (!compare && unsaved === 0)}
               onClick={() => void toggleCompare()}
               className={cn("max-[1320px]:w-[34px] max-[1320px]:px-0", compare && "bg-silkscreen text-lamp-ink hover:bg-silkscreen/90")}
             >
               <GitCompareArrowsIcon aria-hidden />
-              <span className="max-[1320px]:hidden">{compare ? "Back to your edits" : "Compare with saved"}</span>
+              <span className="max-[1320px]:hidden">{compare ? t`Back to your edits` : t`Compare with saved`}</span>
             </Button>
           </TooltipTrigger>
-          <TooltipContent className="min-[1321px]:hidden">{compare ? "Back to your edits" : "Compare with saved"}</TooltipContent>
+          <TooltipContent className="min-[1321px]:hidden">{compare ? t`Back to your edits` : t`Compare with saved`}</TooltipContent>
         </Tooltip>
         <Button variant="ghost" className="max-[1320px]:hidden" disabled={!live || (unsaved === 0 && !compare)} onClick={() => void discard()}>
-          Discard
+          <Trans>Discard</Trans>
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="More actions" className="min-[1321px]:hidden">
+            <Button variant="ghost" size="icon" aria-label={t`More actions`} className="min-[1321px]:hidden">
               <EllipsisIcon aria-hidden />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem disabled={!live || (unsaved === 0 && !compare)} onSelect={() => void discard()}>
-              Discard changes
+              <Trans>Discard changes</Trans>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -210,45 +194,63 @@ export function RigHeader({ preset, connected }: Props) {
               <span tabIndex={connected ? -1 : 0}>
                 <Button disabled={!savable} onClick={() => saveTarget(preset.slot)} className="rounded-r-none pr-3">
                   <SaveIcon aria-hidden />
-                  {busy?.kind === "write" ? `Writing ${Math.round(busy.progress * 100)}%` : `Save to slot ${profile.slotLabel(preset.slot)}`}
+                  {busy?.kind === "write" ? t`Writing ${Math.round(busy.progress * 100)}%` : t`Save to slot ${profile.slotLabel(preset.slot)}`}
                 </Button>
               </span>
             </TooltipTrigger>
             <TooltipContent>
-              {!connected ? `Connect the ${pedal} to save` : compare ? "Go back to your edits to save" : keyLabel(["Mod", "S"])}
+              {!connected ? t`Connect the ${pedal} to save` : compare ? t`Go back to your edits to save` : keyLabel(["Mod", "S"])}
             </TooltipContent>
           </Tooltip>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button aria-label="More save options" className="rounded-l-none border-l border-black/15 px-2.5">
+              <Button aria-label={t`More save options`} className="rounded-l-none border-l border-black/15 px-2.5">
                 <ChevronDownIcon aria-hidden />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuItem disabled={!savable} onSelect={() => saveTarget(preset.slot)}>
-                Save to slot {profile.slotLabel(preset.slot)}
+                <Trans>Save to slot {profile.slotLabel(preset.slot)}</Trans>
                 <DropdownMenuShortcut>{keyLabel(["Mod", "S"])}</DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuItem disabled={!savable} onSelect={() => setSlotPicker(true)}>
-                Save to another slot…
+                <Trans>Save to another slot…</Trans>
               </DropdownMenuItem>
               <DropdownMenuItem disabled={!savable} onSelect={() => setRenaming(true)}>
-                Rename on pedal…
+                <Trans>Rename on pedal…</Trans>
                 <DropdownMenuShortcut>F2</DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => void exportPrst()}>Export .prst…</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => void exportPrst()}><Trans>Export .prst…</Trans></DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           </div>
         )}
       </div>
+      <div className="col-span-2 flex flex-wrap items-center gap-x-[18px] gap-y-1.5 text-sm whitespace-nowrap text-silkscreen-3 max-[1320px]:gap-x-3.5">
+        {shownChanges > 0 ? (
+          <span className="flex items-center gap-1.5 font-semibold text-silkscreen">
+            <span className="size-1.5 rounded-full bg-led-warn" aria-hidden />
+            {shownChanges === 1 ? t`1 unsaved change` : t`${shownChanges} unsaved changes`}
+            {compare && <span className="font-normal text-silkscreen-3"><Trans>· playing the saved version</Trans></span>}
+          </span>
+        ) : (
+          <span className="flex items-center gap-1.5">
+            <span className="size-1.5 rounded-full bg-silkscreen-4" aria-hidden />
+            <Trans>No unsaved changes</Trans>
+          </span>
+        )}
+        <TempoControl bpm={preset.bpm} range={profile.tempo} disabled={!editable} />
+        <FootswitchControl preset={preset} disabled={!editable} />
+        {preset.exp && <ExpControl preset={preset} exp={preset.exp} disabled={!editable} />}
+        {preset.gp200 && <PatchPanel preset={preset} fields={preset.gp200} disabled={!editable} />}
+      </div>
 
-      <CommandDialog open={slotPicker} onOpenChange={setSlotPicker} title="Save to another slot" description="Pick the slot to write this preset to">
-        <CommandInput placeholder="Find a slot by number or name" />
+      <CommandDialog open={slotPicker} onOpenChange={setSlotPicker} title={t`Save to another slot`} description={t`Pick the slot to write this preset to`}>
+        <CommandInput placeholder={t`Find a slot by number or name`} />
         <CommandList className="max-h-[360px]">
-          <CommandEmpty>No slot matches</CommandEmpty>
-          <CommandGroup heading={`${pedal} slots`}>
+          <CommandEmpty><Trans>No slot matches</Trans></CommandEmpty>
+          <CommandGroup heading={t`${pedal} slots`}>
             {names.map((n) => (
               <CommandItem
                 key={n.slot}
@@ -261,7 +263,7 @@ export function RigHeader({ preset, connected }: Props) {
               >
                 <span className="min-w-6 shrink-0 font-semibold whitespace-nowrap text-silkscreen-3 tabular-nums">{profile.slotLabel(n.slot)}</span>
                 <span className="flex-1 truncate">{n.name}</span>
-                {n.slot === preset.slot && <span className="text-xs text-silkscreen-3">This preset</span>}
+                {n.slot === preset.slot && <span className="text-xs text-silkscreen-3"><Trans>This preset</Trans></span>}
               </CommandItem>
             ))}
           </CommandGroup>
@@ -274,9 +276,9 @@ export function RigHeader({ preset, connected }: Props) {
           onOpenChange={(o) => !o && setTarget(null)}
           title={writeTitle}
           slot={target}
-          replacing={replacingName.trim() ? { name: replacingName, detail: target === preset.slot ? `Saved version of ${replacingName}` : undefined } : null}
-          incoming={{ name: preset.name, detail: unsaved > 0 ? `As edited now, including ${unsaved === 1 ? "1 unsaved change" : `${unsaved} unsaved changes`}` : "As shown on the Rig", prst: preset.prst }}
-          action={`Write to slot ${profile.slotLabel(target)}`}
+          replacing={replacingName.trim() ? { name: replacingName, detail: target === preset.slot ? t`Saved version of ${replacingName}` : undefined } : null}
+          incoming={{ name: preset.name, detail: unsaved > 0 ? (unsaved === 1 ? t`As edited now, including 1 unsaved change` : t`As edited now, including ${unsaved} unsaved changes`) : t`As shown on the Rig`, prst: preset.prst }}
+          action={t`Write to slot ${profile.slotLabel(target)}`}
           onConfirm={async ({ backupFirst }) => {
             const slot = target;
             await useDevice.getState().saveToSlot(slot);
@@ -319,13 +321,13 @@ function RenameField({ preset, onDone }: { preset: PresetState; onDone(): void }
     setBusy(true);
     try {
       await useDevice.getState().rename(slot, trimmed);
-      notifySuccess(`Slot ${profile.slotLabel(slot)} renamed to ${trimmed}`, undefined, {
-        label: "Undo",
+      notifySuccess(t`Slot ${profile.slotLabel(slot)} renamed to ${trimmed}`, undefined, {
+        label: t`Undo`,
         run: () => useDevice.getState().rename(slot, before.trimEnd()),
       });
       onDone();
     } catch (e) {
-      notifyError(`Couldn't rename slot ${profile.slotLabel(slot)}`, e);
+      notifyError(t`Couldn't rename slot ${profile.slotLabel(slot)}`, e);
       setBusy(false);
     }
   };
@@ -336,7 +338,7 @@ function RenameField({ preset, onDone }: { preset: PresetState; onDone(): void }
         <span className="text-[32px] leading-[1.05] font-semibold text-silkscreen-4">{profile.slotLabel(slot)}</span>
         <input
           autoFocus
-          aria-label={`Name of slot ${profile.slotLabel(slot)}`}
+          aria-label={t`Name of slot ${profile.slotLabel(slot)}`}
           aria-invalid={!!error}
           value={value}
           maxLength={nameLength}
@@ -360,15 +362,15 @@ function RenameField({ preset, onDone }: { preset: PresetState; onDone(): void }
         <span className={cn("text-xs tabular-nums", atLimit ? "text-led-warn" : "text-silkscreen-3")}>
           {value.length}/{nameLength}
         </span>
-        <Button variant="ghost" size="icon-sm" aria-label="Rename on pedal" disabled={!!error || busy} onClick={() => void commit()}>
+        <Button variant="ghost" size="icon-sm" aria-label={t`Rename on pedal`} disabled={!!error || busy} onClick={() => void commit()}>
           <CheckIcon aria-hidden />
         </Button>
-        <Button variant="ghost" size="icon-sm" aria-label="Cancel rename" onClick={onDone}>
+        <Button variant="ghost" size="icon-sm" aria-label={t`Cancel rename`} onClick={onDone}>
           <XIcon aria-hidden />
         </Button>
       </div>
       <span role={error ? "alert" : undefined} className={cn("text-xs", error ? "text-led-fault" : "text-led-warn")}>
-        {error ?? (atLimit ? `The ${pedal} stores ${nameLength} characters. Further typing is ignored.` : "")}
+        {error ?? (atLimit ? t`The ${pedal} stores ${nameLength} characters. Further typing is ignored.` : "")}
       </span>
     </div>
   );

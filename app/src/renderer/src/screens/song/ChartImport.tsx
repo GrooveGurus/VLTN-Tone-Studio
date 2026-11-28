@@ -5,6 +5,8 @@ import { importChart } from "@/song/performance/import/import-chart";
 import type { ChartMetadata, ImportResult } from "@/song/performance/import/import-result";
 import { useMidiConfiguration } from "@/song/performance/midi-configuration";
 import { usePlaybackClock } from "@/song/performance/playback-clock";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** The largest file the import reads. A chart is a few kilobytes; anything larger is probably not a chart. */
 const MAX_IMPORT_BYTES = 1024 * 1024;
@@ -59,35 +61,36 @@ export function ChartImport({ chart, onImport }: { chart: string; onImport: (cha
   const readFile = async (file: File | undefined) => {
     if (!file) return;
     if (file.size > MAX_IMPORT_BYTES) {
-      setMessage("That file is larger than 1 MB, so it is not a chart. Choose a ChordPro or text file.");
+      setMessage(t`That file is larger than 1 MB, so it is not a chart. Choose a ChordPro or text file.`);
       return;
     }
     readText(await file.text());
   };
   const refusal = playing
-    ? "Stop playback before replacing the chart with an import."
+    ? t`Stop playback before replacing the chart with an import.`
     : hasMidi
-      ? "This chart has MIDI commands or triggers. Remove them in the editor first, so the import cannot drop them without you seeing it."
+      ? t`This chart has MIDI commands or triggers. Remove them in the editor first, so the import cannot drop them without you seeing it.`
       : "";
   const lines = result?.metadata ? metadataLines(result.metadata) : [];
   return (
-    <section aria-label="Import a chart" className="space-y-3 rounded-lg border border-seam p-3">
+    <section aria-label={t`Import a chart`} className="space-y-3 rounded-lg border border-seam p-3">
       <div>
-        <h3 className="font-semibold">Import ChordPro or chords above lyrics</h3>
+        <h3 className="font-semibold"><Trans>Import ChordPro or chords above lyrics</Trans></h3>
         <p className="text-silkscreen-3">
-          Paste the text, or choose a file. Chords stay in their places. Headings and comments come across, and anything the app does not support is
-          listed below before you replace the chart.
+          <Trans>Paste the text, or choose a file. Chords stay in their places. Headings and comments come across, and anything the app does not support is
+          listed below before you replace the chart.</Trans>
         </p>
       </div>
       <textarea
-        aria-label="Text to import"
+        aria-label={t`Text to import`}
         className="min-h-40 w-full rounded border border-seam bg-background p-2 font-mono text-sm"
-        placeholder={"{title: Song}\n[C]Words [G]here"}
+        placeholder={`{title: Song}
+[C]Words [G]here`}
         value={text}
         onChange={(event) => readText(event.target.value)}
       />
       <input
-        aria-label="Choose a text or ChordPro file"
+        aria-label={t`Choose a text or ChordPro file`}
         type="file"
         accept=".cho,.chordpro,.pro,.crd,.txt"
         onChange={(event) => void readFile(event.target.files?.[0])}
@@ -98,18 +101,18 @@ export function ChartImport({ chart, onImport }: { chart: string; onImport: (cha
         </p>
       )}
       {result && (
-        <div aria-label="Import summary" className="space-y-2">
+        <div aria-label={t`Import summary`} className="space-y-2">
           <p>
-            Format: {FORMAT_NAMES[result.format]}. {result.chart.split("\n").filter((line) => line.trim()).length} lines.
+            <Trans>Format: {FORMAT_NAMES[result.format]}. {result.chart.split("\n").filter((line) => line.trim()).length} lines.</Trans>
           </p>
-          {lines.length > 0 && <p>Song details: {lines.join(" · ")}. Key, tempo, capo and year are applied to the song when you replace the chart.</p>}
+          {lines.length > 0 && <p><Trans>Song details: {lines.join(" · ")}. Key, tempo, capo and year are applied to the song when you replace the chart.</Trans></p>}
           {result.notes.length > 0 && (
             <div>
-              <p className="font-semibold">Not taken as written ({result.notes.length})</p>
+              <p className="font-semibold"><Trans>Not taken as written ({result.notes.length})</Trans></p>
               <ul className="list-disc space-y-1 pl-5">
                 {result.notes.map((note, index) => (
                   <li key={index}>
-                    Line {note.line}: {note.text}
+                    <Trans>Line {note.line}: {note.text}</Trans>
                   </li>
                 ))}
               </ul>
@@ -117,7 +120,7 @@ export function ChartImport({ chart, onImport }: { chart: string; onImport: (cha
           )}
           {result.error ? (
             <p role="alert" className="text-red-400">
-              The import does not parse as a chart: {result.error}. Fix the text and read it again.
+              <Trans>The import does not parse as a chart: {result.error}. Fix the text and read it again.</Trans>
             </p>
           ) : (
             refusal && (
@@ -129,7 +132,7 @@ export function ChartImport({ chart, onImport }: { chart: string; onImport: (cha
         </div>
       )}
       <Button disabled={!result || !!result.error || !!refusal} onClick={() => result && onImport(result.chart, result.metadata)}>
-        Replace chart with this import
+        <Trans>Replace chart with this import</Trans>
       </Button>
     </section>
   );

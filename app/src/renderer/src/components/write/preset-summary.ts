@@ -5,6 +5,7 @@ import type { Gp200Catalog } from "@/gp200/lib/catalog.mjs";
 import { isGp5Family, modelsMissingOn } from "@/state/device-model";
 import type { BlockState, DeviceKey, ExpSettings, SlotName } from "@/state/device-types";
 import { toPresetState } from "@/state/preset-codec";
+import { t as lt } from "@lingui/core/macro";
 
 export type SummaryBlock = BlockState;
 
@@ -82,7 +83,7 @@ export function ampOrSnapTone(s: PresetSummary, snapTones: SlotName[] | null): {
   const capture = ns?.enabled ? ns : amp && isCapture(amp) ? amp : undefined;
   if (capture) {
     const named = isCapture(capture) ? snapTones?.find((t) => t.slot === (capture.fxid & 0xff))?.name : undefined;
-    return { kind: "snaptone", title: named || capture.model?.title || "SnapTone" };
+    return { kind: "snaptone", title: named || capture.model?.title || lt`SnapTone` };
   }
   return amp?.model ? { kind: "amp", title: amp.model.title } : null;
 }

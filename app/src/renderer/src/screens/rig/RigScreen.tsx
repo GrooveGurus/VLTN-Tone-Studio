@@ -20,11 +20,13 @@ import { Pedalboard } from "./Pedalboard";
 import { RigHeader } from "./RigHeader";
 import { SceneFootswitches } from "./Scenes";
 import { useRig } from "./rig-store";
+import { t as lt } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const HINTS = [
-  { keys: ["←", "→"], label: "block" },
-  { keys: ["Space"], label: "on/off" },
-  { keys: ["M"], label: "change model" },
+  { keys: ["←", "→"], get label() { return lt`block`; } },
+  { keys: ["Space"], get label() { return lt`on/off`; } },
+  { keys: ["M"], get label() { return lt`change model`; } },
 ];
 
 /** Rig: the active preset drawn as gear, edited live on the pedal. */
@@ -83,11 +85,11 @@ export function RigScreen() {
           <EmptyMedia variant="icon">
             <UsbIcon aria-hidden />
           </EmptyMedia>
-          <EmptyTitle>Connect your {pedal} to see its preset</EmptyTitle>
-          <EmptyDescription>The Rig shows the preset that is active on the pedal and plays every change on it as you turn the knobs.</EmptyDescription>
+          <EmptyTitle><Trans>Connect your {pedal} to see its preset</Trans></EmptyTitle>
+          <EmptyDescription><Trans>The Rig shows the preset that is active on the pedal and plays every change on it as you turn the knobs.</Trans></EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button onClick={() => useNav.getState().go("device")}>Connect the {pedal}</Button>
+          <Button onClick={() => useNav.getState().go("device")}><Trans>Connect the {pedal}</Trans></Button>
         </EmptyContent>
       </Empty>
     );
@@ -165,7 +167,7 @@ function useRigKeys(readOnly: boolean) {
 /** While connecting: the model may not be known yet (the remembered one can be another model), so no name. */
 function RigSkeleton() {
   return (
-    <div className="flex h-full flex-col gap-4 px-7 pt-4" aria-busy="true" aria-label="Reading the pedal">
+    <div className="flex h-full flex-col gap-4 px-7 pt-4" aria-busy="true" aria-label={lt`Reading the pedal`}>
       <Skeleton className="h-9 w-72 rounded-sm" />
       <Skeleton className="h-4 w-96 rounded-sm" />
       <Skeleton className="h-20 w-full rounded-xl" />

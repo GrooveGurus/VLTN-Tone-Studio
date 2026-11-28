@@ -19,6 +19,8 @@ import { formatDay } from "./dnd";
 import { writableCollections } from "./LocalPane";
 import { emptyName, isEmptyName, useLibrary } from "./store";
 import { metaKey, normTag, useMeta, useTags } from "./tags";
+import { t as lt } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const CORE = [2, 9, 3, 4, 5];
 
@@ -32,7 +34,7 @@ export function Inspector({ onClose }: { onClose?: () => void }) {
   return (
     <div className="relative flex min-h-0 flex-1 flex-col gap-3.5">
       {onClose && (
-        <Button variant="ghost" size="icon-sm" className="absolute top-0 right-0 z-10" aria-label="Close details" title="Close (Esc)" onClick={onClose}>
+        <Button variant="ghost" size="icon-sm" className="absolute top-0 right-0 z-10" aria-label={lt`Close details`} title={lt`Close (Esc)`} onClick={onClose}>
           <XIcon />
         </Button>
       )}
@@ -44,8 +46,8 @@ export function Inspector({ onClose }: { onClose?: () => void }) {
 function NothingSelected() {
   return (
     <div className="flex flex-1 flex-col justify-start gap-1 px-2 pt-10 text-center">
-      <p className="font-semibold text-silkscreen">Select a slot</p>
-      <p className="text-sm text-pretty text-silkscreen-3">Its chain, volume and footswitches show here. Ctrl-click or Shift-click to select several.</p>
+      <p className="font-semibold text-silkscreen"><Trans>Select a slot</Trans></p>
+      <p className="text-sm text-pretty text-silkscreen-3"><Trans>Its chain, volume and footswitches show here. Ctrl-click or Shift-click to select several.</Trans></p>
     </div>
   );
 }
@@ -80,7 +82,7 @@ function SlotInspector({ slot }: { slot: number }) {
   const profile = useProfile();
   const label = profile.slotLabel(slot);
   // The GP-200 family has no empty slots: a slot is reset to an init patch instead of cleared
-  const clearLabel = profile.emptyName === null ? `Reset slot ${label} to init patch` : `Clear slot ${label}`;
+  const clearLabel = profile.emptyName === null ? lt`Reset slot ${label} to init patch` : lt`Clear slot ${label}`;
   const name = names[slot]?.name ?? emptyName();
   const empty = isEmptyName(name);
   const connected = status === "connected";
@@ -89,16 +91,16 @@ function SlotInspector({ slot }: { slot: number }) {
   const prst = activeSlot === slot && saved ? saved.prst : body?.prst;
   const parsed = prst ? summarize(prst) : null;
   const summary = parsed && parsed.name === name ? parsed : null;
-  const source = activeSlot === slot && saved ? `Read from the ${pedal}` : body ? (body.from === "backup" ? `Chain from the backup of ${formatDay(body.at)}` : `Read from the ${pedal}`) : null;
+  const source = activeSlot === slot && saved ? lt`Read from the ${pedal}` : body ? (body.from === "backup" ? lt`Chain from the backup of ${formatDay(body.at)}` : lt`Read from the ${pedal}`) : null;
 
   return (
     <>
       <Head
-        title={empty ? "Empty slot" : name}
+        title={empty ? lt`Empty slot` : name}
         meta={
           <>
-            Slot {label} on {pedal}
-            {active && ", playing now"}
+            <Trans>Slot {label} on {pedal}</Trans>
+            {active && lt`, playing now`}
           </>
         }
       >
@@ -106,9 +108,9 @@ function SlotInspector({ slot }: { slot: number }) {
           <RenameField slot={slot} name={name} />
         ) : (
           <div className="flex min-w-0 items-center gap-2">
-            <h2 className="truncate text-[32px] leading-[1.1] font-bold tracking-[-0.02em] text-silkscreen">{empty ? "Empty slot" : name}</h2>
+            <h2 className="truncate text-[32px] leading-[1.1] font-bold tracking-[-0.02em] text-silkscreen">{empty ? lt`Empty slot` : name}</h2>
             {!empty && (
-              <Button variant="ghost" size="icon-sm" aria-label="Rename" title={connected ? "Rename (F2)" : `Rename needs the ${pedal}`} disabled={!connected} onClick={() => useLibrary.setState({ renaming: slot })}>
+              <Button variant="ghost" size="icon-sm" aria-label={lt`Rename`} title={connected ? lt`Rename (F2)` : lt`Rename needs the ${pedal}`} disabled={!connected} onClick={() => useLibrary.setState({ renaming: slot })}>
                 <PencilIcon />
               </Button>
             )}
@@ -118,7 +120,7 @@ function SlotInspector({ slot }: { slot: number }) {
 
       <div className="flex min-h-0 flex-1 flex-col gap-3.5 overflow-auto">
         {empty ? (
-          <p className="text-sm text-pretty text-silkscreen-3">This slot holds the factory empty preset. Drag a preset here, or use Copy to… on another slot.</p>
+          <p className="text-sm text-pretty text-silkscreen-3"><Trans>This slot holds the factory empty preset. Drag a preset here, or use Copy to… on another slot.</Trans></p>
         ) : summary ? (
           <>
             <ChainPreview s={summary} />
@@ -127,12 +129,12 @@ function SlotInspector({ slot }: { slot: number }) {
           </>
         ) : (
           <div className="flex flex-col items-start gap-2 rounded-lg bg-well p-3.5 text-sm">
-            <p className="text-pretty text-silkscreen-2">The chain of this slot hasn't been read yet. Back up now reads every slot; reading just this one switches the pedal to it for a moment and back.</p>
+            <p className="text-pretty text-silkscreen-2"><Trans>The chain of this slot hasn't been read yet. Back up now reads every slot; reading just this one switches the pedal to it for a moment and back.</Trans></p>
             <Button variant="outline" size="sm" disabled={!writable || unsaved > 0 || job !== null} onClick={() => void actions.readSlot(slot)}>
               <ScanSearchIcon data-icon="inline-start" />
-              {job ? "Reading…" : `Read from ${pedal}`}
+              {job ? lt`Reading…` : lt`Read from ${pedal}`}
             </Button>
-            {unsaved > 0 && <p className="text-xs text-silkscreen-3">Save or discard your unsaved changes on the Rig first.</p>}
+            {unsaved > 0 && <p className="text-xs text-silkscreen-3"><Trans>Save or discard your unsaved changes on the Rig first.</Trans></p>}
           </div>
         )}
       </div>
@@ -140,22 +142,22 @@ function SlotInspector({ slot }: { slot: number }) {
       <Actions>
         <Button disabled={!connected || empty} onClick={() => void actions.openInRig(slot)}>
           <CableIcon data-icon="inline-start" />
-          Open in Rig
+          <Trans>Open in Rig</Trans>
         </Button>
         <div className="grid grid-cols-2 gap-2">
           <Button variant="outline" disabled={!writable || empty} onClick={() => actions.copySlots([slot])}>
             <ArrowDownToLineIcon data-icon="inline-start" />
-            Copy to…
+            <Trans>Copy to…</Trans>
           </Button>
           <Button variant="outline" disabled={!writable || empty} onClick={() => actions.duplicateSlot(slot)}>
             <CopyIcon data-icon="inline-start" />
-            Duplicate
+            <Trans>Duplicate</Trans>
           </Button>
         </div>
         <div className="flex gap-1">
           <Button variant="ghost" size="sm" disabled={empty || (!connected && !summary)} onClick={() => void actions.exportSlots([slot])}>
             <DownloadIcon data-icon="inline-start" />
-            Export .prst
+            <Trans>Export .prst</Trans>
           </Button>
           <AddToCollection disabled={empty || (!connected && !summary)} onAdd={(id) => void actions.addSlotsToCollection([slot], id)} />
           <Button
@@ -198,7 +200,7 @@ function RenameField({ slot, name }: { slot: number; name: string }) {
           ref={inputRef}
           value={value}
           maxLength={nameLength}
-          aria-label={`New name for slot ${slotLabel(slot)}`}
+          aria-label={lt`New name for slot ${slotLabel(slot)}`}
           aria-describedby={hintId}
           aria-invalid={error ? true : undefined}
           onChange={(e) => setValue(e.target.value.slice(0, nameLength))}
@@ -215,9 +217,9 @@ function RenameField({ slot, name }: { slot: number; name: string }) {
           className="min-w-0 flex-1"
         />
         <Button variant="secondary" disabled={!!error || trimmed === name} onClick={commit}>
-          Rename
+          <Trans>Rename</Trans>
         </Button>
-        <Button variant="ghost" size="icon" aria-label="Cancel rename" onClick={cancel}>
+        <Button variant="ghost" size="icon" aria-label={lt`Cancel rename`} onClick={cancel}>
           <XIcon />
         </Button>
       </div>
@@ -225,7 +227,7 @@ function RenameField({ slot, name }: { slot: number; name: string }) {
         <FieldError id={hintId}>{error}</FieldError>
       ) : (
         <div id={hintId} className="flex justify-between gap-3 text-xs text-silkscreen-3">
-          <span className="text-pretty">{value.length >= nameLength ? `The ${pedal} stores ${nameLength} characters. Further typing is ignored.` : `The ${pedal} shows up to ${nameLength} characters.`}</span>
+          <span className="text-pretty">{value.length >= nameLength ? lt`The ${pedal} stores ${nameLength} characters. Further typing is ignored.` : lt`The ${pedal} shows up to ${nameLength} characters.`}</span>
           <span className={cn("tabular-nums", value.length >= nameLength && "text-led-warn")}>
             {value.length}/{nameLength}
           </span>
@@ -251,7 +253,7 @@ function MultiInspector({ slots }: { slots: number[] }) {
 
   return (
     <>
-      <Head title={`${slots.length} slots selected`} meta={`On ${pedal}`} />
+      <Head title={lt`${slots.length} slots selected`} meta={`On ${pedal}`} />
       <div className="flex min-h-0 flex-1 flex-col gap-3.5 overflow-auto">
         <ul className="flex flex-col gap-0.5 rounded-lg bg-well p-1.5">
           {slots.map((slot) => {
@@ -261,43 +263,43 @@ function MultiInspector({ slots }: { slots: number[] }) {
             return (
               <li key={slot} className="grid h-8 grid-cols-[minmax(22px,auto)_minmax(0,1fr)_auto] items-center gap-3 px-1.5 text-[13px]">
                 <span className="text-sm font-semibold text-silkscreen-3 tabular-nums">{slotLabel(slot)}</span>
-                <span className={cn("truncate font-semibold text-silkscreen", isEmptyName(name) && "font-medium text-silkscreen-4")}>{isEmptyName(name) ? "Empty" : name}</span>
+                <span className={cn("truncate font-semibold text-silkscreen", isEmptyName(name) && "font-medium text-silkscreen-4")}>{isEmptyName(name) ? lt`Empty` : name}</span>
                 <MiniChain chain={ok ? s : null} />
               </li>
             );
           })}
         </ul>
         <p className="text-sm text-pretty text-silkscreen-3">
-          {both ? "Swapping writes both slots on the pedal." : `Copying, moving and ${resets ? "resetting" : "clearing"} write these slots on the pedal.`} You confirm before anything is stored.
+          {both ? lt`Swapping writes both slots on the pedal.` : lt`Copying, moving and ${resets ? lt`resetting` : lt`clearing`} write these slots on the pedal.`} <Trans>You confirm before anything is stored.</Trans>
         </p>
       </div>
       <Actions>
         {both ? (
           <Button disabled={!writable} onClick={() => actions.swapSlots(slots[0], slots[1])}>
             <ArrowUpDownIcon data-icon="inline-start" />
-            Swap slots {slotLabel(slots[0])} and {slotLabel(slots[1])}
+            <Trans>Swap slots {slotLabel(slots[0])} and {slotLabel(slots[1])}</Trans>
           </Button>
         ) : (
           <Button disabled={!writable || !usedSlots.length} onClick={() => actions.copySlots(slots)}>
             <CopyIcon data-icon="inline-start" />
-            Copy {slots.length} slots to…
+            <Trans>Copy {slots.length} slots to…</Trans>
           </Button>
         )}
         <div className="grid grid-cols-2 gap-2">
           <Button variant="outline" disabled={!connected} onClick={() => void actions.backupSlots(slots)}>
             <HardDriveDownloadIcon data-icon="inline-start" />
-            {both ? "Back up both" : `Back up ${slots.length}`}
+            {both ? lt`Back up both` : lt`Back up ${slots.length}`}
           </Button>
           <Button variant="outline" disabled={!connected} onClick={() => void actions.exportSlots(slots)}>
             <DownloadIcon data-icon="inline-start" />
-            {both ? "Export both" : `Export ${slots.length}`}
+            {both ? lt`Export both` : lt`Export ${slots.length}`}
           </Button>
         </div>
         <div className="flex gap-1">
           <AddToCollection disabled={!connected} onAdd={(id) => void actions.addSlotsToCollection(slots, id)} />
           <Button variant="ghost" size="sm" className="ml-auto text-led-fault hover:text-led-fault" disabled={!writable || !usedSlots.length} onClick={() => actions.clearSlots(slots)}>
             <Trash2Icon data-icon="inline-start" />
-            {resets ? "Reset" : "Clear"} {usedSlots.length === 1 ? "1 slot" : `${usedSlots.length} slots`}
+            {resets ? lt`Reset` : lt`Clear`} {usedSlots.length === 1 ? lt`1 slot` : lt`${usedSlots.length} slots`}
           </Button>
         </div>
       </Actions>
@@ -332,21 +334,21 @@ function LocalInspector({ p }: { p: LocalPreset }) {
             <ChainPreview s={s} />
             <Patch s={s} />
             <MetaEditor p={p} />
-            {p.source && <p className="text-xs text-silkscreen-3">From {p.source}, added {formatDay(p.addedAt)}</p>}
+            {p.source && <p className="text-xs text-silkscreen-3"><Trans>From {p.source}, added {formatDay(p.addedAt)}</Trans></p>}
           </>
         ) : (
-          <p className="text-sm text-led-fault">This file can't be read as a {PRST_MODELS} preset.</p>
+          <p className="text-sm text-led-fault"><Trans>This file can't be read as a {PRST_MODELS} preset.</Trans></p>
         )}
       </div>
       <Actions>
         <Button disabled={!writable || !s} onClick={() => actions.writeLocal(p)}>
           <ArrowDownToLineIcon data-icon="inline-start" />
-          {restore && collection ? `Restore to slot ${profileOrDefault(collection.device).slotLabel(p.slot!)}…` : "Write to slot…"}
+          {restore && collection ? lt`Restore to slot ${profileOrDefault(collection.device).slotLabel(p.slot!)}…` : lt`Write to slot…`}
         </Button>
         <div className="grid grid-cols-2 gap-2">
           <Button variant="outline" onClick={() => void actions.exportLocal([p])}>
             <DownloadIcon data-icon="inline-start" />
-            Export .prst
+            <Trans>Export .prst</Trans>
           </Button>
           <AddToCollection variant="outline" exclude={p.collectionId} onAdd={(id) => void actions.addLocalToCollection([p], id)} />
         </div>
@@ -354,7 +356,7 @@ function LocalInspector({ p }: { p: LocalPreset }) {
           <div className="flex gap-1">
             <Button variant="ghost" size="sm" className="ml-auto text-led-fault hover:text-led-fault" onClick={() => void actions.removeLocal(p)}>
               <Trash2Icon data-icon="inline-start" />
-              Remove from {collection.title}
+              <Trans>Remove from {collection.title}</Trans>
             </Button>
           </div>
         )}
@@ -375,7 +377,7 @@ function MetaEditor({ p }: { p: LocalPreset }) {
   };
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-0.5" role="group" aria-label="Rating">
+      <div className="flex items-center gap-0.5" role="group" aria-label={lt`Rating`}>
         {[1, 2, 3, 4, 5].map((n) => (
           <button key={n} type="button" aria-label={`${n} ${n === 1 ? "star" : "stars"}`} aria-pressed={meta.stars >= n} onClick={() => setStars(key, n)} className={cn("text-lg leading-none", meta.stars >= n ? "text-silkscreen" : "text-silkscreen-3")}>
             {meta.stars >= n ? "★" : "☆"}
@@ -384,14 +386,14 @@ function MetaEditor({ p }: { p: LocalPreset }) {
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
         {meta.tags.map((t) => (
-          <button key={t} type="button" aria-label={`Remove tag ${t}`} onClick={() => removeTag(key, t)} className="rounded-full bg-faceplate-raised px-2 py-0.5 text-xs text-silkscreen-2 hover:text-led-fault">
+          <button key={t} type="button" aria-label={lt`Remove tag ${t}`} onClick={() => removeTag(key, t)} className="rounded-full bg-faceplate-raised px-2 py-0.5 text-xs text-silkscreen-2 hover:text-led-fault">
             #{t} <XIcon className="inline size-3" aria-hidden />
           </button>
         ))}
         <Input
           className="h-7 w-32 text-xs"
-          placeholder="Add tag"
-          aria-label="Add tag"
+          placeholder={lt`Add tag`}
+          aria-label={lt`Add tag`}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => (e.key === "Enter" || e.key === ",") && normTag(draft) && (e.preventDefault(), commit())}
@@ -411,7 +413,7 @@ function AddToCollection({ onAdd, disabled, exclude, variant = "ghost" }: { onAd
       <DropdownMenuTrigger asChild>
         <Button variant={variant} size={variant === "ghost" ? "sm" : "default"} disabled={disabled}>
           <FolderPlusIcon data-icon="inline-start" />
-          Add to collection
+          <Trans>Add to collection</Trans>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
@@ -428,7 +430,7 @@ function AddToCollection({ onAdd, disabled, exclude, variant = "ghost" }: { onAd
           </>
         )}
         <DropdownMenuGroup>
-          <DropdownMenuItem onSelect={() => actions.collectionDialog({ kind: "new", then: (c) => onAdd(c.id) })}>New collection…</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => actions.collectionDialog({ kind: "new", then: (c) => onAdd(c.id) })}><Trans>New collection…</Trans></DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -455,9 +457,9 @@ function ChainRow({ b, replaced }: { b: SummaryBlock; replaced: boolean }) {
         <GearFor block={b} className={wide ? "w-9" : "w-[19px]"} />
       </span>
       <span className={cn("text-xs font-semibold tracking-[0.04em]", b.enabled ? "text-silkscreen-2" : "text-silkscreen-4")}>{b.code}</span>
-      <span className={cn("truncate", b.enabled ? "text-silkscreen" : "text-silkscreen-4")}>{b.model?.title ?? "Unknown model"}</span>
-      <span className="text-xs whitespace-nowrap text-silkscreen-3">{replaced ? "Replaced" : valueText(b)}</span>
-      <span className={cn("size-[7px] rounded-full", b.enabled ? "bg-led-on" : "bg-led-off")} aria-label={b.enabled ? "On" : "Off"} role="img" />
+      <span className={cn("truncate", b.enabled ? "text-silkscreen" : "text-silkscreen-4")}>{b.model?.title ?? lt`Unknown model`}</span>
+      <span className="text-xs whitespace-nowrap text-silkscreen-3">{replaced ? lt`Replaced` : valueText(b)}</span>
+      <span className={cn("size-[7px] rounded-full", b.enabled ? "bg-led-on" : "bg-led-off")} aria-label={b.enabled ? lt`On` : lt`Off`} role="img" />
     </div>
   );
 }
@@ -472,8 +474,8 @@ function ChainPreview({ s }: { s: PresetSummary }) {
   const replacedByNs = [codes.indexOf("AMP"), codes.indexOf("CAB")];
   const row = (i: number) => <ChainRow key={i} b={s.blocks[i]} replaced={nsOn && replacedByNs.includes(i)} />;
   return (
-    <section aria-label="Chain" className="flex flex-col gap-1.5">
-      <h3 className="text-[13px] font-semibold text-silkscreen">Chain</h3>
+    <section aria-label={lt`Chain`} className="flex flex-col gap-1.5">
+      <h3 className="text-[13px] font-semibold text-silkscreen"><Trans>Chain</Trans></h3>
       <div className="flex shrink-0 flex-col rounded-lg bg-well px-1.5 py-1">
         {seq.slice(0, start).map(row)}
         {start < seq.length && <div className="my-[3px] flex flex-col border-y border-seam-strong py-[3px]">{seq.slice(start, start + 5).map(row)}</div>}
@@ -481,7 +483,7 @@ function ChainPreview({ s }: { s: PresetSummary }) {
         {nsOn && (
           <p className="flex items-center gap-1.5 px-1.5 pt-0.5 text-xs text-silkscreen-3">
             <InfoIcon className="size-3" aria-hidden />
-            SnapTone is on, so it replaces AMP and CAB.
+            <Trans>SnapTone is on, so it replaces AMP and CAB.</Trans>
           </p>
         )}
       </div>
@@ -490,7 +492,7 @@ function ChainPreview({ s }: { s: PresetSummary }) {
 }
 
 function FsChips({ blocks, codes }: { blocks: number[]; codes: readonly string[] }) {
-  if (!blocks.length) return <span className="text-sm text-silkscreen-3">None</span>;
+  if (!blocks.length) return <span className="text-sm text-silkscreen-3"><Trans>None</Trans></span>;
   return (
     <span className="col-span-3 flex flex-wrap gap-1">
       {blocks.map((k) => (
@@ -506,8 +508,8 @@ function FsChips({ blocks, codes }: { blocks: number[]; codes: readonly string[]
 /** "DLY Time 0–100%", "Volume 0–100" or "Off": what the preset's EXP pedal (GP-50) sweeps. */
 function expText(s: PresetSummary): string {
   const exp = s.exp!;
-  if (!exp.on) return "Off";
-  if (exp.targetModule === 0) return `Volume ${exp.volMin}–${exp.volMax}`;
+  if (!exp.on) return lt`Off`;
+  if (exp.targetModule === 0) return lt`Volume ${exp.volMin}–${exp.volMax}`;
   const code = EXP_TARGETS[exp.targetModule];
   const param = s.blocks.find((b) => b.code === code)?.model?.params[exp.targetParam];
   return `${code}${param ? ` ${paramTitle(param.name)}` : ""} ${exp.paramMin}–${exp.paramMax}%`;
@@ -518,9 +520,9 @@ function Patch({ s }: { s: PresetSummary }) {
   const codes = profileFor(s.device).blocks;
   return (
     <dl className="grid grid-cols-[auto_1fr_auto_1fr] items-center gap-x-3 gap-y-2 text-sm">
-      <dt className={key}>Volume</dt>
+      <dt className={key}><Trans>Volume</Trans></dt>
       <dd className="font-semibold text-silkscreen">{s.volume}</dd>
-      <dt className={key}>Tempo</dt>
+      <dt className={key}><Trans>Tempo</Trans></dt>
       <dd className="font-semibold text-silkscreen">
         {s.bpm} <small className="text-xs font-medium text-silkscreen-3">BPM</small>
       </dd>

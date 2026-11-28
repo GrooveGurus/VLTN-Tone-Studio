@@ -13,6 +13,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { useDevice } from "@/state/device";
 import type { UpdateState } from "@shared/host/update";
 import { acceptUpdate, closeUpdatePrompt, installUpdate, openReleasePage, restartBlocker, retryUpdate, useUpdate } from "../updates";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 type Shown = Exclude<UpdateState, { status: "idle" } | { status: "checking" } | { status: "current" }>;
 
@@ -42,25 +44,25 @@ export function UpdateDialog() {
           <>
             <AlertDialogHeader>
               <AlertDialogTitle className="text-lg font-semibold text-balance">
-                {view.status === "available" && `Tone Studio ${view.version} is available`}
-                {view.status === "downloading" && `Downloading Tone Studio ${view.version}`}
-                {view.status === "ready" && (restarting ? `Installing Tone Studio ${view.version}` : `Tone Studio ${view.version} is ready to install`)}
-                {view.status === "error" && "Couldn't update Tone Studio"}
+                {view.status === "available" && t`Tone Studio ${view.version} is available`}
+                {view.status === "downloading" && t`Downloading Tone Studio ${view.version}`}
+                {view.status === "ready" && (restarting ? t`Installing Tone Studio ${view.version}` : t`Tone Studio ${view.version} is ready to install`)}
+                {view.status === "error" && t`Couldn't update Tone Studio`}
               </AlertDialogTitle>
               <AlertDialogDescription className="text-[13px] text-pretty text-silkscreen-2">
                 {view.status === "available" &&
                   (installs
-                    ? `You have version ${snap?.current}. Download and install the new version now? Tone Studio restarts to finish; presets, backups and settings stay as they are.`
-                    : `You have version ${snap?.current}. This build can't install updates by itself. Open the release page to download the new version?`)}
-                {view.status === "downloading" && "The installer is checked against the release's checksum before anything is installed. You can keep working meanwhile."}
+                    ? t`You have version ${snap?.current ?? ""}. Download and install the new version now? Tone Studio restarts to finish; presets, backups and settings stay as they are.`
+                    : t`You have version ${snap?.current ?? ""}. This build can't install updates by itself. Open the release page to download the new version?`)}
+                {view.status === "downloading" && t`The installer is checked against the release's checksum before anything is installed. You can keep working meanwhile.`}
                 {view.status === "ready" &&
-                  (restarting ? "Tone Studio closes and starts again with the new version." : (blocker?.message ?? "Downloaded and checked. Restart to install it now, or it installs when you quit."))}
+                  (restarting ? t`Tone Studio closes and starts again with the new version.` : (blocker?.message ?? t`Downloaded and checked. Restart to install it now, or it installs when you quit.`))}
                 {view.status === "error" && view.message}
               </AlertDialogDescription>
             </AlertDialogHeader>
             {view.status === "downloading" && (
               <div className="flex items-center gap-3">
-                <Progress value={view.percent} aria-label="Download progress" className="flex-1" />
+                <Progress value={view.percent} aria-label={t`Download progress`} className="flex-1" />
                 <span className="w-10 text-right text-xs text-silkscreen-2 tabular-nums">{view.percent}%</span>
               </div>
             )}
@@ -69,45 +71,45 @@ export function UpdateDialog() {
                 <>
                   {installs && (
                     <Button variant="ghost" className="mr-auto -ml-2.5 px-2.5" onClick={() => void openReleasePage(view.version)}>
-                      What's new
+                      <Trans>What's new</Trans>
                     </Button>
                   )}
                   <Button variant="outline" onClick={closeUpdatePrompt}>
-                    Later
+                    <Trans>Later</Trans>
                   </Button>
                   <Button autoFocus onClick={() => void acceptUpdate()}>
-                    {installs ? "Download and install" : "Open release page"}
+                    {installs ? t`Download and install` : t`Open release page`}
                   </Button>
                 </>
               )}
               {view.status === "downloading" && (
                 <Button variant="outline" onClick={closeUpdatePrompt}>
-                  Hide
+                  <Trans>Hide</Trans>
                 </Button>
               )}
               {view.status === "ready" &&
                 (restarting ? (
                   <Button disabled>
                     <Spinner />
-                    Restarting
+                    <Trans>Restarting</Trans>
                   </Button>
                 ) : (
                   <>
                     <Button variant="outline" onClick={closeUpdatePrompt}>
-                      Install when I quit
+                      <Trans>Install when I quit</Trans>
                     </Button>
                     <Button autoFocus disabled={blocker?.kind === "busy"} onClick={() => void installUpdate()}>
-                      Restart now
+                      <Trans>Restart now</Trans>
                     </Button>
                   </>
                 ))}
               {view.status === "error" && (
                 <>
                   <Button variant="outline" onClick={closeUpdatePrompt}>
-                    Close
+                    <Trans>Close</Trans>
                   </Button>
                   <Button autoFocus onClick={() => void retryUpdate(accepted)}>
-                    Try again
+                    <Trans>Try again</Trans>
                   </Button>
                 </>
               )}

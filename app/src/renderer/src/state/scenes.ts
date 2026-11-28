@@ -9,6 +9,7 @@ import { DeviceError, getDriver, onSceneEvent, useDevice } from "./device";
 import type { PresetState } from "./device-types";
 import type { SceneList, SlotScenes } from "./driver/types";
 import { applyScene, captureScene, ctrlMasks, sceneName, scenesOf, withScene, type CapturedScene } from "./scenes-model";
+import { t } from "@lingui/core/macro";
 
 export interface ScenesState {
   /** The record of the active slot as last read; null before the first read or without the feature */
@@ -16,6 +17,8 @@ export interface ScenesState {
   loading: boolean;
   /** Why the last read failed */
   error: string | null;
+  /** The failure itself (a mod status, a timeout), for the pedal's notice */
+  errorCause: unknown;
   /** Scene records on the pedal (used per slot, free) */
   list: SceneList | null;
   /** What the pedal reports (NOTIFY): scene mode and the scene it plays (null = the base) */
@@ -27,6 +30,8 @@ export interface ScenesState {
   editing: number | null;
   /** A scene write is on its way */
   writing: boolean;
+  /** When the last scene write of this app ended (ms): the pedal's AVISO about it is an echo, not a change on the pedal */
+  lastWriteAt: number;
   /** CTRL 1-4 switched on from the footswitches on screen; all off on every scene change, like the pedal */
   ctrlOn: boolean[];
   /** The mod's Tap Tempo setting ("disabled": TAP is CTRL 4); null until read */
@@ -38,8 +43,14 @@ export interface ScenesState {
   edit(k: number): Promise<void>;
   /** Play the base again and stop editing the scene. */
   leave(): Promise<void>;
-  /** Save what the Rig plays now as scene `k` (its differences from the saved preset). */
-  save(k: number): Promise<CapturedScene>;
+  /** What saving the Rig's sound as scene `k` would store (nothing is written), with what stays out of it. */
+  capture(k: number): CapturedScene;
+  /**
+   * Save what the Rig plays now as scene `k` (its differences from the saved preset), named `name` when given (cleaned
+   * for the pedal), else keeping the scene's name. Saving while another scene is edited moves the edit to `k`: the sound
+   * now lives there, and the scene it came from stays as stored.
+   */
+  save(k: number, name?: string): Promise<CapturedScene>;
   rename(k: number, name: string): Promise<void>;
   remove(k: number): Promise<void>;
   /** CTRL `n` (0-3) footswitch: switch its blocks on the Rig, like the pedal in scene mode. */
@@ -49,6 +60,9 @@ export interface ScenesState {
 }
 
 const CTRLS_OFF = (): boolean[] => Array(SCENE_CTRLS).fill(false);
+
+/** The scene the pedal plays in scene mode (null: scene mode off, or the base playing). */
+const pedalScene = (p: ScenesState["pedal"]): number | null => (p?.sceneMode ? p.activeScene : null);
 
 /**
  * Make the Rig play `target`: live edits for what the pedal takes live, and the CTRL assignments on the Rig (the GP-200
@@ -95,9 +109,9 @@ const dev = () => useDevice.getState();
 function driverFor(write: boolean) {
   const d = dev();
   const driver = getDriver();
-  if (!driver || d.status !== "connected") throw new DeviceError("not-connected", "The pedal is not connected");
-  if (!d.can(write ? "modScenesWrite" : "modScenes") || !driver.readScenes) throw new DeviceError("unsafe", write ? "The pedal's mod can't write scenes" : "The pedal doesn't run the GrooveGurus mod");
-  if (d.busy) throw new DeviceError("busy", `Wait until the ${d.busy.kind} finishes`);
+  if (!driver || d.status !== "connected") throw new DeviceError("not-connected", t`The pedal is not connected`);
+  if (!d.can(write ? "modScenesWrite" : "modScenes") || !driver.readScenes) throw new DeviceError("unsafe", write ? t`The pedal's mod can't write scenes` : t`The pedal doesn't run the GrooveGurus mod`);
+  if (d.busy) throw new DeviceError("busy", t`Wait until the ${d.busy.kind} finishes`);
   return driver;
 }
 
@@ -108,8 +122,8 @@ export const useScenes = create<ScenesState>((set, get) => {
   const writable = () => {
     const { current } = get();
     const slot = dev().slot;
-    if (slot === null || !current || current.slot !== slot) throw new DeviceError("busy", "The scenes of this preset are still being read");
-    if (current.bytes && !current.record) throw new DeviceError("unsafe", `These scenes were saved by a newer mod (${current.error ?? "unknown format"}); Tone Studio can only show that they exist`);
+    if (slot === null || !current || current.slot !== slot) throw new DeviceError("busy", t`The scenes of this preset are still being read`);
+    if (current.bytes && !current.record) throw new DeviceError("unsafe", t`These scenes were saved by a newer mod (${current.error ?? t`unknown format`}); Tone Studio can only show that they exist`);
     return { slot, current };
   };
 
@@ -139,7 +153,7 @@ export const useScenes = create<ScenesState>((set, get) => {
       resume = null;
       throw e;
     } finally {
-      set({ writing: false });
+      set({ writing: false, lastWriteAt: Date.now() });
     }
   };
 
@@ -167,11 +181,13 @@ export const useScenes = create<ScenesState>((set, get) => {
     current: null,
     loading: false,
     error: null,
+    errorCause: null,
     list: null,
     pedal: null,
     mode: "preset",
     editing: null,
     writing: false,
+    lastWriteAt: 0,
     ctrlOn: CTRLS_OFF(),
     tapTempo: null,
 
@@ -183,9 +199,9 @@ export const useScenes = create<ScenesState>((set, get) => {
       set({ loading: true });
       try {
         const current = await driver.readScenes(slot);
-        if (seq === readSeq) set({ current, error: null });
+        if (seq === readSeq) set({ current, error: null, errorCause: null });
       } catch (e) {
-        if (seq === readSeq) set({ error: (e as Error)?.message ?? String(e) });
+        if (seq === readSeq) set({ error: (e as Error)?.message ?? String(e), errorCause: e });
       } finally {
         if (seq === readSeq) set({ loading: false });
       }
@@ -197,7 +213,7 @@ export const useScenes = create<ScenesState>((set, get) => {
       driverFor(false);
       const { current } = writable();
       const base = dev().saved;
-      if (!base) throw new DeviceError("busy", "The preset is still being read");
+      if (!base) throw new DeviceError("busy", t`The preset is still being read`);
       const scene = scenesOf(current.record)[k];
       set({ editing: k, mode: "scene" });
       try {
@@ -216,19 +232,33 @@ export const useScenes = create<ScenesState>((set, get) => {
       if (base && dev().status === "connected") await playOnRig(base);
     },
 
-    async save(k) {
-      const { slot, current } = writable();
+    capture(k) {
+      const { current } = writable();
       const { saved, preset } = dev();
-      if (!saved || !preset) throw new DeviceError("busy", "The preset is still being read");
-      const captured = captureScene(saved, preset, k, scenesOf(current.record)[k], get().ctrlOn);
-      await write(slot, withScene(current.record, k, captured.scene));
+      if (!saved || !preset) throw new DeviceError("busy", t`The preset is still being read`);
+      return captureScene(saved, preset, k, scenesOf(current.record)[k], get().ctrlOn);
+    },
+
+    async save(k, name) {
+      const { slot, current } = writable();
+      const captured = get().capture(k);
+      if (name !== undefined) captured.scene.name = sceneName(name, k);
+      // The pedal goes back to the base after the write; the scene that plays again on the Rig is the one saved.
+      const editing = get().editing;
+      if (editing !== null && editing !== k) set({ editing: k });
+      try {
+        await write(slot, withScene(current.record, k, captured.scene));
+      } catch (e) {
+        if (editing !== null && get().editing === k) set({ editing });
+        throw e;
+      }
       return captured;
     },
 
     async rename(k, name) {
       const { slot, current } = writable();
       const scene = scenesOf(current.record)[k];
-      if (!scene) throw new DeviceError("unsafe", "Save the scene before naming it");
+      if (!scene) throw new DeviceError("unsafe", t`Save the scene before naming it`);
       const next = sceneName(name, k);
       if (next === scene.name) return;
       await write(slot, withScene(current.record, k, { ...scene, name: next }), true);
@@ -273,7 +303,10 @@ useDevice.subscribe((s, p) => {
   if (!wasUsable) void readGuests();
   if (!wasUsable || s.slot !== p.slot) {
     resume = null;
-    useScenes.setState({ editing: null, ctrlOn: CTRLS_OFF(), ...(s.slot !== useScenes.getState().current?.slot ? { current: null } : {}) });
+    // Another preset: the scene the pedal plays in it (if any) is what the Rig edits now; its NOTIFY corrects it.
+    const k = pedalScene(useScenes.getState().pedal);
+    useHistory.getState().clear();
+    useScenes.setState({ editing: k, ...(k !== null ? { mode: "scene" as const } : {}), ctrlOn: CTRLS_OFF(), ...(s.slot !== useScenes.getState().current?.slot ? { current: null } : {}) });
     void useScenes.getState().refresh();
     return;
   }
@@ -302,15 +335,25 @@ onSceneEvent((e) => {
   const prev = useScenes.getState().pedal;
   const pedal = { sceneMode: e.sceneMode, activeScene: e.activeScene };
   const changed = !prev || prev.sceneMode !== pedal.sceneMode || prev.activeScene !== pedal.activeScene;
-  // The pedal took over the sound (another scene, scene mode, its base): the Rig follows it and stops editing. Not after
-  // our own write, when the pedal goes back to the base by itself (the scene plays again on the Rig).
-  const ours = useScenes.getState().writing || resume !== null;
+  // The pedal took over the sound (another scene, scene mode, its base): the editor follows it. With a scene playing
+  // in scene mode the Rig edits that scene (the pedal re-reads it as the base plus the scene), so edits made on the
+  // pedal or here are saved into the scene, not into the slot; the base or scene mode off edits the preset again. Not
+  // after our own write, when the pedal goes back to the base by itself (the scene plays again on the Rig).
+  const k = pedalScene(pedal);
+  // Our write sends the pedal back to the base: a scene picked on the pedal meanwhile is the player's, and wins.
+  const ours = useScenes.getState().writing || (resume !== null && k === null);
+  const follow = (e.events & NOTIFY.SCENE) !== 0 && changed && !ours;
+  if (follow && resume) {
+    clearTimeout(resume.timer);
+    resume = null;
+  }
   // Scene mode switched on the pedal (double tap on CTRL 1): the editor follows it.
   const modeChanged = !prev || prev.sceneMode !== pedal.sceneMode;
+  if (follow) useHistory.getState().clear();
   useScenes.setState({
     pedal,
     ...(modeChanged ? { mode: pedal.sceneMode ? "scene" : "preset" } : {}),
-    ...(e.events & NOTIFY.SCENE && changed && !ours ? { editing: null, ctrlOn: CTRLS_OFF() } : {}),
+    ...(follow ? { editing: k, ctrlOn: CTRLS_OFF(), ...(k !== null ? { mode: "scene" as const } : {}) } : {}),
   });
   if (e.events & NOTIFY.SETTINGS) void getDriver()?.readModSettings?.().then(({ tapTempo }) => useScenes.setState({ tapTempo }), () => {});
   if (e.events & NOTIFY.RECORD && !useScenes.getState().writing) {

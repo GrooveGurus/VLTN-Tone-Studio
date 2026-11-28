@@ -4,6 +4,8 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 import { downloadMegabytes, LYRICS_MODELS, type LyricsModelId } from "@/song/performance/lyrics-models";
 import { hasWebGpuAdapter, LYRICS_QUALITIES, type LyricsChoice, type LyricsQualityId } from "@/song/performance/lyrics-options";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Whether the transcriber will run on WebGPU here, asked the same way the worker asks. */
 export function useWebGpu(): boolean {
@@ -27,7 +29,7 @@ export function LyricsModelPicker({ choice, disabled, onChange }: { choice: Lyri
   return (
     <div className="flex flex-col gap-3 text-left">
       <RadioGroup
-        aria-label="Lyrics model"
+        aria-label={t`Lyrics model`}
         value={choice.model}
         onValueChange={(v) => onChange({ ...choice, model: v as LyricsModelId })}
         disabled={disabled}
@@ -41,16 +43,16 @@ export function LyricsModelPicker({ choice, disabled, onChange }: { choice: Lyri
               <label htmlFor={id} className="flex min-w-0 grow cursor-pointer flex-col gap-0.5">
                 <span className="text-[13px] font-semibold text-silkscreen">{m.label}</span>
                 <span className="text-[12px] text-pretty text-silkscreen-3">{m.description}</span>
-                <span className="text-[11px] text-silkscreen-2 tabular-nums">Downloads about {downloadMegabytes(m, webgpu)} MB once</span>
+                <Trans><span className="text-[11px] text-silkscreen-2 tabular-nums">Downloads about {downloadMegabytes(m, webgpu)} MB once</span></Trans>
               </label>
             </div>
           );
         })}
       </RadioGroup>
       <div className="flex flex-wrap items-center gap-3">
-        <span id="lyrics-quality" className="text-[12px] font-semibold text-silkscreen-2">
+        <Trans><span id="lyrics-quality" className="text-[12px] font-semibold text-silkscreen-2">
           Quality
-        </span>
+        </span></Trans>
         <ToggleGroup
           type="single"
           value={choice.quality}

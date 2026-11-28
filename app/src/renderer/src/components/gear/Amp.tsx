@@ -6,6 +6,7 @@ import { GearFrame, type Control } from "./controls";
 import { formatValue } from "./knob-math";
 import { Defs, T } from "./parts";
 import { paramTitle, type GearBaseProps } from "./types";
+import { t as lt } from "@lingui/core/macro";
 
 export interface AmpProps extends GearBaseProps {
   /** Catalog amp type: Clean | Drive | Hi Gain | Bass | Acoustic sets the dress (tolex, cloth, faceplate), voicing colour and label; others show none */
@@ -24,7 +25,7 @@ export function AmpHead({ name, type, origin, on = true, knobs = [], interactive
   return (
     <GearFrame
       view={look.template === "classic" ? [240, 120] : HEAD_VIEW}
-      label={`${name} amplifier head`}
+      label={lt`${name} amplifier head`}
       interactive={interactive}
       disabled={disabled}
       className={className}
@@ -107,7 +108,7 @@ export function Cab({ name, ir, origin, match, className, style }: CabProps) {
   return (
     <GearFrame
       view={[240, H]}
-      label={`${name} speaker cabinet`}
+      label={lt`${name} speaker cabinet`}
       className={className}
       style={style}
       render={(id) => {
@@ -195,7 +196,7 @@ export function AmpPanel({ name, type, origin, on = true, knobs = [], interactiv
   return (
     <GearFrame
       view={[1200, 124]}
-      label={`${name} amplifier controls`}
+      label={lt`${name} amplifier controls`}
       interactive={interactive}
       disabled={disabled}
       className={className}
@@ -244,7 +245,7 @@ export function AmpPanel({ name, type, origin, on = true, knobs = [], interactiv
             </g>,
           );
         });
-        controls.push({ kind: "fs", id: "power", label: `${name} power`, on, onToggle: onToggleOn, x: W - 100, y: 34, w: 64, h: 54 });
+        controls.push({ kind: "fs", id: "power", label: lt`${name} power`, on, onToggle: onToggleOn, x: W - 100, y: 34, w: 64, h: 54 });
         const voicing = voicingOf(type);
         const typeLabel = voicing ? `${voicing.toUpperCase()} AMP` : "AMP";
         const art = (

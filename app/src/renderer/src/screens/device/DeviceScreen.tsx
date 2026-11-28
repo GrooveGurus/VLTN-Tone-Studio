@@ -17,10 +17,11 @@ import { PedalSettings, RawRecords } from "./PedalSettings";
 import { SettingsView } from "./SettingsView";
 import { useAppSettings } from "./settings-store";
 import { Gp180Inspection } from './Gp180Inspection';
+import { t } from "@lingui/core/macro";
 
 const HINTS = [
-  { keys: ["Mod", "Shift", "B"], label: "back up now" },
-  { keys: ["Mod", ","], label: "settings" },
+  { keys: ["Mod", "Shift", "B"], get label() { return t`back up now`; } },
+  { keys: ["Mod", ","], get label() { return t`settings`; } },
 ];
 
 /** Device (connection, pedal settings, backups, diagnostics) and, with `param=settings`, app Settings. */
@@ -64,7 +65,7 @@ function DevicePage() {
   }, []);
 
   useCommand("diagnostics-report", () => copyReport(checks));
-  useCommand("open-backups-folder", () => host.files.openBackupsFolder().catch((e) => notifyError("Couldn't open the backups folder", e)));
+  useCommand("open-backups-folder", () => host.files.openBackupsFolder().catch((e) => notifyError(t`Couldn't open the backups folder`, e)));
 
   const showFix = () => {
     setGuideOpen(true);

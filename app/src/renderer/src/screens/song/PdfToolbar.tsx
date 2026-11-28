@@ -1,12 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { ANNOTATION_COLOURS, type AnnotationTool } from "@/song/performance/pdf/annotations";
 import type { ChartLayout } from "@/song/performance/pdf/layout";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** The tools a performer can pick on the PDF. Annotation tools are left out in stage mode, where the chart is read only. */
 const TOOLS: { tool: AnnotationTool; label: string }[] = [
-  { tool: "pen", label: "Pen" },
-  { tool: "highlighter", label: "Highlighter" },
-  { tool: "text", label: "Text note" },
+  { tool: "pen", get label() { return t`Pen`; } },
+  { tool: "highlighter", get label() { return t`Highlighter`; } },
+  { tool: "text", get label() { return t`Text note`; } },
 ];
 
 export interface PdfToolbarProps {
@@ -32,36 +34,36 @@ export interface PdfToolbarProps {
 export function PdfToolbar(props: PdfToolbarProps) {
   const { layout, page, pages, editing, tool, colour } = props;
   return (
-    <div className="mb-2 flex shrink-0 flex-wrap items-center gap-2 text-sm" aria-label="PDF chart controls">
+    <div className="mb-2 flex shrink-0 flex-wrap items-center gap-2 text-sm" aria-label={t`PDF chart controls`}>
       <Button variant="outline" aria-pressed={layout === "scroll"} onClick={() => props.onLayout("scroll")}>
-        Scroll
+        <Trans>Scroll</Trans>
       </Button>
       <Button variant="outline" aria-pressed={layout === "page"} onClick={() => props.onLayout("page")}>
-        Page
+        <Trans>Page</Trans>
       </Button>
-      <Button variant="outline" aria-label="Previous page" disabled={page <= 1} onClick={() => props.onPage(-1)}>
-        Previous
+      <Button variant="outline" aria-label={t`Previous page`} disabled={page <= 1} onClick={() => props.onPage(-1)}>
+        <Trans>Previous</Trans>
       </Button>
-      <span className="tabular-nums text-silkscreen-3" aria-live="polite">
+      <Trans><span className="tabular-nums text-silkscreen-3" aria-live="polite">
         Page {page} of {pages}
-      </span>
-      <Button variant="outline" aria-label="Next page" disabled={page >= pages} onClick={() => props.onPage(1)}>
-        Next
+      </span></Trans>
+      <Button variant="outline" aria-label={t`Next page`} disabled={page >= pages} onClick={() => props.onPage(1)}>
+        <Trans>Next</Trans>
       </Button>
       {editing && (
         <>
-          <span className="ml-2 text-silkscreen-3">Mark:</span>
+          <span className="ml-2 text-silkscreen-3"><Trans>Mark:</Trans></span>
           {TOOLS.map((option) => (
             <Button key={option.tool} variant="outline" aria-pressed={tool === option.tool} onClick={() => props.onTool(tool === option.tool ? "none" : option.tool)}>
               {option.label}
             </Button>
           ))}
-          <div className="flex items-center gap-1" role="group" aria-label="Mark colour">
+          <div className="flex items-center gap-1" role="group" aria-label={t`Mark colour`}>
             {ANNOTATION_COLOURS.map((value) => (
               <button
                 key={value}
                 type="button"
-                aria-label={`Colour ${value}`}
+                aria-label={t`Colour ${value}`}
                 aria-pressed={colour === value}
                 onClick={() => props.onColour(value)}
                 className={"size-6 rounded-full border border-seam " + (colour === value ? "ring-2 ring-sky-400" : "")}
@@ -70,17 +72,17 @@ export function PdfToolbar(props: PdfToolbarProps) {
             ))}
           </div>
           <Button variant="outline" onClick={props.onUndo}>
-            Undo mark
+            <Trans>Undo mark</Trans>
           </Button>
           <Button variant="outline" onClick={props.onClearPage}>
-            Clear page marks
+            <Trans>Clear page marks</Trans>
           </Button>
-          <span className="ml-2 text-silkscreen-3">Page turns: {props.turns}</span>
+          <span className="ml-2 text-silkscreen-3"><Trans>Page turns: {props.turns}</Trans></span>
           <Button variant="outline" onClick={props.onTurnNow}>
-            Turn page at this time
+            <Trans>Turn page at this time</Trans>
           </Button>
           <Button variant="outline" disabled={!props.turns} onClick={props.onClearTurns}>
-            Clear page turns
+            <Trans>Clear page turns</Trans>
           </Button>
         </>
       )}

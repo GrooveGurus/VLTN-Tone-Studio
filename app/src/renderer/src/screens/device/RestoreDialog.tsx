@@ -24,6 +24,8 @@ import { alreadyMatchesCopy, describeSlots, type RestoreSource } from "./restore
 import { classifySlots, isChangedState } from "./compare";
 import { CompareList } from "./CompareList";
 import { useAppSettings } from "./settings-store";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 type Failure = { message: string; done: number[]; failed: number | null; notStarted: number[] };
 
@@ -83,8 +85,8 @@ export function RestoreDialog({ source, onOpenChange }: { source: RestoreSource 
   const nothingToWrite = compare !== null && onlyChanged && !slots.length;
   const matched = alreadyMatchesCopy(pedal);
   const replacedText = all
-    ? `Every preset on the ${pedal} is replaced with the copy in this backup.`
-    : `${describeSlots(slots, slotLabel)} on the ${pedal} are replaced with the copies in this folder.`;
+    ? t`Every preset on the ${pedal} is replaced with the copy in this backup.`
+    : t`${describeSlots(slots, slotLabel)} on the ${pedal} are replaced with the copies in this folder.`;
 
   // Reads the pedal: a full backup first when `withBackup`, else a read of every slot. The result becomes the comparison.
   async function readPedal(withBackup: boolean) {
@@ -125,9 +127,9 @@ export function RestoreDialog({ source, onOpenChange }: { source: RestoreSource 
         signal: abort.current.signal,
         onProgress: (done, total) => void host.app.setProgress(done / total).catch(() => {}),
       });
-      const countText = list.length === 1 ? "1 slot" : `${list.length} slots`;
+      const countText = list.length === 1 ? t`1 slot` : t`${list.length} slots`;
       const slotText = describeSlots(list.map((e) => e.slot), slotLabel);
-      notifySuccess(`${countText} restored`, `${slotText} now hold the presets from ${source.title}. Each slot was checked by reading it back.`);
+      notifySuccess(t`${countText} restored`, t`${slotText} now hold the presets from ${source.title}. Each slot was checked by reading it back.`);
       onOpenChange(false);
     } catch (e) {
       if (e instanceof RestoreError) setFailure({ message: e.failed === null ? e.message : describeError(e.cause), done: e.done, failed: e.failed, notStarted: e.notStarted });
@@ -147,7 +149,7 @@ export function RestoreDialog({ source, onOpenChange }: { source: RestoreSource 
     void write(list);
   };
 
-  const label = phase === "backup" ? (busy?.label ?? "Backing up the pedal") : phase === "read" ? (busy?.label ?? "Reading the pedal") : (busy?.label ?? "Restoring");
+  const label = phase === "backup" ? (busy?.label ?? t`Backing up the pedal`) : phase === "read" ? (busy?.label ?? t`Reading the pedal`) : (busy?.label ?? t`Restoring`);
   const progress = Math.round((busy?.progress ?? 0) * 100);
 
   return (
@@ -159,34 +161,34 @@ export function RestoreDialog({ source, onOpenChange }: { source: RestoreSource 
               matched.title
             ) : (
               <>
-                {all ? `Restore all ${slotCount} slots` : `Restore ${count}`} from {source.title}?
+                {all ? t`Restore all ${slotCount} slots` : t`Restore ${count}`} <Trans>from {source.title}?</Trans>
               </>
             )}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            {nothingToWrite ? matched.description : `${replacedText} Presets you changed since then are lost unless you back them up first.`}
+            {nothingToWrite ? matched.description : t`${replacedText} Presets you changed since then are lost unless you back them up first.`}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <dl className="grid grid-cols-[88px_minmax(0,1fr)] gap-x-3 gap-y-2 rounded-lg bg-well px-3.5 py-3 text-sm">
-          <dt className="text-silkscreen-3">From</dt>
+          <dt className="text-silkscreen-3"><Trans>From</Trans></dt>
           <dd className="truncate text-silkscreen" title={source.location}>
-            {source.location}, {entries.length} {entries.length === 1 ? "preset" : "presets"}
+            {source.location}, {entries.length} {entries.length === 1 ? t`preset` : t`presets`}
           </dd>
           {!nothingToWrite && (
             <>
-              <dt className="text-silkscreen-3">Replaces</dt>
+              <dt className="text-silkscreen-3"><Trans>Replaces</Trans></dt>
               <dd className="text-silkscreen">
-                {describeSlots(slots, slotLabel)} on the pedal, now {used} {used === 1 ? "preset" : "presets"} and{" "}
-                {slots.length - used} empty {slots.length - used === 1 ? "slot" : "slots"}
+                <Trans>{describeSlots(slots, slotLabel)} on the pedal, now {used}</Trans> {used === 1 ? t`preset` : t`presets`} <Trans>and{" "}</Trans>
+                {slots.length - used} <Trans>empty</Trans> {slots.length - used === 1 ? t`slot` : t`slots`}
               </dd>
-              <dt className="text-silkscreen-3">Checks</dt>
-              <dd className="text-silkscreen">Each slot is read back after writing. Keep the pedal connected until it finishes.</dd>
+              <dt className="text-silkscreen-3"><Trans>Checks</Trans></dt>
+              <dd className="text-silkscreen"><Trans>Each slot is read back after writing. Keep the pedal connected until it finishes.</Trans></dd>
             </>
           )}
           {source.skipped.length > 0 && (
             <>
-              <dt className="text-silkscreen-3">Skipped</dt>
+              <dt className="text-silkscreen-3"><Trans>Skipped</Trans></dt>
               <dd className="max-h-20 overflow-auto text-silkscreen-2">
                 {source.skipped.map((s) => (
                   <div key={s}>{s}</div>
@@ -196,15 +198,15 @@ export function RestoreDialog({ source, onOpenChange }: { source: RestoreSource 
           )}
           {converted.length > 0 && (
             <>
-              <dt className="text-silkscreen-3">Converted</dt>
+              <dt className="text-silkscreen-3"><Trans>Converted</Trans></dt>
               <dd className="max-h-24 overflow-auto text-silkscreen-2">
                 <div className="text-pretty">
-                  {converted.length === 1 ? "1 preset was" : `${converted.length} presets were`} made on a {pedalName(converted[0].from)} and {converted.length === 1 ? "is" : "are"} converted
-                  for your {pedal}.{lossy.length > 0 ? " These blocks have no equivalent and are left empty:" : ""}
+                  {converted.length === 1 ? t`1 preset was` : t`${converted.length} presets were`} <Trans>made on a {pedalName(converted[0].from)} and</Trans> {converted.length === 1 ? t`is` : t`are`} <Trans>converted
+                  for your {pedal}.</Trans>{lossy.length > 0 ? t` These blocks have no equivalent and are left empty:` : ""}
                 </div>
                 {lossy.map((c) => (
                   <div key={c.slot}>
-                    Slot {slotLabel(c.slot)} {c.name}: {c.dropped.join(", ")}
+                    <Trans>Slot {slotLabel(c.slot)} {c.name}: {c.dropped.join(", ")}</Trans>
                   </div>
                 ))}
               </dd>
@@ -214,18 +216,18 @@ export function RestoreDialog({ source, onOpenChange }: { source: RestoreSource 
 
         {unsaved > 0 && !running && (
           <p className="text-sm text-pretty text-silkscreen-2">
-            The Rig has {unsaved} unsaved {unsaved === 1 ? "change" : "changes"}. Restoring discards {unsaved === 1 ? "it" : "them"} first.
+            <Trans>The Rig has {unsaved} unsaved</Trans> {unsaved === 1 ? t`change` : t`changes`}<Trans>. Restoring discards</Trans> {unsaved === 1 ? t`it` : t`them`} <Trans>first.</Trans>
           </p>
         )}
 
         {compare && device && (
           <div className="flex flex-col gap-2">
-            <div role="group" aria-label="What to write" className="flex flex-wrap gap-2">
+            <div role="group" aria-label={t`What to write`} className="flex flex-wrap gap-2">
               <Button size="sm" variant={onlyChanged ? "secondary" : "ghost"} aria-pressed={onlyChanged} disabled={running} onClick={() => setOnlyChanged(true)}>
-                Write only changed slots
+                <Trans>Write only changed slots</Trans>
               </Button>
               <Button size="sm" variant={onlyChanged ? "ghost" : "secondary"} aria-pressed={!onlyChanged} disabled={running} onClick={() => setOnlyChanged(false)}>
-                Write all
+                <Trans>Write all</Trans>
               </Button>
             </div>
             <CompareList rows={compare} source={entries} pedal={pedalEntries ?? []} device={device} slotLabel={slotLabel} />
@@ -236,10 +238,10 @@ export function RestoreDialog({ source, onOpenChange }: { source: RestoreSource 
           <div className="flex items-start gap-2.5">
             <Checkbox id={checkId} checked={backupFirst} disabled={running} onCheckedChange={(v) => setBackupFirst(v === true)} className="mt-px" />
             <Label htmlFor={checkId} className="flex flex-col items-start gap-0.5 text-sm">
-              <b className="font-semibold">Back up the pedal first</b>
+              <Trans><b className="font-semibold">Back up the pedal first</b>
               <span className="font-normal text-silkscreen-3">
                 Saves what is on the pedal now to a new folder, then compares it with this backup. Takes about {backupSeconds} seconds.
-              </span>
+              </span></Trans>
             </Label>
           </div>
         )}
@@ -253,43 +255,43 @@ export function RestoreDialog({ source, onOpenChange }: { source: RestoreSource 
 
         {readError && !running && (
           <div role="alert" className="flex flex-col gap-1 rounded-lg bg-well px-3.5 py-3 text-sm">
-            <b className="font-semibold text-silkscreen">The pedal couldn't be read</b>
+            <Trans><b className="font-semibold text-silkscreen">The pedal couldn't be read</b></Trans>
             <span className="text-pretty text-silkscreen-2">{readError}</span>
           </div>
         )}
 
         {failure && (
           <div role="alert" className="flex flex-col gap-1 rounded-lg bg-well px-3.5 py-3 text-sm">
-            <b className="font-semibold text-silkscreen">{failure.failed === null ? "The restore stopped" : `Slot ${slotLabel(failure.failed)} failed after 3 attempts`}</b>
+            <b className="font-semibold text-silkscreen">{failure.failed === null ? t`The restore stopped` : t`Slot ${slotLabel(failure.failed)} failed after 3 attempts`}</b>
             <span className="text-pretty text-silkscreen-2">{failure.message}</span>
-            <span className="text-silkscreen-3">Done: {failure.done.length ? describeSlots(failure.done, slotLabel) : "none"}</span>
-            <span className="text-silkscreen-3">Not started: {failure.notStarted.length ? describeSlots(failure.notStarted, slotLabel) : "none"}</span>
+            <span className="text-silkscreen-3"><Trans>Done:</Trans> {failure.done.length ? describeSlots(failure.done, slotLabel) : t`none`}</span>
+            <span className="text-silkscreen-3"><Trans>Not started:</Trans> {failure.notStarted.length ? describeSlots(failure.notStarted, slotLabel) : t`none`}</span>
           </div>
         )}
 
         <AlertDialogFooter>
           {running && phase === "restore" ? (
             <Button variant="ghost" onClick={() => abort.current?.abort()}>
-              Stop after this slot
+              <Trans>Stop after this slot</Trans>
             </Button>
           ) : (
-            <AlertDialogCancel disabled={running}>{failure || nothingToWrite ? "Close" : "Cancel"}</AlertDialogCancel>
+            <AlertDialogCancel disabled={running}>{failure || nothingToWrite ? t`Close` : t`Cancel`}</AlertDialogCancel>
           )}
           {failure ? (
             (failure.failed !== null || failure.notStarted.length > 0) && (
               <Button variant="destructive" disabled={!connected || running} onClick={retryFrom}>
                 <RefreshCw aria-hidden />
-                Retry from slot {slotLabel(failure.failed ?? failure.notStarted[0])}
+                <Trans>Retry from slot {slotLabel(failure.failed ?? failure.notStarted[0])}</Trans>
               </Button>
             )
           ) : !pedalEntries ? (
             <Button variant="secondary" disabled={!connected || running || !entries.length} onClick={() => void readPedal(backupFirst)}>
-              {backupFirst ? "Back up and compare" : "Read the pedal and compare"}
+              {backupFirst ? t`Back up and compare` : t`Read the pedal and compare`}
             </Button>
           ) : nothingToWrite ? null : (
             <Button variant="destructive" disabled={!connected || running || !slots.length} onClick={() => void write(writeList)}>
               <RotateCcw aria-hidden />
-              Restore {count}
+              <Trans>Restore {count}</Trans>
             </Button>
           )}
         </AlertDialogFooter>

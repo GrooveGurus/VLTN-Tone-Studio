@@ -12,6 +12,8 @@ import { FilterBuilder } from "./FilterBuilder";
 import { SongDetails, parseKeywords } from "./SongDetails";
 import { AnalyseSongsDialog } from "./AnalyseSongsDialog";
 import type { BatchSong } from "@/song/analysis/batch";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const field = "rounded border border-seam bg-transparent p-2";
 const EMPTY_FILTER: SmartRules = { match: "all", rules: [], sort: "title" };
@@ -89,17 +91,17 @@ export function LibraryBrowser() {
     setSelected(new Set());
   };
   return (
-    <section aria-label="Saved songs" className="space-y-3">
-      <h2 className="font-semibold">Songs · {songs.length}</h2>
+    <section aria-label={t`Saved songs`} className="space-y-3">
+      <h2 className="font-semibold"><Trans>Songs · {songs.length}</Trans></h2>
       <div className="flex flex-wrap items-center gap-2">
         <input
-          aria-label="Search saved songs"
-          placeholder="Search title, artist, notes or keywords"
+          aria-label={t`Search saved songs`}
+          placeholder={t`Search title, artist, notes or keywords`}
           className={field + " min-w-0 flex-1"}
           value={view.query}
           onChange={(e) => setView({ ...view, query: e.target.value })}
         />
-        <select aria-label="Sort songs" className={field} value={view.sort} onChange={(e) => setView({ ...view, sort: e.target.value as SortKey })}>
+        <select aria-label={t`Sort songs`} className={field} value={view.sort} onChange={(e) => setView({ ...view, sort: e.target.value as SortKey })}>
           {SORT_KEYS.map((key) => (
             <option key={key} value={key}>
               {SORT_LABELS[key]}
@@ -107,15 +109,15 @@ export function LibraryBrowser() {
           ))}
         </select>
         <Button variant="outline" aria-pressed={view.reverse} onClick={() => setView({ ...view, reverse: !view.reverse })}>
-          Reverse order
+          <Trans>Reverse order</Trans>
         </Button>
         <Button variant="outline" aria-pressed={filtering} onClick={() => setFiltering(!filtering)}>
-          {filtering ? "Hide filter" : "Filter the list"}
+          {filtering ? t`Hide filter` : t`Filter the list`}
         </Button>
       </div>
-      <div className="flex flex-wrap items-center gap-2 text-sm" aria-label="Folders">
+      <div className="flex flex-wrap items-center gap-2 text-sm" aria-label={t`Folders`}>
         <Button variant={view.folderId ? "outline" : "default"} onClick={() => setView({ ...view, folderId: null })}>
-          All songs
+          <Trans>All songs</Trans>
         </Button>
         {tree.map(({ folder, depth }) => (
           <Button
@@ -128,18 +130,18 @@ export function LibraryBrowser() {
           </Button>
         ))}
         <input
-          aria-label="New folder name"
-          placeholder={chosen ? `New folder in ${chosen.name}` : "New folder"}
+          aria-label={t`New folder name`}
+          placeholder={chosen ? t`New folder in ${chosen.name}` : t`New folder`}
           className={field}
           value={folderName}
           onChange={(e) => setFolderName(e.target.value)}
         />
         <Button variant="outline" disabled={!folderName.trim() || library.busy} onClick={addFolder}>
-          Add folder
+          <Trans>Add folder</Trans>
         </Button>
         {chosen && (
           <Button variant="outline" disabled={library.busy} onClick={() => deleteFolder(chosen)}>
-            Delete folder
+            <Trans>Delete folder</Trans>
           </Button>
         )}
       </div>
@@ -147,7 +149,7 @@ export function LibraryBrowser() {
         <div className="rounded border border-seam p-3">
           <FilterBuilder value={view.filter ?? EMPTY_FILTER} folders={folders} showSort={false} onChange={(filter) => setView({ ...view, filter })} />
           <Button variant="outline" className="mt-2" onClick={() => setView({ ...view, filter: null })}>
-            Clear filter
+            <Trans>Clear filter</Trans>
           </Button>
         </div>
       )}
@@ -157,13 +159,13 @@ export function LibraryBrowser() {
         </p>
       ))}
       <p className="text-sm text-silkscreen-3">
-        {result.songs.length} shown{view.folderId ? ` in ${chosen?.name ?? "this folder"}` : ""}
+        <Trans>{result.songs.length} shown</Trans>{view.folderId ? t` in ${chosen?.name ?? t`this folder`}` : ""}
       </p>
       <Button variant="outline" disabled={library.busy || !songs.length} onClick={() => setAnalysing("all")}>
-        {analysisRunning ? "Analysis running…" : "Analyse all songs…"}
+        {analysisRunning ? t`Analysis running…` : t`Analyse all songs…`}
       </Button>
       {result.letters.length > 0 && (
-        <nav aria-label="Jump to letter" className="flex flex-wrap gap-1 text-sm">
+        <nav aria-label={t`Jump to letter`} className="flex flex-wrap gap-1 text-sm">
           {result.letters.map(({ letter, index }) => (
             <button key={letter} type="button" className="rounded px-1 hover:underline" onClick={() => jump(index)}>
               {letter}
@@ -171,7 +173,7 @@ export function LibraryBrowser() {
           ))}
         </nav>
       )}
-      {!songs.length && <p>No saved songs. Open audio, prepare it, then save it.</p>}
+      {!songs.length && <p><Trans>No saved songs. Open audio, prepare it, then save it.</Trans></p>}
       <ul className="max-h-[60vh] space-y-2 overflow-auto pr-1">
         {result.songs.map((song, index) => (
           <SongRow
@@ -188,8 +190,8 @@ export function LibraryBrowser() {
               void library.remove(song.id);
             }}
             onLoad={() => void library.load(song.id)}
-            onNext={() => setMessage(library.playNextSong(song.id) ?? `${song.title} plays next.`)}
-            onQueue={() => setMessage(library.addToQueue([song.id]) ?? `${song.title} added to the queue.`)}
+            onNext={() => setMessage(library.playNextSong(song.id) ?? t`${song.title} plays next.`)}
+            onQueue={() => setMessage(library.addToQueue([song.id]) ?? t`${song.title} added to the queue.`)}
           />
         ))}
       </ul>
@@ -200,18 +202,18 @@ export function LibraryBrowser() {
       )}
       {single && <SongDetails key={single.id} song={single} />}
       {picked.length > 0 && (
-        <section aria-label="Batch edit" className="space-y-2 rounded border border-seam p-3">
+        <section aria-label={t`Batch edit`} className="space-y-2 rounded border border-seam p-3">
           <p className="text-sm">
-            {picked.length} selected · {formatTime(picked.reduce((sum, id) => sum + selectedSeconds(id), 0))}
+            <Trans>{picked.length} selected · {formatTime(picked.reduce((sum, id) => sum + selectedSeconds(id), 0))}</Trans>
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <select
-              aria-label="Add selected to playlist"
+              aria-label={t`Add selected to playlist`}
               className={field}
               value={batch.playlist}
               onChange={(e) => setBatch({ ...batch, playlist: e.target.value })}
             >
-              <option value="">Choose a playlist…</option>
+              <option value=""><Trans>Choose a playlist…</Trans></option>
               {playlists.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
@@ -230,21 +232,21 @@ export function LibraryBrowser() {
                       overrides: [...overridesFor(target.songs.length, target.overrides), ...picked.map(() => null)],
                     });
                   }
-                  setMessage(`Added ${picked.length} songs to ${target?.name ?? "the playlist"}.`);
+                  setMessage(t`Added ${picked.length} songs to ${target?.name ?? t`the playlist`}.`);
                 })
               }
             >
-              Add to playlist
+              <Trans>Add to playlist</Trans>
             </Button>
             {newPlaylist === null ? (
               <Button variant="outline" disabled={library.busy} onClick={() => setNewPlaylist("")}>
-                New playlist from selected…
+                <Trans>New playlist from selected…</Trans>
               </Button>
             ) : (
               <>
                 <input
-                  aria-label="Name for the new playlist"
-                  placeholder="New playlist name"
+                  aria-label={t`Name for the new playlist`}
+                  placeholder={t`New playlist name`}
                   className={field}
                   value={newPlaylist}
                   onChange={(e) => setNewPlaylist(e.target.value)}
@@ -253,35 +255,35 @@ export function LibraryBrowser() {
                   }}
                 />
                 <Button disabled={!newPlaylist.trim() || library.busy} onClick={() => void createFromSelected()}>
-                  Create playlist
+                  <Trans>Create playlist</Trans>
                 </Button>
                 <Button variant="outline" onClick={() => setNewPlaylist(null)}>
-                  Cancel
+                  <Trans>Cancel</Trans>
                 </Button>
               </>
             )}
-            <input aria-label="Colour for selected" type="color" value={batch.colour} onChange={(e) => setBatch({ ...batch, colour: e.target.value })} />
+            <input aria-label={t`Colour for selected`} type="color" value={batch.colour} onChange={(e) => setBatch({ ...batch, colour: e.target.value })} />
             <Button variant="outline" disabled={library.busy} onClick={() => void library.organiseSongs(picked, { color: batch.colour })}>
-              Set colour
+              <Trans>Set colour</Trans>
             </Button>
             <input
-              aria-label="Keywords for selected"
-              placeholder="Replace keywords, comma separated"
+              aria-label={t`Keywords for selected`}
+              placeholder={t`Replace keywords, comma separated`}
               className={field}
               value={batch.keywords}
               onChange={(e) => setBatch({ ...batch, keywords: e.target.value })}
             />
             <Button variant="outline" disabled={library.busy} onClick={() => void library.organiseSongs(picked, { keywords: parseKeywords(batch.keywords) })}>
-              Set keywords
+              <Trans>Set keywords</Trans>
             </Button>
             <select
-              aria-label="Move selected to folder"
+              aria-label={t`Move selected to folder`}
               className={field}
               value={batch.folder}
               onChange={(e) => setBatch({ ...batch, folder: e.target.value })}
             >
-              <option value="">Choose a folder…</option>
-              <option value="none">Library root</option>
+              <option value=""><Trans>Choose a folder…</Trans></option>
+              <option value="none"><Trans>Library root</Trans></option>
               {folders.map((f) => (
                 <option key={f.id} value={f.id}>
                   {f.name}
@@ -293,29 +295,29 @@ export function LibraryBrowser() {
               disabled={!batch.folder || library.busy}
               onClick={() => void library.organiseSongs(picked, { folderId: batch.folder === "none" ? null : batch.folder })}
             >
-              Move to folder
+              <Trans>Move to folder</Trans>
             </Button>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" disabled={library.busy} onClick={() => setAnalysing("selected")}>
-              {analysisRunning ? "Analysis running…" : "Analyse selected…"}
+              {analysisRunning ? t`Analysis running…` : t`Analyse selected…`}
             </Button>
             <Button variant="outline" onClick={() => setSelected(new Set())}>
-              Clear selection
+              <Trans>Clear selection</Trans>
             </Button>
             {confirm === "batch" ? (
               <>
-                <span>Delete {picked.length} songs and remove them from all playlists?</span>
+                <span><Trans>Delete {picked.length} songs and remove them from all playlists?</Trans></span>
                 <Button disabled={library.busy} onClick={() => void deleteSelected()}>
-                  Confirm delete
+                  <Trans>Confirm delete</Trans>
                 </Button>
                 <Button variant="outline" onClick={() => setConfirm("")}>
-                  Keep songs
+                  <Trans>Keep songs</Trans>
                 </Button>
               </>
             ) : (
               <Button variant="outline" disabled={library.busy} onClick={() => setConfirm("batch")}>
-                Delete selected…
+                <Trans>Delete selected…</Trans>
               </Button>
             )}
           </div>
@@ -351,7 +353,7 @@ function SongRow(props: {
   return (
     <li id={`library-row-${index}`} className="rounded border border-seam p-3">
       <div className="flex flex-wrap items-center gap-2">
-        <input type="checkbox" aria-label={`Select ${song.title}`} checked={checked} onChange={props.onToggle} />
+        <input type="checkbox" aria-label={t`Select ${song.title}`} checked={checked} onChange={props.onToggle} />
         {song.color && <span aria-hidden className="inline-block h-3 w-3 rounded-full" style={{ background: song.color }} />}
         <strong className="flex-1">{song.title}</strong>
         <span className="text-sm text-silkscreen-3">
@@ -359,29 +361,29 @@ function SongRow(props: {
         </span>
       </div>
       <p className="text-sm">
-        {formatTime(song.duration)} · {song.playCount ?? 0} plays{song.keywords?.length ? ` · ${song.keywords.join(", ")}` : ""}
+        {formatTime(song.duration)} · {song.playCount ?? 0} <Trans>plays</Trans>{song.keywords?.length ? ` · ${song.keywords.join(", ")}` : ""}
       </p>
       <div className="mt-2 flex flex-wrap gap-2">
         <Button disabled={disabled} onClick={props.onLoad}>
-          Load song
+          <Trans>Load song</Trans>
         </Button>
         <Button variant="outline" disabled={disabled} onClick={props.onNext}>
-          Play next
+          <Trans>Play next</Trans>
         </Button>
         <Button variant="outline" disabled={disabled} onClick={props.onQueue}>
-          Add to queue
+          <Trans>Add to queue</Trans>
         </Button>
         <Button variant="outline" disabled={disabled} onClick={() => props.onConfirm(true)}>
-          Delete song…
+          <Trans>Delete song…</Trans>
         </Button>
         {confirming && (
           <>
-            <span>Delete saved audio and remove from all playlists?</span>
+            <span><Trans>Delete saved audio and remove from all playlists?</Trans></span>
             <Button disabled={disabled} onClick={props.onDelete}>
-              Confirm delete
+              <Trans>Confirm delete</Trans>
             </Button>
             <Button variant="outline" onClick={() => props.onConfirm(false)}>
-              Keep song
+              <Trans>Keep song</Trans>
             </Button>
           </>
         )}

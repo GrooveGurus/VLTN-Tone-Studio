@@ -9,6 +9,8 @@ import { useDevice } from "@/state/device";
 import { attachedDevice, pedalName } from "@/state/device-model";
 import { GP200_EQ_BANDS, gp200EqSpec } from "@/state/driver/gp200-globals";
 import { useNav } from "@/state/nav";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /**
  * Global EQ faceplate (GP-200 family): the pedal's output EQ after every preset, its on/off switch (the globalEq
@@ -52,22 +54,22 @@ export function GlobalEqPanel({ offline }: { offline: boolean }) {
 
   return (
     <section
-      aria-label="Global EQ"
+      aria-label={t`Global EQ`}
       className="relative grid grid-cols-1 min-[1100px]:grid-cols-[220px_minmax(0,1fr)] items-start gap-y-4 overflow-hidden rounded-xl bg-faceplate px-7 py-6 shadow-[inset_0_0_0_1px_var(--seam)] min-[1360px]:grid-cols-[280px_minmax(0,1fr)_236px]"
     >
       <div className="flex min-w-0 flex-col gap-3">
         <div>
-          <h2 className="mb-1.5 text-xl leading-[1.1] font-bold tracking-[-0.01em] text-balance">Global EQ</h2>
-          <p className="max-w-[240px] text-sm text-pretty text-silkscreen-3">Shapes everything the {pedal} plays, after every preset. The USB recording doesn't get it.</p>
+          <h2 className="mb-1.5 text-xl leading-[1.1] font-bold tracking-[-0.01em] text-balance"><Trans>Global EQ</Trans></h2>
+          <p className="max-w-[240px] text-sm text-pretty text-silkscreen-3"><Trans>Shapes everything the {pedal} plays, after every preset. The USB recording doesn't get it.</Trans></p>
         </div>
         <div className="flex items-center gap-2.5 text-sm font-[550] text-silkscreen-2">
           <Switch
             checked={s.on === 1}
             disabled={locked || s.on === undefined}
             onCheckedChange={(v) => useDevice.getState().setGlobal("globalEq", v ? 1 : 0)}
-            aria-label="Global EQ on"
+            aria-label={t`Global EQ on`}
           />
-          {s.on === 1 ? "On" : "Off"}
+          {s.on === 1 ? t`On` : t`Off`}
         </div>
       </div>
 
@@ -75,15 +77,15 @@ export function GlobalEqPanel({ offline }: { offline: boolean }) {
         {GP200_EQ_BANDS.map((b) => (
           <div key={b.label} role="group" aria-label={b.label} className="flex w-[84px] flex-col items-center gap-2.5">
             <h3 className="text-sm font-[550] whitespace-nowrap text-silkscreen-2">{b.label}</h3>
-            <Switch size="sm" checked={values[b.en] >= 0.5} disabled={disabled} onCheckedChange={(v) => useDevice.getState().setGlobalEq(b.en, v ? 1 : 0)} aria-label={`${b.label} on`} />
+            <Switch size="sm" checked={values[b.en] >= 0.5} disabled={disabled} onCheckedChange={(v) => useDevice.getState().setGlobalEq(b.en, v ? 1 : 0)} aria-label={t`${b.label} on`} />
             {dial(b.freq, "Freq", `${b.label} frequency`)}
             {b.q !== undefined && dial(b.q, "Q", `${b.label} Q`)}
             {b.gain !== undefined && dial(b.gain, "Gain", `${b.label} gain`)}
           </div>
         ))}
-        <div role="group" aria-label="Level" className="flex w-[84px] flex-col items-center gap-2.5">
-          <h3 className="text-sm font-[550] text-silkscreen-2">Level</h3>
-          {dial(GLOBAL_EQ_INDEX.level, "Level", "Global EQ level")}
+        <div role="group" aria-label={t`Level`} className="flex w-[84px] flex-col items-center gap-2.5">
+          <h3 className="text-sm font-[550] text-silkscreen-2"><Trans>Level</Trans></h3>
+          {dial(GLOBAL_EQ_INDEX.level, "Level", t`Global EQ level`)}
         </div>
       </div>
 
@@ -91,32 +93,32 @@ export function GlobalEqPanel({ offline }: { offline: boolean }) {
         {offline ? (
           <span className="flex items-center gap-1.5 font-[550] text-silkscreen-2 opacity-45">
             <Lock className="size-3.5" aria-hidden />
-            Read-only until connected
+            <Trans>Read-only until connected</Trans>
           </span>
         ) : s.experimental ? (
           <>
             <span className="flex items-center gap-1.5 font-[550] text-silkscreen-2">
               <FlaskConical className="size-3.5" aria-hidden />
-              Experimental
+              <Trans>Experimental</Trans>
             </span>
-            <span className="text-xs text-pretty text-silkscreen-3">Tone Studio knows this command from Valeton's editor only. Turn on Experimental pedal commands to use it.</span>
+            <span className="text-xs text-pretty text-silkscreen-3"><Trans>Tone Studio knows this command from Valeton's editor only. Turn on Experimental pedal commands to use it.</Trans></span>
             <Button variant="outline" size="sm" onClick={() => useNav.getState().go("device", "settings")}>
-              Open Settings
+              <Trans>Open Settings</Trans>
             </Button>
           </>
         ) : (
           <span className="flex items-center gap-1.5 font-[550] text-silkscreen-2">
             <Zap className="size-3.5" aria-hidden />
-            Changes apply immediately
+            <Trans>Changes apply immediately</Trans>
           </span>
         )}
         {!s.eq.read && (
           <span className="flex gap-1.5 text-xs text-pretty text-silkscreen-3">
             <Info className="mt-px size-3.5 shrink-0" aria-hidden />
-            The {pedal} hasn't reported its Global EQ, so the controls start at the factory settings.
+            <Trans>The {pedal} hasn't reported its Global EQ, so the controls start at the factory settings.</Trans>
           </span>
         )}
-        <span className="text-xs text-pretty text-silkscreen-3">Boosts raise the level of every output: turn them up gently.</span>
+        <Trans><span className="text-xs text-pretty text-silkscreen-3">Boosts raise the level of every output: turn them up gently.</span></Trans>
       </div>
     </section>
   );

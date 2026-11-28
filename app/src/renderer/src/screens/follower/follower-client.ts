@@ -5,6 +5,7 @@
 import { parseAudienceUpdate, type AudienceClock, type AudienceModel } from "@shared/audience";
 import { BAND_SYNC_PROTOCOL, parseServerMessage, type ClientMessage, type FollowerAction, type RefusalReason } from "@shared/band-sync";
 import { estimateOffset, MAX_SAMPLES, pingSample, type PingSample } from "./clock-offset";
+import { t } from "@lingui/core/macro";
 
 /** Where the session token is kept on this device: per tab, so it ends when the tab does. */
 export const SESSION_KEY = "vltn.band.session.v1";
@@ -75,10 +76,10 @@ export function socketOf(url: string): SocketLike {
 }
 
 const REFUSAL_TEXT: Record<RefusalReason, string> = {
-  pin: "That PIN is not right. Check the PIN on the performer's screen.",
-  token: "Your session has ended. Enter the PIN again.",
-  locked: "Too many wrong PINs from this device. Wait, then try again.",
-  full: "The band sync is full. Try again when a bandmate leaves.",
+  get pin() { return t`That PIN is not right. Check the PIN on the performer's screen.`; },
+  get token() { return t`Your session has ended. Enter the PIN again.`; },
+  get locked() { return t`Too many wrong PINs from this device. Wait, then try again.`; },
+  get full() { return t`The band sync is full. Try again when a bandmate leaves.`; },
 };
 
 export class FollowerClient {
@@ -86,7 +87,7 @@ export class FollowerClient {
   private listeners = new Set<() => void>();
   private state: FollowerState = {
     phase: "connecting",
-    message: "Connecting…",
+    get message() { return t`Connecting…`; },
     model: null,
     clock: null,
     controlAllowed: false,
@@ -111,7 +112,7 @@ export class FollowerClient {
   start(): void {
     this.stopped = false;
     if (this.options.tokens.get()) this.connect();
-    else this.setState({ phase: "pin", message: "Enter the PIN shown on the performer's screen." });
+    else this.setState({ phase: "pin", message: t`Enter the PIN shown on the performer's screen.` });
   }
 
   /** The page is leaving: nothing is retried after this. */
@@ -157,7 +158,7 @@ export class FollowerClient {
     this.socket?.close();
     const socket = this.options.connect(this.options.url);
     this.socket = socket;
-    if (this.state.phase !== "live") this.setState({ phase: this.retries > 0 ? "reconnecting" : "connecting", message: "Connecting…" });
+    if (this.state.phase !== "live") this.setState({ phase: this.retries > 0 ? "reconnecting" : "connecting", message: t`Connecting…` });
     socket.onopen = () => this.signIn(socket);
     socket.onmessage = (text) => this.receive(text);
     socket.onclose = () => this.closed(socket);
@@ -226,14 +227,14 @@ export class FollowerClient {
     this.retries = 0;
     this.pings = 0;
     this.samples = [];
-    this.setState({ phase: "live", message: "Following the performer.", controlAllowed, refusal: null });
+    this.setState({ phase: "live", message: t`Following the performer.`, controlAllowed, refusal: null });
     this.ping();
   }
 
   private refused(reason: RefusalReason, retryAfter: number): void {
     this.awaitingPin = false;
     if (reason === "token") this.options.tokens.clear();
-    const wait = reason === "locked" && retryAfter > 0 ? ` Try again in ${retryAfter} seconds.` : "";
+    const wait = reason === "locked" && retryAfter > 0 ? t` Try again in ${retryAfter} seconds.` : "";
     this.clearTimers();
     this.setState({ phase: "pin", message: `${REFUSAL_TEXT[reason]}${wait}`, refusal: reason, model: null, clock: null, synced: false });
   }
@@ -242,11 +243,11 @@ export class FollowerClient {
     if (reason === "pin-changed") {
       this.options.tokens.clear();
       this.clearTimers();
-      this.setState({ phase: "pin", message: "The PIN was changed. Enter the new PIN.", refusal: null, synced: false });
+      this.setState({ phase: "pin", message: t`The PIN was changed. Enter the new PIN.`, refusal: null, synced: false });
       return;
     }
     // The sync stopped: the server is gone, so this page waits and tries again. Its session is revoked, so it will ask for the PIN then.
-    this.setState({ phase: "reconnecting", message: "Band sync has stopped. Waiting for it to start again.", synced: false });
+    this.setState({ phase: "reconnecting", message: t`Band sync has stopped. Waiting for it to start again.`, synced: false });
   }
 
   private closed(socket: SocketLike): void {
@@ -255,11 +256,11 @@ export class FollowerClient {
     if (this.stopped || this.state.phase === "pin") return;
     if (this.awaitingPin) {
       this.awaitingPin = false;
-      this.setState({ phase: "pin", message: "Could not reach the performer's app. Check the address and that band sync is on." });
+      this.setState({ phase: "pin", message: t`Could not reach the performer's app. Check the address and that band sync is on.` });
       return;
     }
     this.clearPings();
-    this.setState({ phase: "reconnecting", message: "Connection lost. Reconnecting…", synced: false });
+    this.setState({ phase: "reconnecting", message: t`Connection lost. Reconnecting…`, synced: false });
     this.retryTimer = this.options.setTimer(() => {
       this.retryTimer = null;
       this.retries += 1;

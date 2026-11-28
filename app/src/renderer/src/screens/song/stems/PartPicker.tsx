@@ -8,6 +8,8 @@ import { PartPreview } from "@/song/preview";
 import { audioSeconds, MIN_RANGE_SECONDS } from "@/song/range";
 import { useSong } from "@/song/store";
 import { formatTime, peaks } from "@/song/stems/mix";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const WAVE_BUCKETS = 800;
 const STEP_S = 0.1;
@@ -76,32 +78,32 @@ export function PartPicker({ className }: { className?: string }) {
       await preview.play(part);
       setPlaying(true);
     } catch (e) {
-      notifyError("Couldn't play the part", e);
+      notifyError(t`Couldn't play the part`, e);
     }
   };
 
   return (
     <div className={cn("flex flex-col gap-2 text-left", className)}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="text-[12px] font-semibold text-silkscreen-2">Part to split</span>
+        <Trans><span className="text-[12px] font-semibold text-silkscreen-2">Part to split</span></Trans>
         <span className="text-[12px] text-silkscreen-3 tabular-nums">
-          {range ? `${formatTime(part.start)} – ${formatTime(part.end)} (${formatTime(part.end - part.start)} of ${formatTime(duration)})` : `Whole song, ${formatTime(duration)}`}
+          {range ? t`${formatTime(part.start)} – ${formatTime(part.end)} (${formatTime(part.end - part.start)} of ${formatTime(duration)})` : t`Whole song, ${formatTime(duration)}`}
         </span>
         <span className="ml-auto flex gap-1">
           {range && (
             <Button size="sm" variant="ghost" disabled={busy} onClick={() => choose(0, duration)}>
-              Whole song
+              <Trans>Whole song</Trans>
             </Button>
           )}
           <Button size="sm" variant="outline" disabled={!preview} onClick={() => void toggle()}>
             {playing ? <Square data-icon="inline-start" /> : <Play data-icon="inline-start" />}
-            {playing ? "Stop" : range ? "Play the part" : "Play"}
+            {playing ? t`Stop` : range ? t`Play the part` : t`Play`}
           </Button>
         </span>
       </div>
       <PartWave wave={wave} duration={duration} part={part} time={time} disabled={busy} onChoose={choose} />
       <Slider
-        aria-label="Part to split"
+        aria-label={t`Part to split`}
         min={0}
         max={duration}
         step={STEP_S}
@@ -111,8 +113,8 @@ export function PartPicker({ className }: { className?: string }) {
         onValueChange={([start, end]) => choose(start, end)}
       />
       <p className="text-[12px] text-pretty text-silkscreen-3">
-        Drag across the waveform to pick the part with the guitar sound you want, such as one riff or the solo. Tone Match reads that part only, and a shorter part
-        splits faster and with less memory.
+        <Trans>Drag across the waveform to pick the part with the guitar sound you want, such as one riff or the solo. Tone Match reads that part only, and a shorter part
+        splits faster and with less memory.</Trans>
       </p>
     </div>
   );

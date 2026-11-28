@@ -9,6 +9,8 @@ import type { PartToneFile, TonePart, ToneRole } from "@/song/band/arrangement";
 import { SearchBar } from "@/screens/tones/SearchBar";
 import { ToneGrid } from "@/screens/tones/TonesScreen";
 import { loadAccount, loadRecords, useTones, type SearchFilters } from "@/screens/tones/store";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** The gear a block can be: the TONE3000 search for it starts on that gear. */
 export type PartSourceRole = ToneRole;
@@ -33,12 +35,12 @@ function rolePreset(part: TonePart, role: PartSourceRole): { format: "nam" | "ir
   return { format, search: { query: part === "bass" ? "bass" : "", sort: "trending", gears, architecture: null } };
 }
 const TITLE: Record<PartSourceRole, string> = {
-  pedal: "Choose a bass pedal",
-  preamp: "Choose a preamp",
-  amp: "Choose a bass amp",
-  cab: "Choose a cab IR",
-  space: "Choose a space IR",
-  outboard: "Choose an outboard capture",
+  get pedal() { return t`Choose a bass pedal`; },
+  get preamp() { return t`Choose a preamp`; },
+  get amp() { return t`Choose a bass amp`; },
+  get cab() { return t`Choose a cab IR`; },
+  get space() { return t`Choose a space IR`; },
+  get outboard() { return t`Choose an outboard capture`; },
 };
 const KIND_NAME: Record<PartSourceRole, string> = {
   pedal: "pedal",
@@ -105,13 +107,14 @@ export function PartSourceDialog({ part, role, open, onClose, onPick }: PartSour
   const pickTone = async (toneId: number, tone: T3kTone) => {
     setError(null);
     if (tone.format !== format) {
-      setError(`${tone.title} is ${tone.format === "ir" ? "an IR" : "a NAM capture"}, not a${part === "bass" ? " bass" : "n"} ${KIND_NAME[role]}.`);
+      const is = tone.format === "ir" ? t`an IR` : t`a NAM capture`;
+      setError(part === "bass" ? t`${tone.title} is ${is}, not a bass ${KIND_NAME[role]}.` : t`${tone.title} is ${is}, not an ${KIND_NAME[role]}.`);
       return;
     }
-    setBusy(`Downloading ${tone.title}…`);
+    setBusy(t`Downloading ${tone.title}…`);
     try {
       const model = modelFor(format, await host.tones.models(toneId));
-      if (!model) throw new Error(`${tone.title} has no model that can be used.`);
+      if (!model) throw new Error(t`${tone.title} has no model that can be used.`);
       const { record } = await host.tones.downloadModel(toneId, model.id);
       void loadRecords();
       const older = model.architecture_version === "1" ? { older: true } : {};
@@ -139,7 +142,7 @@ export function PartSourceDialog({ part, role, open, onClose, onPick }: PartSour
         <DialogHeader>
           <DialogTitle>{TITLE[role]}</DialogTitle>
           <DialogDescription>
-            Search TONE3000 for one, or open a file from this computer. The choice is used the next time you press Generate.
+            <Trans>Search TONE3000 for one, or open a file from this computer. The choice is used the next time you press Generate.</Trans>
           </DialogDescription>
         </DialogHeader>
         {signedIn ? (
@@ -148,7 +151,7 @@ export function PartSourceDialog({ part, role, open, onClose, onPick }: PartSour
             <ToneGrid kind="search" onOpen={(toneId, tone) => void pickTone(toneId, tone)} />
           </div>
         ) : (
-          <p className="text-silkscreen-2">Sign in to TONE3000 on the Tones screen to search its {KIND_PLURAL[role]} here.</p>
+          <p className="text-silkscreen-2"><Trans>Sign in to TONE3000 on the Tones screen to search its {KIND_PLURAL[role]} here.</Trans></p>
         )}
         {busy && <p role="status">{busy}</p>}
         {error && (
@@ -158,7 +161,7 @@ export function PartSourceDialog({ part, role, open, onClose, onPick }: PartSour
         )}
         <div className="flex flex-wrap items-center gap-2 border-t border-seam pt-3">
           <Button variant="outline" onClick={() => void chooseFile()} disabled={busy !== null}>
-            {format === "nam" ? "Open a .nam file…" : "Open a .wav file…"}
+            {format === "nam" ? t`Open a .nam file…` : t`Open a .wav file…`}
           </Button>
         </div>
       </DialogContent>

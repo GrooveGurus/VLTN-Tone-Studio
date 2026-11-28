@@ -37,6 +37,8 @@ import { ClockText } from "./PlaybackDisplay";
 import { PdfChart } from "./PdfChart";
 import { PdfControls } from "./PdfControls";
 import type { ChartView } from "@shared/song-library";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** The PDF chart of the song on screen: whether it has one, which view is showing, and how to change the view. */
 export interface PdfReaderState {
@@ -191,14 +193,14 @@ export function PerformanceReader({
   }, [expanded, selectedChord, stage]);
   const content = (
     <section
-      aria-label="Combined performance view"
+      aria-label={t`Combined performance view`}
       className={
         expanded || stage ? "fixed inset-0 z-50 flex flex-col bg-background p-6 text-foreground" : "flex flex-col rounded-xl border border-seam bg-black/10 p-4"
       }
     >
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <div className="mr-auto">
-          <h2 className="font-semibold">Lyrics & chords · Perform</h2>
+          <h2 className="font-semibold"><Trans>Lyrics & chords · Perform</Trans></h2>
           <p className="text-sm text-silkscreen-3">
             {title} · <ClockText />
           </p>
@@ -212,21 +214,21 @@ export function PerformanceReader({
               setEditing(true);
             }}
           >
-            Edit chords, lyrics & MIDI
+            <Trans>Edit chords, lyrics & MIDI</Trans>
           </Button>
         )}
         {!stage && soloScale && (
           <Button ref={soloButton} variant="outline" onClick={() => setSoloOpen(true)}>
-            Solo scale
+            <Trans>Solo scale</Trans>
           </Button>
         )}
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={follow} onChange={(e) => setFollow(e.target.checked)} /> Follow playback
+          <input type="checkbox" checked={follow} onChange={(e) => setFollow(e.target.checked)} /> <Trans>Follow playback</Trans>
         </label>
         {pdf && <PdfControls songId={pdf.songId} chart={pdf.chart} view={pdf.view} stage={stage} onView={pdf.onView} />}
         {follow && !pdfShown && (
           <Select value={autoscrollMode} onValueChange={(value) => isAutoscrollMode(value) && useAutoscroll.getState().update({ mode: value })}>
-            <SelectTrigger aria-label="Autoscroll style" className="w-48">
+            <SelectTrigger aria-label={t`Autoscroll style`} className="w-48">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -241,9 +243,9 @@ export function PerformanceReader({
         {follow && !pdfShown && autoscrollMode === "constant" && (
           <>
             <label className="flex items-center gap-2 text-sm">
-              Lines per minute
+              <Trans>Lines per minute</Trans>
               <Input
-                aria-label="Lines per minute"
+                aria-label={t`Lines per minute`}
                 type="number"
                 min={LINES_PER_MINUTE.min}
                 max={LINES_PER_MINUTE.max}
@@ -254,28 +256,28 @@ export function PerformanceReader({
             </label>
             {fitLinesPerMinute(lines.length, duration) !== null && (
               <Button variant="outline" onClick={() => useAutoscroll.getState().update({ linesPerMinute: fitLinesPerMinute(lines.length, duration) ?? linesPerMinute })}>
-                Fit to song length
+                <Trans>Fit to song length</Trans>
               </Button>
             )}
           </>
         )}
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={showCommands} onChange={(e) => useMidiConfiguration.getState().update({ showCommands: e.target.checked })} /> Show
-          MIDI commands
+          <input type="checkbox" checked={showCommands} onChange={(e) => useMidiConfiguration.getState().update({ showCommands: e.target.checked })} /> <Trans>Show
+          MIDI commands</Trans>
         </label>
-        <Button variant="outline" aria-label="Smaller performance text" disabled={size <= READER_TEXT.min} onClick={() => useReaderText.getState().step(-1)}>
+        <Button variant="outline" aria-label={t`Smaller performance text`} disabled={size <= READER_TEXT.min} onClick={() => useReaderText.getState().step(-1)}>
           A−
         </Button>
-        <Button variant="outline" aria-label="Larger performance text" disabled={size >= READER_TEXT.max} onClick={() => useReaderText.getState().step(1)}>
+        <Button variant="outline" aria-label={t`Larger performance text`} disabled={size >= READER_TEXT.max} onClick={() => useReaderText.getState().step(1)}>
           A+
         </Button>
         {stage ? (
           <Button variant="outline" onClick={onExitStage}>
-            Exit stage mode
+            <Trans>Exit stage mode</Trans>
           </Button>
         ) : (
           <Button ref={expandButton} variant="outline" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>
-            {expanded ? "Close expanded view" : "Expand performance view"}
+            {expanded ? t`Close expanded view` : t`Expand performance view`}
           </Button>
         )}
       </div>
@@ -291,7 +293,7 @@ export function PerformanceReader({
         </div>
       )}
       {status && (
-        <div className="mb-3 shrink-0 space-y-1 text-sm" aria-label="Performance status">
+        <div className="mb-3 shrink-0 space-y-1 text-sm" aria-label={t`Performance status`}>
           {status}
         </div>
       )}
@@ -321,7 +323,7 @@ export function PerformanceReader({
           ref={viewport}
           data-reader-scroll
           tabIndex={0}
-          aria-label="Combined lyrics and chords"
+          aria-label={t`Combined lyrics and chords`}
           onWheel={() => holdAutoscroll()}
           onTouchMove={() => holdAutoscroll()}
           onKeyDown={(event) => {
@@ -352,7 +354,7 @@ export function PerformanceReader({
                     }
                   >
                     {!!line.chords.length && (
-                      <div aria-label="Chords" className="flex flex-wrap gap-x-6 font-semibold text-sky-400">
+                      <div aria-label={t`Chords`} className="flex flex-wrap gap-x-6 font-semibold text-sky-400">
                         {line.chords.map((chord, i) =>
                           chord.name === "N" ? (
                             <span key={i}>—</span>
@@ -361,7 +363,7 @@ export function PerformanceReader({
                               disabled={stage}
                               key={i}
                               type="button"
-                              aria-label={`Show ${transpose(`[${chord.name}]`, shift, spelling).slice(1, -1)} guitar voicings`}
+                              aria-label={t`Show ${transpose(`[${chord.name}]`, shift, spelling).slice(1, -1)} guitar voicings`}
                               title={(Number.isFinite(chord.time) ? lrcTime(chord.time) + " · " : "") + "Show guitar tabs"}
                               onClick={(event) => {
                                 chordButton.current = event.currentTarget;
@@ -386,9 +388,9 @@ export function PerformanceReader({
                       </p>
                     ) : null}
                     {line.midi.map((cue, i) => (
-                      <div key={i} aria-label="MIDI cue" className="my-2 rounded border border-amber-400/30 bg-amber-400/5 px-3 py-2 text-sm text-amber-300">
+                      <div key={i} aria-label={t`MIDI cue`} className="my-2 rounded border border-amber-400/30 bg-amber-400/5 px-3 py-2 text-sm text-amber-300">
                         <strong>
-                          {lrcTime(cue.time)} · {cue.label || "MIDI command"}
+                          {lrcTime(cue.time)} · {cue.label || t`MIDI command`}
                         </strong>
                         <span className="ml-2 font-mono">
                           {cue.messages
@@ -407,7 +409,7 @@ export function PerformanceReader({
             </div>
           ) : (
             <p className="text-base text-silkscreen-3">
-              Generate lyrics from vocals or import a timed chart in the editors below. Lyrics and chords will appear together here and follow song playback.
+              <Trans>Generate lyrics from vocals or import a timed chart in the editors below. Lyrics and chords will appear together here and follow song playback.</Trans>
             </p>
           )}
         </div>
@@ -426,8 +428,8 @@ export function PerformanceReader({
         />
       )}
       <p className="mt-2 text-xs text-silkscreen-3">
-        Chords follow their timestamps above the corresponding lyric line. Chart chords take priority over estimates. Untimed text stays available for manual
-        reading.
+        <Trans>Chords follow their timestamps above the corresponding lyric line. Chart chords take priority over estimates. Untimed text stays available for manual
+        reading.</Trans>
       </p>
     </section>
   );
@@ -441,7 +443,7 @@ export function PerformanceReader({
           onInteractOutside={(event) => event.preventDefault()}
           className="fixed inset-0 z-50 bg-background text-foreground"
         >
-          <StageDialog.Title className="sr-only">Stage mode</StageDialog.Title>
+          <StageDialog.Title className="sr-only"><Trans>Stage mode</Trans></StageDialog.Title>
           {content}
         </StageDialog.Content>
       </StageDialog.Portal>

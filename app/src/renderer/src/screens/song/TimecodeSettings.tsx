@@ -2,6 +2,8 @@ import { useMidiConfiguration } from "@/song/performance/midi-configuration";
 import type { PerformanceSession } from "@/song/performance/session";
 import { parseOffset, TIMECODE_RATES, type TimecodeRate } from "@/song/performance/timecode";
 import { HelpNote } from "@/components/ui/help-note";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const field = "rounded border border-seam bg-transparent p-2";
 
@@ -24,25 +26,25 @@ export function TimecodeSettings({
   const update = useMidiConfiguration((s) => s.update);
   const parsed = parseOffset(offset || "00:00:00:00", timecode.fps);
   return (
-    <div className="w-full space-y-2 rounded border border-seam p-3 text-sm" aria-label="MIDI timecode">
+    <div className="w-full space-y-2 rounded border border-seam p-3 text-sm" aria-label={t`MIDI timecode`}>
       <label>
         <input
           type="checkbox"
-          aria-label="Send MIDI timecode"
+          aria-label={t`Send MIDI timecode`}
           checked={timecode.enabled}
           onChange={(e) => {
             session.pause();
             if (e.target.checked) session.setClock(false);
             update({ timecode: { ...timecode, enabled: e.target.checked } });
           }}
-        />{" "}
-        Send MIDI timecode (quarter frames)
+        /><Trans>{" "}
+        Send MIDI timecode (quarter frames)</Trans>
       </label>
       <div className="flex flex-wrap items-center gap-3">
         <label>
-          Frame rate{" "}
+          <Trans>Frame rate{" "}</Trans>
           <select
-            aria-label="Timecode frame rate"
+            aria-label={t`Timecode frame rate`}
             className={field}
             value={timecode.fps}
             onChange={(e) => {
@@ -52,15 +54,15 @@ export function TimecodeSettings({
           >
             {TIMECODE_RATES.map((fps) => (
               <option key={fps} value={fps}>
-                {fps} fps
+                <Trans>{fps} fps</Trans>
               </option>
             ))}
           </select>
         </label>
         <label>
-          This song’s offset (HH:MM:SS:FF){" "}
+          <Trans>This song’s offset (HH:MM:SS:FF){" "}</Trans>
           <input
-            aria-label="Song timecode offset"
+            aria-label={t`Song timecode offset`}
             className={field + " w-36 font-mono"}
             value={offset}
             placeholder="00:00:00:00"
@@ -75,9 +77,9 @@ export function TimecodeSettings({
       )}
       <HelpNote>
         <p>
-          Timecode follows song time. A full frame goes out at start, seek, jumps, loops and speed changes, then quarter frames. Nothing is sent during the
-          count-in. Timecode replaces app MIDI clock. 29.97 drop-frame is not offered.
-          {bluetooth ? " Bluetooth is not recommended for timecode: use USB." : ""}
+          <Trans>Timecode follows song time. A full frame goes out at start, seek, jumps, loops and speed changes, then quarter frames. Nothing is sent during the
+          count-in. Timecode replaces app MIDI clock. 29.97 drop-frame is not offered.</Trans>
+          {bluetooth ? t` Bluetooth is not recommended for timecode: use USB.` : ""}
         </p>
       </HelpNote>
     </div>

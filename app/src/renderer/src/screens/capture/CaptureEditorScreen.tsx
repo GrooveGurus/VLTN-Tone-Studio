@@ -15,12 +15,14 @@ import { Pipeline } from "./Pipeline";
 import { VersionsButton, VersionsPanel } from "./Versions";
 import { isDirty, useCapture, type EditTab } from "./store";
 import { CLIPS } from "./audio/engine";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const HINTS = [
-  { keys: ["Space"], label: "play" },
-  { keys: ["A", "B"], label: "compare" },
-  { keys: ["L"], label: "level match" },
-  { keys: ["Mod", "S"], label: "save version" },
+  { keys: ["Space"], get label() { return t`play`; } },
+  { keys: ["A", "B"], get label() { return t`compare`; } },
+  { keys: ["L"], get label() { return t`level match`; } },
+  { keys: ["Mod", "S"], get label() { return t`save version`; } },
 ];
 const TABS: EditTab[] = ["info", "level", "size", "shape"];
 
@@ -36,7 +38,7 @@ async function openNamFiles(files: OpenFile[]) {
     const ref = f.path ? await host.capture.importFile(f.path) : f.file ? await host.capture.importText(f.name, await f.file.text()) : null;
     if (ref) useNav.getState().go("capture", ref);
   } catch (e) {
-    notifyError(`Couldn't open ${f.name}`, e);
+    notifyError(t`Couldn't open ${f.name}`, e);
   }
 }
 
@@ -53,7 +55,7 @@ export function CaptureEditorScreen() {
   playRef.current = play;
 
   const isA2 = useCapture((s) => s.loaded?.info.arch.kind === "A2");
-  useStatusHints(status === "ready" ? (isA2 ? HINTS : HINTS.filter((h) => h.label !== "compare")) : null);
+  useStatusHints(status === "ready" ? (isA2 ? HINTS : HINTS.filter((h) => !h.keys.includes("A")) /* A/B compare needs an A2 capture */) : null);
   useFileHandler("nam", openNamFiles);
 
   useEffect(() => {
@@ -71,7 +73,7 @@ export function CaptureEditorScreen() {
       audition.stop();
       setPlay({ playing: false, starting: false });
       const s = useCapture.getState();
-      if (isDirty(s) && s.viewing === null) s.saveVersion().catch((e) => notifyError("Couldn't save your changes as a version", e));
+      if (isDirty(s) && s.viewing === null) s.saveVersion().catch((e) => notifyError(t`Couldn't save your changes as a version`, e));
     };
   }, [param, setPlay]);
 
@@ -81,7 +83,7 @@ export function CaptureEditorScreen() {
     try {
       await useCapture.getState().saveVersion();
     } catch (e) {
-      notifyError("Couldn't save the version", e);
+      notifyError(t`Couldn't save the version`, e);
     }
   }, []);
   useCommand("save-to-slot", save, status === "ready");
@@ -156,20 +158,20 @@ export function CaptureEditorScreen() {
             <EmptyMedia variant="icon">
               <AudioWaveform />
             </EmptyMedia>
-            <EmptyTitle>{status === "error" ? "This capture can't be opened" : "Edit a NAM capture"}</EmptyTitle>
+            <EmptyTitle>{status === "error" ? t`This capture can't be opened` : t`Edit a NAM capture`}</EmptyTitle>
             <EmptyDescription>
               {status === "error"
                 ? error
-                : "Open a .nam file, or choose a NAM tone in Tones and pick Edit capture. The original file is never changed: every edit is a version on top of it."}
+                : t`Open a .nam file, or choose a NAM tone in Tones and pick Edit capture. The original file is never changed: every edit is a version on top of it.`}
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent className="flex-row justify-center gap-2">
             <Button onClick={pick}>
               <FileUp aria-hidden />
-              Open a .nam file…
+              <Trans>Open a .nam file…</Trans>
             </Button>
             <Button variant="outline" onClick={() => useNav.getState().go("tones")}>
-              Go to Tones
+              <Trans>Go to Tones</Trans>
             </Button>
           </EmptyContent>
         </Empty>
@@ -182,7 +184,7 @@ export function CaptureEditorScreen() {
       <div className="grid h-full place-items-center text-[12px] text-silkscreen-3" role="status">
         <span className="flex items-center gap-2">
           <Spinner />
-          {progress ?? "Opening the capture"}
+          {progress ?? t`Opening the capture`}
         </span>
       </div>
     );

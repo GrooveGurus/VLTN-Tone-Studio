@@ -29,6 +29,8 @@ import { notifyError, showToast } from "@/app/notify";
 import { irSlotLabel, openLinkChoice, openRename, openSheet, readSlots, unlink, useTones } from "./store";
 import { buildUsage, type PresetRef } from "./usage";
 import { ToneImage } from "./ToneImage";
+import { t as lt } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 type Kind = "snaptone" | "ir";
 
@@ -43,9 +45,9 @@ function useNow(intervalMs: number): number {
 
 function ago(at: number, now: number): string {
   const min = Math.floor((now - at) / 60_000);
-  if (min < 1) return "Read just now";
-  if (min < 60) return `Read ${min} min ago`;
-  return `Read at ${new Date(at).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}`;
+  if (min < 1) return lt`Read just now`;
+  if (min < 60) return lt`Read ${min} min ago`;
+  return lt`Read at ${new Date(at).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}`;
 }
 
 /**
@@ -111,35 +113,35 @@ export function SlotPanel({ onAddNam }: { onAddNam: (file: OpenFile) => void }) 
   const byBlock = [...new Set(snapUser.map((s) => profile.captureBlock(s.slot)))].map((block) => ({ block, slots: snapUser.filter((s) => profile.captureBlock(s.slot) === block) }));
   // A table the pedal didn't list (GP-200LT without 0x1009 replies) has no count: its slots may or may not be used.
   const usedOf = (list: SlotName[], of: string) =>
-    list.some((s) => s.kind === "unknown") ? "Contents unknown: the pedal didn't list them" : `${list.filter((s) => !isEmptySlot(s)).length} of ${of} used`;
-  const sourceNote = usage ? `From ${usage.source}` : "Back up the pedal in Library to see which presets use each slot";
+    list.some((s) => s.kind === "unknown") ? lt`Contents unknown: the pedal didn't list them` : `${list.filter((s) => !isEmptySlot(s)).length} of ${of} used`;
+  const sourceNote = usage ? lt`From ${usage.source}` : lt`Back up the pedal in Library to see which presets use each slot`;
 
   let notice: string | null = null;
-  if (error?.code === "busy") notice = `Close ${vendorApps(device).editor} to reconnect.`;
-  else if (!connected && snapTones) notice = `The ${pedal} isn't connected. Slots from ${readAt ? new Date(readAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "the last read"}.`;
-  else if (!connected) notice = `Connect the ${pedal} to see its capture and IR slots.`;
-  else if (slotsError) notice = `Couldn't read the slots: ${slotsError}`;
+  if (error?.code === "busy") notice = lt`Close ${vendorApps(device).editor} to reconnect.`;
+  else if (!connected && snapTones) notice = lt`The ${pedal} isn't connected. Slots from ${readAt ? new Date(readAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : lt`the last read`}.`;
+  else if (!connected) notice = lt`Connect the ${pedal} to see its capture and IR slots.`;
+  else if (slotsError) notice = lt`Couldn't read the slots: ${slotsError}`;
   const driverProblem = !connected && error?.code === "not-found" && host.platform === "win32";
 
   return (
-    <aside aria-label={`On your ${pedal}`} className="glass mt-5 flex min-h-0 flex-col gap-3.5 overflow-auto rounded-xl px-4 pt-3.5 pb-4">
+    <aside aria-label={lt`On your ${pedal}`} className="glass mt-5 flex min-h-0 flex-col gap-3.5 overflow-auto rounded-xl px-4 pt-3.5 pb-4">
       <div className="-mb-1 flex items-center gap-2">
-        <h2 className="text-[12px] font-semibold text-silkscreen-2">On your {pedal}</h2>
+        <h2 className="text-[12px] font-semibold text-silkscreen-2"><Trans>On your {pedal}</Trans></h2>
         <span className="grow" />
         {readAt && <span className="text-[11px] text-silkscreen-3">{ago(readAt, now)}</span>}
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon-sm" aria-label="Read slots from the pedal again" disabled={!connected || reading || Boolean(busy)} onClick={read}>
+            <Button variant="ghost" size="icon-sm" aria-label={lt`Read slots from the pedal again`} disabled={!connected || reading || Boolean(busy)} onClick={read}>
               <RefreshCw className={cn(reading && "animate-spin motion-reduce:animate-none")} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Read slots again (R)</TooltipContent>
+          <TooltipContent><Trans>Read slots again (R)</Trans></TooltipContent>
         </Tooltip>
       </div>
 
       <Button variant="outline" size="sm" className="self-start" onClick={() => namInput.current?.click()}>
         <FilePlus data-icon="inline-start" />
-        Add NAM from disk…
+        <Trans>Add NAM from disk…</Trans>
       </Button>
       <input
         ref={namInput}
@@ -158,16 +160,16 @@ export function SlotPanel({ onAddNam }: { onAddNam: (file: OpenFile) => void }) 
       {notice && <p className="text-[12px] text-pretty text-silkscreen-2">{notice}</p>}
       {driverProblem && (
         <Button variant="outline" size="sm" className="self-start" onClick={() => useNav.getState().go("device")}>
-          Fix the USB driver on the Device page
+          <Trans>Fix the USB driver on the Device page</Trans>
         </Button>
       )}
 
       {snapTones && (
-        <section aria-label="SnapTone slots" className="flex flex-col gap-1.5">
-          <SlotsHead title="SnapTone captures" count={usedOf(snapUser, `${userSlots} ${userFirst > 0 ? "user slots" : "slots"}`)} />
+        <section aria-label={lt`SnapTone slots`} className="flex flex-col gap-1.5">
+          <SlotsHead title={lt`SnapTone captures`} count={usedOf(snapUser, `${userSlots} ${userFirst > 0 ? "user slots" : "slots"}`)} />
           {byBlock.length > 1 ? (
             byBlock.map(({ block, slots }) => (
-              <div key={block} role="group" aria-label={`SnapTones in the ${block} block`} className="flex flex-col gap-1">
+              <div key={block} role="group" aria-label={lt`SnapTones in the ${block} block`} className="flex flex-col gap-1">
                 <h4 className="text-[11px] font-semibold text-silkscreen-3">{`${block} ${slots[0].slot}–${slots[slots.length - 1].slot}`}</h4>
                 <SlotGrid kind="snaptone" slots={slots} index={index.snaptone} links={links.snaptone} targets={targets.snaptone} note={sourceNote} />
               </div>
@@ -179,9 +181,9 @@ export function SlotPanel({ onAddNam }: { onAddNam: (file: OpenFile) => void }) 
             <Collapsible>
               <CollapsibleTrigger className="group flex h-8 w-full items-center gap-1.5 rounded-sm px-2 text-[12px] font-[550] text-silkscreen-2 shadow-[inset_0_0_0_1px_var(--seam)] hover:bg-accent">
                 <ChevronRight className="size-3.5 transition-transform group-data-[state=open]:rotate-90 motion-reduce:transition-none" aria-hidden />
-                <span>{`Factory captures 0–${userFirst - 1}`}</span>
+                <span>{lt`Factory captures 0–${userFirst - 1}`}</span>
                 <span className="grow" />
-                <span className="text-[11px] font-normal text-silkscreen-3">{snapFactory.length}, read-only</span>
+                <Trans><span className="text-[11px] font-normal text-silkscreen-3">{snapFactory.length}, read-only</span></Trans>
               </CollapsibleTrigger>
               <CollapsibleContent className="pt-2">
                 <SlotGrid kind="snaptone" slots={snapFactory} index={index.snaptone} links={links.snaptone} targets={targets.snaptone} note={sourceNote} readOnly />
@@ -192,8 +194,8 @@ export function SlotPanel({ onAddNam }: { onAddNam: (file: OpenFile) => void }) 
       )}
 
       {userIRs && (
-        <section aria-label="User IR slots" className="flex flex-col gap-1.5">
-          <SlotsHead title="User IRs" count={usedOf(userIRs, `${profile.userIr.slots} slots`)} />
+        <section aria-label={lt`User IR slots`} className="flex flex-col gap-1.5">
+          <SlotsHead title={lt`User IRs`} count={usedOf(userIRs, `${profile.userIr.slots} slots`)} />
           <SlotGrid kind="ir" slots={userIRs} index={index.ir} links={links.ir} targets={targets.ir} note={sourceNote} />
         </section>
       )}
@@ -267,8 +269,8 @@ function SlotCell({
     else if (empty)
       showToast({
         tone: "ok",
-        title: `${label} is empty`,
-        body: kind === "snaptone" ? "Send a capture from TONE3000 to fill this slot." : "Send an IR from TONE3000, or drop a .wav file on Tones, to fill this slot.",
+        title: lt`${label} is empty`,
+        body: kind === "snaptone" ? lt`Send a capture from TONE3000 to fill this slot.` : lt`Send an IR from TONE3000, or drop a .wav file on Tones, to fill this slot.`,
       });
   };
   const openOnRig = async (p: PresetRef) => {
@@ -277,13 +279,13 @@ function SlotCell({
   };
 
   const tip = target
-    ? "Proposed slot for the file you are sending"
+    ? lt`Proposed slot for the file you are sending`
     : empty
-      ? "Empty"
+      ? lt`Empty`
       : [
-          slot.kind === "unknown" ? "The pedal didn't say what this slot holds; writing to it replaces whatever is there" : null,
-          link ? `Linked to ${link.title} on TONE3000${stale ? ` (the pedal now calls it ${slot.name})` : ""}` : null,
-          usedIn.length ? `Used in ${usedIn.map((p) => `${profile.slotLabel(p.slot)} ${p.name}`).join(", ")}` : "Not used by any preset",
+          slot.kind === "unknown" ? lt`The pedal didn't say what this slot holds; writing to it replaces whatever is there` : null,
+          link ? lt`Linked to ${link.title} on TONE3000${stale ? lt` (the pedal now calls it ${slot.name})` : ""}` : null,
+          usedIn.length ? lt`Used in ${usedIn.map((p) => `${profile.slotLabel(p.slot)} ${p.name}`).join(", ")}` : lt`Not used by any preset`,
           note,
         ]
           .filter(Boolean)
@@ -306,7 +308,7 @@ function SlotCell({
             >
               <span className="min-w-4 flex-none text-[11px] font-semibold text-silkscreen-3">{kind === "ir" ? slot.slot + 1 : slot.slot}</span>
               <span className={cn("truncate", target ? "font-semibold text-lamp" : empty ? "font-medium text-silkscreen-4" : "font-semibold text-silkscreen")}>
-                {target && empty ? "Proposed" : empty ? "Empty" : slot.name}
+                {target && empty ? lt`Proposed` : empty ? lt`Empty` : slot.name}
               </span>
               {link && (
                 <ToneImage url={link.image_url} gear={link.gear} format={link.format} alt="" caption={false} className="ml-auto size-4 rounded-xs [&_svg]:size-2.5" />
@@ -320,25 +322,25 @@ function SlotCell({
         <ContextMenuGroup>
           {!readOnly && !empty && (
             <ContextMenuItem disabled={linkable.length === 0} onSelect={() => openLinkChoice({ kind, slot: slot.slot })}>
-              Link to a TONE3000 tone…
+              <Trans>Link to a TONE3000 tone…</Trans>
             </ContextMenuItem>
           )}
           {!readOnly && !empty && canRename && (
             <ContextMenuItem disabled={Boolean(busy)} onSelect={() => openRename({ kind, slot: slot.slot })}>
-              Rename…
+              <Trans>Rename…</Trans>
             </ContextMenuItem>
           )}
           {link && (
             <>
-              <ContextMenuItem onSelect={() => openSheet(link.tone_id)}>Show {link.title}</ContextMenuItem>
-              <ContextMenuItem onSelect={() => unlink(link.tone_id).catch((e) => notifyError("Couldn't unlink", e))}>Unlink</ContextMenuItem>
+              <ContextMenuItem onSelect={() => openSheet(link.tone_id)}><Trans>Show {link.title}</Trans></ContextMenuItem>
+              <ContextMenuItem onSelect={() => unlink(link.tone_id).catch((e) => notifyError(lt`Couldn't unlink`, e))}><Trans>Unlink</Trans></ContextMenuItem>
             </>
           )}
         </ContextMenuGroup>
         <ContextMenuSeparator />
         <ContextMenuGroup>
           <ContextMenuSub>
-            <ContextMenuSubTrigger disabled={usedIn.length === 0}>Show presets using it</ContextMenuSubTrigger>
+            <ContextMenuSubTrigger disabled={usedIn.length === 0}><Trans>Show presets using it</Trans></ContextMenuSubTrigger>
             <ContextMenuSubContent>
               <ContextMenuGroup>
                 {usedIn.map((p) => (
@@ -350,7 +352,7 @@ function SlotCell({
             </ContextMenuSubContent>
           </ContextMenuSub>
           <ContextMenuItem disabled={usedIn.length === 0} onSelect={() => usedIn[0] && void openOnRig(usedIn[0])}>
-            Open on Rig
+            <Trans>Open on Rig</Trans>
           </ContextMenuItem>
         </ContextMenuGroup>
       </ContextMenuContent>

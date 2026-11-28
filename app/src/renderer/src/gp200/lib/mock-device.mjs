@@ -711,9 +711,10 @@ export class MockGp200 {
       image = applyPatchEdits(image, { blocks, ...(scene.volume !== null ? { volume: scene.volume } : {}), ...(scene.bpm !== null ? { tempo: scene.bpm } : {}) });
     }
     this.editBuffer = image;
-    const dirty = !!scene;
-    if (dirty !== this.dirty) this.#reply(rec.status(STATUS.DIRTY, dirty ? 1 : 0));
-    this.dirty = dirty;
+    // Like the pedal: a scene played on the pedal leaves the buffer reported unmodified, although it differs from the
+    // stored preset (seen on a GP-200 with the mod, 2026-11-28). The host must not take it for the base.
+    if (this.dirty) this.#reply(rec.status(STATUS.DIRTY, 0));
+    this.dirty = false;
   }
 
   #modWrite(seq, arg, payload) {

@@ -4,6 +4,8 @@ import { host } from "@/host";
 import { useNav } from "@/state/nav";
 import { openFiles } from "@/state/ui";
 import { notifyError } from "../notify";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 const hasFiles = (e: DragEvent) => !!e.dataTransfer && Array.from(e.dataTransfer.types).includes("Files");
 
@@ -45,8 +47,8 @@ export function FileDropOverlay() {
       const { ignored } = openFiles(files);
       if (ignored.length)
         notifyError(
-          ignored.length === 1 ? `Can't open ${ignored[0].name}` : `Can't open ${ignored.length} files`,
-          new Error("Tone Studio opens .prst presets, .nam captures, .wav impulse responses and songs (MP3, FLAC, M4A, OGG)."),
+          ignored.length === 1 ? t`Can't open ${ignored[0].name}` : t`Can't open ${ignored.length} files`,
+          new Error(t`Tone Studio opens .prst presets, .nam captures, .wav impulse responses and songs (MP3, FLAC, M4A, OGG).`),
         );
     };
     window.addEventListener("dragenter", enter);
@@ -68,11 +70,11 @@ export function FileDropOverlay() {
       <div className="glass-float flex items-center gap-3 rounded-lg px-5 py-4 text-[13px]">
         <FileDown className="size-5 text-silkscreen-2" />
         <div className="flex flex-col gap-0.5">
-          <b className="font-semibold">Drop to open</b>
+          <Trans><b className="font-semibold">Drop to open</b></Trans>
           <span className="text-xs text-silkscreen-2">
             {screen === "song"
-              ? "Songs (WAV, MP3, FLAC, M4A, OGG) are split into stems here"
-              : "Presets (.prst) go to the Library, NAM captures to the capture editor, IRs (.wav) to a User IR slot, songs to Song"}
+              ? t`Songs (WAV, MP3, FLAC, M4A, OGG) are split into stems here`
+              : t`Presets (.prst) go to the Library, NAM captures to the capture editor, IRs (.wav) to a User IR slot, songs to Song`}
           </span>
         </div>
       </div>

@@ -8,6 +8,8 @@ import { useDevice, useProfile } from "@/state/device";
 import { attachedDevice, pedalName } from "@/state/device-model";
 import { keyLabel } from "./keys";
 import { requestPresetSwitch } from "./preset-switch";
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** ‹ 63 Shatte-GT1 ⌄ › : step or pick the active preset on the pedal (unsaved edits ask first). */
 export function PresetSwitcher() {
@@ -35,7 +37,7 @@ export function PresetSwitcher() {
       <TooltipTrigger asChild>
         <button
           type="button"
-          aria-label={dir < 0 ? "Previous preset" : "Next preset"}
+          aria-label={dir < 0 ? t`Previous preset` : t`Next preset`}
           disabled={!canSwitch}
           onClick={() => select(slot! + dir)}
           className="grid w-8 place-items-center rounded-pill text-silkscreen-3 transition-colors hover:text-silkscreen disabled:opacity-40"
@@ -44,7 +46,7 @@ export function PresetSwitcher() {
         </button>
       </TooltipTrigger>
       <TooltipContent side="bottom">
-        {dir < 0 ? "Previous preset" : "Next preset"} <span className="text-silkscreen-3">{keyLabel(["Mod", dir < 0 ? "[" : "]"])}</span>
+        {dir < 0 ? t`Previous preset` : t`Next preset`} <span className="text-silkscreen-3">{keyLabel(["Mod", dir < 0 ? "[" : "]"])}</span>
       </TooltipContent>
     </Tooltip>
   );
@@ -52,7 +54,7 @@ export function PresetSwitcher() {
   return (
     <div
       role="group"
-      aria-label="Preset"
+      aria-label={t`Preset`}
       className="no-drag glass-float flex h-8 shrink-0 items-stretch rounded-pill text-[13px] shadow-[var(--glass-shine),0_0_0_1px_var(--glass-edge),0_4px_16px_rgb(0_0_0/0.3)]"
     >
       {step(-1)}
@@ -61,7 +63,7 @@ export function PresetSwitcher() {
           <button
             type="button"
             disabled={!canSwitch}
-            aria-label={current ? `Preset ${slotLabel(current.slot)} ${current.name}${unsaved ? `, ${unsaved} unsaved changes` : ""}. Choose a preset` : "Choose a preset"}
+            aria-label={current ? t`Preset ${slotLabel(current.slot)} ${current.name}${unsaved ? t`, ${unsaved} unsaved changes` : ""}. Choose a preset` : t`Choose a preset`}
             className="flex w-[260px] items-center gap-2 border-x border-glass-edge px-3 text-left font-medium text-silkscreen transition-colors hover:bg-white/6 disabled:hover:bg-transparent"
           >
             {current ? (
@@ -71,22 +73,22 @@ export function PresetSwitcher() {
                 {connected && unsaved > 0 && <span className="size-1.5 shrink-0 rounded-full bg-led-warn" aria-hidden />}
               </>
             ) : (
-              <span className="flex-1 text-silkscreen-3">{status === "connecting" ? `Reading the ${pedal}…` : "No preset loaded"}</span>
+              <span className="flex-1 text-silkscreen-3">{status === "connecting" ? t`Reading the ${pedal}…` : t`No preset loaded`}</span>
             )}
             <ChevronDown className="size-3.5 shrink-0 text-silkscreen-3" aria-hidden />
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-[320px] p-0" align="center" sideOffset={8}>
           <Command>
-            <CommandInput placeholder="Find a preset or slot number" />
+            <CommandInput placeholder={t`Find a preset or slot number`} />
             <CommandList className="max-h-[360px]">
-              <CommandEmpty>No preset with that name</CommandEmpty>
+              <CommandEmpty><Trans>No preset with that name</Trans></CommandEmpty>
               <CommandGroup>
                 {names.map((n) => (
                   <CommandItem key={n.slot} value={`${slotLabel(n.slot)} ${n.name}`} onSelect={() => select(n.slot)} className="min-h-8">
                     <span className="min-w-5 font-semibold text-silkscreen-3 tabular-nums">{slotLabel(n.slot)}</span>
                     <span className="flex-1 truncate">{n.name}</span>
-                    {n.slot === slot && <span className="text-xs text-silkscreen-3">Current</span>}
+                    {n.slot === slot && <span className="text-xs text-silkscreen-3"><Trans>Current</Trans></span>}
                   </CommandItem>
                 ))}
               </CommandGroup>

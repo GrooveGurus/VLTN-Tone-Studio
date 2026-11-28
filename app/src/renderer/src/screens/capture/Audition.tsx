@@ -12,6 +12,8 @@ import { loudnessOf, type NamInfo } from "./nam/model";
 import { levelGainDb } from "./nam/recipe";
 import { useCapture, useShownRecipe, type AuditionSource } from "./store";
 import { fmtInt, PANEL } from "./parts";
+import { t as lt } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 
 /** Loudness every compare choice is matched to when "Level-matched" is on. */
 const MATCH_DB = -18;
@@ -31,11 +33,11 @@ export function compareOptions(info: NamInfo): CompareOption[] {
     return order.flatMap((size, i) => {
       const sub = info.arch.kind === "A2" ? info.arch.submodels.find((s) => s.size === size) : undefined;
       if (!sub) return [];
-      return [{ id: size, key: "AB"[i], title: size === "full" ? "A2-Full" : "A2-Lite", detail: `${fmtInt(sub.params)} params`, choice: { id: size, slimSize: SLIM_SIZE[size] } }];
+      return [{ id: size, key: "AB"[i], title: size === "full" ? lt`A2-Full` : lt`A2-Lite`, detail: lt`${fmtInt(sub.params)} params`, choice: { id: size, slimSize: SLIM_SIZE[size] } }];
     });
   }
-  const title = info.arch.kind === "A1" ? `A1 ${info.arch.size}` : "Model";
-  return [{ id: "a1", key: "A", title, detail: `${fmtInt(info.params)} params`, choice: { id: "a1", slimSize: SLIM_SIZE.full } }];
+  const title = info.arch.kind === "A1" ? `A1 ${info.arch.size}` : lt`Model`;
+  return [{ id: "a1", key: "A", title, detail: lt`${fmtInt(info.params)} params`, choice: { id: "a1", slimSize: SLIM_SIZE.full } }];
 }
 
 /** The one audition engine of the screen (one AudioContext, created when the editor opens). */
@@ -85,7 +87,7 @@ export async function togglePlay(state: { playing: boolean }, source: AuditionSo
   } catch (e) {
     const err = e as Error;
     const denied = err?.name === "NotAllowedError" || err?.name === "SecurityError";
-    onState({ starting: false, playing: false, error: denied ? "Live input needs permission to use your audio input." : (err?.message ?? String(e)) });
+    onState({ starting: false, playing: false, error: denied ? lt`Live input needs permission to use your audio input.` : (err?.message ?? String(e)) });
   }
 }
 
@@ -146,13 +148,13 @@ export function AuditionStrip({ play, setPlay }: { play: PlayState; setPlay: (p:
 
   const ready = engine === "ready";
   return (
-    <section aria-label="Audition" className={cn(PANEL, "col-start-1 row-start-1 flex flex-col gap-3 px-4 py-3.5 min-[1421px]:col-span-2")}>
+    <section aria-label={lt`Audition`} className={cn(PANEL, "col-start-1 row-start-1 flex flex-col gap-3 px-4 py-3.5 min-[1421px]:col-span-2")}>
       <div className="flex min-w-0 flex-wrap items-center gap-x-3.5 gap-y-2.5">
         <div className="flex items-center gap-1">
           <Button
             variant="secondary"
             size="icon-lg"
-            aria-label="Play"
+            aria-label={lt`Play`}
             aria-pressed={play.playing}
             aria-keyshortcuts="Space"
             disabled={!ready || play.starting || play.playing}
@@ -161,15 +163,15 @@ export function AuditionStrip({ play, setPlay }: { play: PlayState; setPlay: (p:
           >
             {play.starting ? <Spinner /> : <Play />}
           </Button>
-          <Button variant="ghost" size="icon" aria-label="Stop" disabled={!play.playing} onClick={() => (audition.stop(), setPlay({ playing: false }))}>
+          <Button variant="ghost" size="icon" aria-label={lt`Stop`} disabled={!play.playing} onClick={() => (audition.stop(), setPlay({ playing: false }))}>
             <Square className="size-3" />
           </Button>
         </div>
         <span className="h-[22px] w-px bg-border" aria-hidden />
         <div className="flex items-center gap-2.5">
-          <span id="ce-play-through" className="text-[11px] font-medium tracking-[0.04em] text-silkscreen-3 uppercase">
+          <Trans><span id="ce-play-through" className="text-[11px] font-medium tracking-[0.04em] text-silkscreen-3 uppercase">
             Play through
-          </span>
+          </span></Trans>
           <ToggleGroup type="single" value={source} onValueChange={onSource} aria-labelledby="ce-play-through" className="gap-1">
             {CLIPS.map((c, i) => (
               <ToggleGroupItem key={c.id} value={c.id} aria-keyshortcuts={String(i + 1)}>
@@ -178,7 +180,7 @@ export function AuditionStrip({ play, setPlay }: { play: PlayState; setPlay: (p:
             ))}
             <ToggleGroupItem value="live" aria-keyshortcuts={String(CLIPS.length + 1)}>
               <Guitar className="size-3.5" aria-hidden />
-              Live input
+              <Trans>Live input</Trans>
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
@@ -186,12 +188,12 @@ export function AuditionStrip({ play, setPlay }: { play: PlayState; setPlay: (p:
         <div className="flex items-center gap-2">
           <Switch id="ce-level-matched" checked={levelMatched} onCheckedChange={(v) => set({ levelMatched: v })} aria-keyshortcuts="L" />
           <Label htmlFor="ce-level-matched" className="text-[12px] font-normal whitespace-nowrap text-silkscreen-2">
-            Level-matched
+            <Trans>Level-matched</Trans>
           </Label>
         </div>
       </div>
       <div className="flex min-w-0 flex-wrap items-center gap-x-3.5 gap-y-2.5">
-        <div role="radiogroup" aria-label="Compare" className="grid flex-[3_1_380px] grid-cols-[repeat(3,minmax(0,178px))] gap-1.5">
+        <div role="radiogroup" aria-label={lt`Compare`} className="grid flex-[3_1_380px] grid-cols-[repeat(3,minmax(0,178px))] gap-1.5">
           {options.map((o) => {
             const on = choice === o.id;
             return (
@@ -227,10 +229,10 @@ export function AuditionStrip({ play, setPlay }: { play: PlayState; setPlay: (p:
       {(engine === "error" || play.error || source === "live") && (
         <p className={cn("text-[12px]", engine === "error" || play.error ? "text-led-fault" : "text-silkscreen-3")} role={engine === "error" || play.error ? "alert" : undefined}>
           {engine === "error"
-            ? `The audition engine couldn't load this capture: ${engineError}`
+            ? lt`The audition engine couldn't load this capture: ${engineError ?? ""}`
             : play.error
               ? play.error
-              : `Use your audio interface's instrument input. The ${pedal}'s USB audio isn't a dry signal.`}
+              : lt`Use your audio interface's instrument input. The ${pedal}'s USB audio isn't a dry signal.`}
         </p>
       )}
     </section>
@@ -302,11 +304,11 @@ function Preview({ play, engineReady }: { play: PlayState; engineReady: boolean 
   const stale = render && render.key !== key;
   const head = play.playing && duration ? Math.round((pos / duration) * BARS) : 0;
   return (
-    <div className="relative h-14 min-w-[180px] flex-[1_1_180px] rounded-lg bg-well px-2.5 pt-[21px] pb-1" aria-label="Preview of the rendered clip">
+    <div className="relative h-14 min-w-[180px] flex-[1_1_180px] rounded-lg bg-well px-2.5 pt-[21px] pb-1" aria-label={lt`Preview of the rendered clip`}>
       <div className="absolute inset-x-2.5 top-1 flex justify-between gap-2 text-[11px] whitespace-nowrap text-silkscreen-3">
         <span className="min-w-0 truncate">
-          <b className="font-medium text-silkscreen-2">{clip ? "Rendered preview" : "Live input"}</b>
-          {clip ? ` · ${clip.label}, ${option.title}` : " · nothing is recorded"}
+          <b className="font-medium text-silkscreen-2">{clip ? lt`Rendered preview` : lt`Live input`}</b>
+          {clip ? ` · ${clip.label}, ${option.title}` : lt` · nothing is recorded`}
         </span>
         {clip && duration ? <span className="tabular-nums">{`${fmtTime(play.playing ? pos : 0)} / ${fmtTime(duration)}`}</span> : null}
       </div>
@@ -321,16 +323,16 @@ function Preview({ play, engineReady }: { play: PlayState; engineReady: boolean 
           </svg>
         ) : (
           <span className="flex h-[30px] items-center gap-2 text-[11px] text-silkscreen-3">
-            {failed ? `Couldn't render: ${failed}` : (
+            {failed ? lt`Couldn't render: ${failed}` : (
               <>
                 <Spinner className="size-3" />
-                Rendering
+                <Trans>Rendering</Trans>
               </>
             )}
           </span>
         )
       ) : (
-        <span className="flex h-[30px] items-center text-[11px] text-silkscreen-3">The preview needs a DI clip.</span>
+        <span className="flex h-[30px] items-center text-[11px] text-silkscreen-3"><Trans>The preview needs a DI clip.</Trans></span>
       )}
     </div>
   );

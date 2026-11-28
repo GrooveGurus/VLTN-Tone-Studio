@@ -2,6 +2,7 @@
 // Reads the tempo before every click, so editing the preset's BPM while it runs takes effect on the next beat.
 
 import { isPedalInput, listInputs } from "@/song/tonematch/recorder";
+import { t } from "@lingui/core/macro";
 
 const LOOKAHEAD_S = 0.12;
 const TICK_MS = 25;
@@ -69,7 +70,7 @@ export class Metronome {
     this.master.connect(ctx.destination);
     try {
       await ctx.resume();
-      if (ctx.state !== "running") throw new Error("The audio output didn't start. Check that the output isn't muted or in use.");
+      if (ctx.state !== "running") throw new Error(t`The audio output didn't start. Check that the output isn't muted or in use.`);
     } catch (e) {
       this.stop();
       throw e;
