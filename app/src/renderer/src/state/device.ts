@@ -2,6 +2,7 @@
 // memory writes run only after the user confirmed them. Screens use `useDevice`.
 import { create } from "zustand";
 import { useGp200Catalog } from "@/gp200/app/catalog-store";
+import { NOTIFY } from "@/gp200/lib/mod-service.mjs";
 import { host } from "@/host";
 import { deviceForPortName, profileFor, type DeviceProfile } from "@shared/devices";
 import { pedalOnUsb } from "@shared/host/device";
@@ -54,6 +55,8 @@ const ECHO_GRACE_MS = 1500;
 let driver: DeviceDriver | null = null;
 /** Model the simulator plays; kept for later `connect("mock")` calls in this session. */
 let mockDevice: DeviceKey = DEFAULT_DEVICE;
+/** The simulated GP-200 runs the GrooveGurus mod (`?mock=gp200mod`); kept like mockDevice. */
+let mockMod = false;
 let reconnects = 0;
 let userDisconnected = false;
 let resyncTimer: number | undefined;
@@ -67,6 +70,15 @@ let watchTimer: number | undefined;
 let logNotifyTimer: number | undefined;
 /** Frames the pedal sent; every driver logs each incoming frame, unreadable ones too. */
 let rxFrames = 0;
+
+/** GrooveGurus mod NOTIFY events, for the scenes store (state/scenes.ts). */
+export type SceneEvent = Extract<DriverEvent, { type: "scenes" }>;
+const sceneListeners = new Set<(e: SceneEvent) => void>();
+/** Listen to the mod's scene events of the open connection; returns the unsubscribe function. */
+export function onSceneEvent(listener: (e: SceneEvent) => void): () => void {
+  sceneListeners.add(listener);
+  return () => sceneListeners.delete(listener);
+}
 
 /** Advanced access for diagnostics and tests (the open connection); not for screens' normal use. */
 export const getDriver = () => driver;
@@ -254,6 +266,12 @@ export const useDevice = create<DeviceState>((set, get) => {
   const onDriverEvent = (e: DriverEvent) => {
     if (e.type === "resync") return scheduleResync();
     if (e.type === "listChanged") return scheduleListRead(e.list);
+    if (e.type === "scenes") {
+      for (const l of sceneListeners) l(e);
+      // The pedal played a scene or its base, or reloaded the active preset after a record write: re-read what plays.
+      if (e.events & NOTIFY.SCENE || (e.events & NOTIFY.RECORD && e.slot === get().slot)) scheduleResync();
+      return;
+    }
     if (e.type === "global") {
       if (!isEcho(`global:${e.name}`)) set({ globals: { ...(get().globals ?? {}), [e.name]: e.value } });
       return;
@@ -303,6 +321,7 @@ export const useDevice = create<DeviceState>((set, get) => {
         globalEq: snap.globals?.eq ?? null,
         globalRecords: snap.globals?.records ?? null,
         firmware: snap.globals?.firmware ?? null,
+        mod: snap.mod ?? null,
         snapTones: null,
         userIRs: null,
         connectedAt: now,
@@ -419,6 +438,7 @@ export const useDevice = create<DeviceState>((set, get) => {
     globals: null,
     globalEq: null,
     firmware: null,
+    mod: null,
     features: [],
     lockedFeatures: [],
     gp50Extras: false,
@@ -499,7 +519,8 @@ export const useDevice = create<DeviceState>((set, get) => {
         let d: DeviceDriver;
         if (mode === "mock") {
           if (opts?.mockDevice) mockDevice = opts.mockDevice;
-          d = await simulate(mockDevice, driverOpts);
+          if (opts?.mockDevice || opts?.mockMod !== undefined) mockMod = opts?.mockMod ?? false;
+          d = await simulate(mockDevice, { ...driverOpts, simulatedMod: mockMod });
         } else {
           d = await openPort(settings?.portPattern || undefined, driverOpts);
         }

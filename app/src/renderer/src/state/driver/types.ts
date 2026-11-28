@@ -1,7 +1,8 @@
 // What the device store needs from a pedal, whatever its protocol family. One driver per connection; the store
 // (state/device.ts) talks only to this interface. Gp5Driver adapts Gp5Session; the GP-200 family gets its own driver.
 import { DEVICE_KEYS, profileFor, type DeviceFamily, type DeviceKey } from "@shared/devices";
-import type { BackupEntry, DeviceFeature, ExpEdit, ExpSettings, GlobalEq, GlobalName, GlobalRecord, Globals, SlotName } from "../device-types";
+import type { ModGuest, ModSettings, Scene, ScenePre2, SceneRecord } from "@/gp200/lib/mod-service.mjs";
+import type { BackupEntry, DeviceFeature, ExpEdit, ExpSettings, GlobalEq, GlobalName, GlobalRecord, Globals, ModFirmware, SlotName } from "../device-types";
 
 export type { DeviceFeature };
 
@@ -35,7 +36,35 @@ export type DriverEvent =
   /** A pedal setting changed (menu on the pedal, or the echo of a host write) */
   | { type: "global"; name: GlobalName; value: number }
   /** The pedal reported Global EQ values, by index (`all`: the whole EQ, GP-200 0x1004) */
-  | { type: "globalEq"; values: Readonly<Record<number, number>>; all: boolean };
+  | { type: "globalEq"; values: Readonly<Record<number, number>>; all: boolean }
+  /**
+   * GrooveGurus mod NOTIFY (after its HELLO): `events` bits 1 scene/mode/preset changed, 2 a scene record was written or
+   * deleted, 4 the mod settings changed; the state is the pedal's now (`activeScene` null = the base plays).
+   */
+  | { type: "scenes"; events: number; sceneMode: boolean; activeScene: number | null; savedScenes: number; slot: number };
+
+/** The scene record of one slot as the pedal stores it (GrooveGurus mod). */
+export interface SlotScenes {
+  slot: number;
+  /** The preset's record number (owner of the scene record) */
+  owner: number;
+  /** null: the slot has no scene record */
+  record: SceneRecord | null;
+  /** Raw bytes when stored (also when this app can't decode them) */
+  bytes: Uint8Array | null;
+  /** Why `record` is null although `bytes` aren't: a format this app doesn't know (read-only) */
+  error?: string;
+}
+
+/** Scene records on the pedal: used per slot, free and total (42 on the mod). */
+export interface SceneList {
+  free: number;
+  total: number;
+  /** slot -> bit k = scene A+k saved; records no preset points at are left out */
+  slots: ReadonlyMap<number, number>;
+  /** Records no preset points at (an interrupted move) */
+  orphans: number;
+}
 
 export interface GlobalsSnapshot {
   values: Globals;
@@ -56,6 +85,8 @@ export interface SyncSnapshot {
   globals: GlobalsSnapshot | null;
   /** The active preset has unsaved edits on the pedal (features "modified"); null/absent = unknown */
   modified?: boolean | null;
+  /** Custom firmware that answered (GrooveGurus mod); null/absent = stock or unknown */
+  mod?: ModFirmware | null;
 }
 
 export interface ProgressOptions {
@@ -139,6 +170,19 @@ export interface DeviceDriver {
   movePreset?(from: number, to: number): Promise<void>;
   /** "globalEq": Global EQ value `index` (GlobalEq order), clamped to its range. */
   setGlobalEq?(index: number, value: number): Promise<void>;
+  /** "modScenes": the scene records on the pedal. */
+  readSceneList?(): Promise<SceneList>;
+  /** "modScenes": the scene record of `slot`. */
+  readScenes?(slot: number): Promise<SlotScenes>;
+  /**
+   * "modScenesWrite": write the scene record of `slot` (verified by reading it back; retried while the pedal is busy).
+   * No scene and no PRE 2 deletes the record. Writing the active slot sends the pedal back to the base.
+   */
+  writeScenes?(slot: number, scenes: (Scene | null)[], pre2: ScenePre2 | null): Promise<SlotScenes>;
+  /** "modSettings": the mod's own settings (factory values when the pedal never stored them). */
+  readModSettings?(): Promise<ModSettings>;
+  /** "modGuests": the effects of other blocks the mod offers in `block` (0-10). */
+  readModGuests?(block: number): Promise<ModGuest[]>;
 }
 
 /** What the factory needs to open a driver. */
@@ -147,4 +191,6 @@ export interface DriverOptions {
   log: (dir: string, bytes: Uint8Array, decoded?: unknown) => void;
   /** The port went away (unplugged, switched off) */
   onDisconnect: () => void;
+  /** Simulator only: the simulated pedal runs the GrooveGurus mod (GP-200 family) */
+  simulatedMod?: boolean;
 }
