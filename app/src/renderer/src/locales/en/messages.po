@@ -91,7 +91,7 @@ msgid " and {0}"
 msgstr " and {0}"
 
 #. placeholder {0}: letter(k)
-#: src/renderer/src/screens/rig/Scenes.tsx:939
+#: src/renderer/src/screens/rig/Scenes.tsx:940
 msgid " and scene {0} stays empty"
 msgstr " and scene {0} stays empty"
 
@@ -176,7 +176,7 @@ msgid " The first split with the {0} model downloads it ({missing} MB) once."
 msgstr " The first split with the {0} model downloads it ({missing} MB) once."
 
 #: src/renderer/src/components/write/ConfirmWriteDialog.tsx:133
-#: src/renderer/src/screens/rig/Scenes.tsx:889
+#: src/renderer/src/screens/rig/Scenes.tsx:890
 msgid " The pedal has no undo."
 msgstr " The pedal has no undo."
 
@@ -267,7 +267,7 @@ msgid "; repeats lose their highs"
 msgstr "; repeats lose their highs"
 
 #. placeholder {0}: letter(k)
-#: src/renderer/src/screens/rig/Scenes.tsx:939
+#: src/renderer/src/screens/rig/Scenes.tsx:940
 msgid ": saving removes scene {0} from the {pedal}"
 msgstr ": saving removes scene {0} from the {pedal}"
 
@@ -300,7 +300,7 @@ msgstr ".prst files you added"
 msgid "· {0} timing/dispatch failures"
 msgstr "· {0} timing/dispatch failures"
 
-#: src/renderer/src/screens/rig/RigHeader.tsx:147
+#: src/renderer/src/screens/rig/RigHeader.tsx:235
 msgid "· playing the saved version"
 msgstr "· playing the saved version"
 
@@ -438,7 +438,7 @@ msgstr "{0} chain mix"
 #. placeholder {0}: rows.length
 #. placeholder {0}: sceneRows(base, replacing).length
 #: src/renderer/src/screens/rig/Scenes.tsx:262
-#: src/renderer/src/screens/rig/Scenes.tsx:928
+#: src/renderer/src/screens/rig/Scenes.tsx:929
 msgid "{0} changes"
 msgstr "{0} changes"
 
@@ -974,7 +974,7 @@ msgstr "{base} Turn on Experimental pedal commands in Settings to hear it right 
 msgid "{blendable} of {0} blocks share a model and blend; the others stay as they are."
 msgstr "{blendable} of {0} blocks share a model and blend; the others stay as they are."
 
-#: src/renderer/src/screens/rig/Scenes.tsx:921
+#: src/renderer/src/screens/rig/Scenes.tsx:922
 msgid "{changes} changes"
 msgstr "{changes} changes"
 
@@ -1208,7 +1208,7 @@ msgstr "{replacedText} Presets you changed since then are lost unless you back t
 msgid "{shift} semitones)"
 msgstr "{shift} semitones)"
 
-#: src/renderer/src/screens/rig/RigHeader.tsx:146
+#: src/renderer/src/screens/rig/RigHeader.tsx:234
 msgid "{shownChanges} unsaved changes"
 msgstr "{shownChanges} unsaved changes"
 
@@ -1473,7 +1473,7 @@ msgid "<0>Learning {what}. {press}</0>"
 msgstr "<0>Learning {what}. {press}</0>"
 
 #. placeholder {0}: preview.dropped.join(", ")
-#: src/renderer/src/screens/rig/Scenes.tsx:944
+#: src/renderer/src/screens/rig/Scenes.tsx:945
 msgid "<0>Left out of the scene:</0> {0}. The {pedal} plays the base's value there."
 msgstr "<0>Left out of the scene:</0> {0}. The {pedal} plays the base's value there."
 
@@ -1709,8 +1709,8 @@ msgid "1 block"
 msgstr "1 block"
 
 #: src/renderer/src/screens/rig/Scenes.tsx:262
-#: src/renderer/src/screens/rig/Scenes.tsx:921
-#: src/renderer/src/screens/rig/Scenes.tsx:928
+#: src/renderer/src/screens/rig/Scenes.tsx:922
+#: src/renderer/src/screens/rig/Scenes.tsx:929
 msgid "1 change"
 msgstr "1 change"
 
@@ -1731,7 +1731,7 @@ msgstr "1 preset was"
 msgid "1 slot"
 msgstr "1 slot"
 
-#: src/renderer/src/screens/rig/RigHeader.tsx:146
+#: src/renderer/src/screens/rig/RigHeader.tsx:234
 msgid "1 unsaved change"
 msgstr "1 unsaved change"
 
@@ -2332,7 +2332,7 @@ msgstr "and kept with the version for making a {model} version. Your"
 msgid "and measures it, like Valeton Suite does. Takes about 10 seconds."
 msgstr "and measures it, like Valeton Suite does. Takes about 10 seconds."
 
-#: src/renderer/src/screens/rig/Scenes.tsx:889
+#: src/renderer/src/screens/rig/Scenes.tsx:890
 msgid "and the Rig plays the saved preset again"
 msgstr "and the Rig plays the saved preset again"
 
@@ -2441,7 +2441,7 @@ msgstr "As opened, never changed"
 msgid "As shown on the Rig"
 msgstr "As shown on the Rig"
 
-#: src/renderer/src/screens/rig/Scenes.tsx:920
+#: src/renderer/src/screens/rig/Scenes.tsx:921
 msgid "As the Rig plays {from} now"
 msgstr "As the Rig plays {from} now"
 
@@ -2632,8 +2632,8 @@ msgstr "Back to generated"
 msgid "Back to the base"
 msgstr "Back to the base"
 
-#: src/renderer/src/screens/rig/RigHeader.tsx:186
-#: src/renderer/src/screens/rig/RigHeader.tsx:189
+#: src/renderer/src/screens/rig/RigHeader.tsx:168
+#: src/renderer/src/screens/rig/RigHeader.tsx:171
 msgid "Back to your edits"
 msgstr "Back to your edits"
 
@@ -3216,7 +3216,7 @@ msgstr "Can't write {0}"
 #: src/renderer/src/screens/rig/Scenes.tsx:524
 #: src/renderer/src/screens/rig/Scenes.tsx:757
 #: src/renderer/src/screens/rig/Scenes.tsx:800
-#: src/renderer/src/screens/rig/Scenes.tsx:958
+#: src/renderer/src/screens/rig/Scenes.tsx:959
 #: src/renderer/src/screens/rig/Variation.tsx:148
 #: src/renderer/src/screens/setlist/SetlistScreen.tsx:191
 #: src/renderer/src/screens/song/AddSongsDialog.tsx:84
@@ -4002,9 +4002,9 @@ msgid "Compare with pedal"
 msgstr "Compare with pedal"
 
 #: src/renderer/src/app/palette/CommandPalette.tsx:204
-#: src/renderer/src/screens/rig/RigHeader.tsx:179
-#: src/renderer/src/screens/rig/RigHeader.tsx:186
-#: src/renderer/src/screens/rig/RigHeader.tsx:189
+#: src/renderer/src/screens/rig/RigHeader.tsx:161
+#: src/renderer/src/screens/rig/RigHeader.tsx:168
+#: src/renderer/src/screens/rig/RigHeader.tsx:171
 msgid "Compare with saved"
 msgstr "Compare with saved"
 
@@ -4115,7 +4115,7 @@ msgstr "Connect the {pedal} to change its EXP settings."
 msgid "Connect the {pedal} to hear the proposal, or try it on the simulated pedal."
 msgstr "Connect the {pedal} to hear the proposal, or try it on the simulated pedal."
 
-#: src/renderer/src/screens/rig/RigHeader.tsx:220
+#: src/renderer/src/screens/rig/RigHeader.tsx:202
 msgid "Connect the {pedal} to save"
 msgstr "Connect the {pedal} to save"
 
@@ -4662,7 +4662,7 @@ msgid "Couldn't save"
 msgstr "Couldn't save"
 
 #. placeholder {0}: letter(k)
-#: src/renderer/src/screens/rig/Scenes.tsx:948
+#: src/renderer/src/screens/rig/Scenes.tsx:949
 msgid "Couldn't save scene {0}"
 msgstr "Couldn't save scene {0}"
 
@@ -5187,12 +5187,12 @@ msgid "Different preset"
 msgstr "Different preset"
 
 #: src/renderer/src/app/overlays/UnsavedSwitchDialog.tsx:122
-#: src/renderer/src/screens/rig/RigHeader.tsx:192
+#: src/renderer/src/screens/rig/RigHeader.tsx:174
 msgid "Discard"
 msgstr "Discard"
 
 #: src/renderer/src/app/palette/CommandPalette.tsx:213
-#: src/renderer/src/screens/rig/RigHeader.tsx:202
+#: src/renderer/src/screens/rig/RigHeader.tsx:184
 #: src/renderer/src/screens/song/PlaylistsPanel.tsx:200
 #: src/renderer/src/screens/song/SmartPlaylistEditor.tsx:42
 msgid "Discard changes"
@@ -5676,7 +5676,7 @@ msgid "Empty user slot"
 msgstr "Empty user slot"
 
 #: src/renderer/src/components/write/ConfirmWriteDialog.tsx:175
-#: src/renderer/src/screens/rig/Scenes.tsx:931
+#: src/renderer/src/screens/rig/Scenes.tsx:932
 msgid "Empty, nothing is replaced"
 msgstr "Empty, nothing is replaced"
 
@@ -5879,7 +5879,7 @@ msgstr "Export .nam"
 msgid "Export .prst"
 msgstr "Export .prst"
 
-#: src/renderer/src/screens/rig/RigHeader.tsx:242
+#: src/renderer/src/screens/rig/RigHeader.tsx:224
 msgid "Export .prst…"
 msgstr "Export .prst…"
 
@@ -6334,7 +6334,7 @@ msgstr "Frets"
 
 #: src/renderer/src/components/write/ConfirmWriteDialog.tsx:163
 #: src/renderer/src/screens/device/RestoreDialog.tsx:174
-#: src/renderer/src/screens/rig/Scenes.tsx:918
+#: src/renderer/src/screens/rig/Scenes.tsx:919
 msgid "From"
 msgstr "From"
 
@@ -6562,7 +6562,7 @@ msgstr "Global EQ on"
 msgid "Global: stored on the {pedal} and shared by every preset. Saving a preset doesn't change them."
 msgstr "Global: stored on the {pedal} and shared by every preset. Saving a preset doesn't change them."
 
-#: src/renderer/src/screens/rig/RigHeader.tsx:220
+#: src/renderer/src/screens/rig/RigHeader.tsx:202
 msgid "Go back to your edits to save"
 msgstr "Go back to your edits to save"
 
@@ -7090,7 +7090,7 @@ msgstr "Keep songs"
 msgid "Keep the {pedal} connected until {0}."
 msgstr "Keep the {pedal} connected until {0}."
 
-#: src/renderer/src/screens/rig/Scenes.tsx:888
+#: src/renderer/src/screens/rig/Scenes.tsx:889
 msgid "Keep the {pedal} connected until it reads the scene back."
 msgstr "Keep the {pedal} connected until it reads the scene back."
 
@@ -8092,7 +8092,7 @@ msgstr "More"
 msgid "More {0} controls"
 msgstr "More {0} controls"
 
-#: src/renderer/src/screens/rig/RigHeader.tsx:196
+#: src/renderer/src/screens/rig/RigHeader.tsx:178
 msgid "More actions"
 msgstr "More actions"
 
@@ -8104,7 +8104,7 @@ msgstr "More bass options for {name}"
 msgid "More controls"
 msgstr "More controls"
 
-#: src/renderer/src/screens/rig/RigHeader.tsx:225
+#: src/renderer/src/screens/rig/RigHeader.tsx:207
 msgid "More save options"
 msgstr "More save options"
 
@@ -8364,7 +8364,7 @@ msgstr "Name for the new playlist"
 #. placeholder {0}: letter(k)
 #: src/renderer/src/screens/rig/Scenes.tsx:311
 #: src/renderer/src/screens/rig/Scenes.tsx:795
-#: src/renderer/src/screens/rig/Scenes.tsx:905
+#: src/renderer/src/screens/rig/Scenes.tsx:906
 msgid "Name of scene {0}"
 msgstr "Name of scene {0}"
 
@@ -8774,7 +8774,7 @@ msgstr "No TONE3000 app key is set, so Tone Studio can't sign in. Enter one in S
 msgid "No tones in this list match the filters."
 msgstr "No tones in this list match the filters."
 
-#: src/renderer/src/screens/rig/RigHeader.tsx:152
+#: src/renderer/src/screens/rig/RigHeader.tsx:240
 msgid "No unsaved changes"
 msgstr "No unsaved changes"
 
@@ -9470,7 +9470,7 @@ msgstr "Overwrite {current} in slot {0}?"
 
 #. placeholder {0}: letter(k)
 #. placeholder {1}: replacing.name
-#: src/renderer/src/screens/rig/Scenes.tsx:878
+#: src/renderer/src/screens/rig/Scenes.tsx:879
 msgid "Overwrite scene {0} · {1}?"
 msgstr "Overwrite scene {0} · {1}?"
 
@@ -10654,8 +10654,8 @@ msgstr "records belong"
 
 #: src/renderer/src/screens/capture/Head.tsx:191
 #: src/renderer/src/screens/capture/Head.tsx:195
-#: src/renderer/src/screens/rig/RigHeader.tsx:167
-#: src/renderer/src/screens/rig/RigHeader.tsx:168
+#: src/renderer/src/screens/rig/RigHeader.tsx:149
+#: src/renderer/src/screens/rig/RigHeader.tsx:150
 msgid "Redo"
 msgstr "Redo"
 
@@ -10866,7 +10866,7 @@ msgstr "Rename needs the {pedal}"
 msgid "Rename on pedal"
 msgstr "Rename on pedal"
 
-#: src/renderer/src/screens/rig/RigHeader.tsx:238
+#: src/renderer/src/screens/rig/RigHeader.tsx:220
 msgid "Rename on pedal…"
 msgstr "Rename on pedal…"
 
@@ -11226,7 +11226,7 @@ msgstr "Restoring slot {0} ({1} of {total})"
 #: src/renderer/src/components/write/ConfirmWriteDialog.tsx:221
 #: src/renderer/src/screens/device/ConnectionHeader.tsx:125
 #: src/renderer/src/screens/library/BulkWriteDialog.tsx:219
-#: src/renderer/src/screens/rig/Scenes.tsx:966
+#: src/renderer/src/screens/rig/Scenes.tsx:967
 #: src/renderer/src/screens/tones/SendSteps.tsx:124
 #: src/renderer/src/screens/tones/SnapToneSteps.tsx:110
 #: src/renderer/src/screens/tones/TonesScreen.tsx:437
@@ -11501,12 +11501,12 @@ msgstr "Save rules"
 #. placeholder {0}: letter(k)
 #: src/renderer/src/screens/rig/Scenes.tsx:642
 #: src/renderer/src/screens/rig/Scenes.tsx:671
-#: src/renderer/src/screens/rig/Scenes.tsx:966
+#: src/renderer/src/screens/rig/Scenes.tsx:967
 msgid "Save scene {0}"
 msgstr "Save scene {0}"
 
 #. placeholder {0}: letter(k)
-#: src/renderer/src/screens/rig/Scenes.tsx:879
+#: src/renderer/src/screens/rig/Scenes.tsx:880
 msgid "Save scene {0}?"
 msgstr "Save scene {0}?"
 
@@ -11566,7 +11566,7 @@ msgstr "Save to another scene…"
 msgid "Save to another slot"
 msgstr "Save to another slot"
 
-#: src/renderer/src/screens/rig/RigHeader.tsx:235
+#: src/renderer/src/screens/rig/RigHeader.tsx:217
 msgid "Save to another slot…"
 msgstr "Save to another slot…"
 
@@ -11581,8 +11581,8 @@ msgstr "Save to slot"
 #. placeholder {0}: profile.slotLabel(preset.slot)
 #. placeholder {0}: slotLabel(view.slot)
 #: src/renderer/src/app/overlays/UnsavedSwitchDialog.tsx:128
-#: src/renderer/src/screens/rig/RigHeader.tsx:215
-#: src/renderer/src/screens/rig/RigHeader.tsx:231
+#: src/renderer/src/screens/rig/RigHeader.tsx:197
+#: src/renderer/src/screens/rig/RigHeader.tsx:213
 msgid "Save to slot {0}"
 msgstr "Save to slot {0}"
 
@@ -11698,13 +11698,13 @@ msgstr "Saves the copy from the backup of {backupDate} to Replaced presets (read
 msgid "Saves them to Replaced presets on this computer"
 msgstr "Saves them to Replaced presets on this computer"
 
-#: src/renderer/src/screens/rig/Scenes.tsx:954
+#: src/renderer/src/screens/rig/Scenes.tsx:955
 msgid "Saving"
 msgstr "Saving"
 
 #. placeholder {0}: letter(k)
 #: src/renderer/src/screens/rig/Scenes.tsx:642
-#: src/renderer/src/screens/rig/Scenes.tsx:876
+#: src/renderer/src/screens/rig/Scenes.tsx:877
 msgid "Saving scene {0}"
 msgstr "Saving scene {0}"
 
@@ -11738,7 +11738,7 @@ msgstr "Scene"
 
 #. placeholder {0}: letter(k)
 #: src/renderer/src/screens/rig/Scenes.tsx:247
-#: src/renderer/src/screens/rig/Scenes.tsx:901
+#: src/renderer/src/screens/rig/Scenes.tsx:902
 msgid "Scene {0}"
 msgstr "Scene {0}"
 
@@ -11746,7 +11746,7 @@ msgstr "Scene {0}"
 #. placeholder {1}: base?.name ?? preset.name
 #. placeholder {2}: editing === null ? t`and the Rig plays the saved preset again` : t`then the Rig plays scene ${letter(k)} again`
 #. placeholder {3}: replacing ? t` The pedal has no undo.` : ""
-#: src/renderer/src/screens/rig/Scenes.tsx:889
+#: src/renderer/src/screens/rig/Scenes.tsx:890
 msgid "Scene {0} becomes what the Rig plays now, as differences from {1} as saved. The {pedal} goes back to the base after the write, {2}.{3}"
 msgstr "Scene {0} becomes what the Rig plays now, as differences from {1} as saved. The {pedal} goes back to the base after the write, {2}.{3}"
 
@@ -11761,7 +11761,7 @@ msgid "Scene {0} is empty"
 msgstr "Scene {0} is empty"
 
 #. placeholder {0}: letter(k)
-#: src/renderer/src/screens/rig/Scenes.tsx:923
+#: src/renderer/src/screens/rig/Scenes.tsx:924
 msgid "Scene {0} now"
 msgstr "Scene {0} now"
 
@@ -11787,6 +11787,10 @@ msgstr "Scene {l} plays. Click again for the base."
 #: src/renderer/src/screens/rig/Scenes.tsx:470
 msgid "Scene {l}{0}"
 msgstr "Scene {l}{0}"
+
+#: src/renderer/src/screens/rig/Scenes.tsx:860
+msgid "scene {sourceLetter}"
+msgstr "scene {sourceLetter}"
 
 #: src/renderer/src/state/pedal-notices.ts:145
 msgid "Scene mode off, on the {pedal}"
@@ -12255,7 +12259,7 @@ msgid "Shown as the preset stores them: what the numbers mean on the {pedal} isn
 msgstr "Shown as the preset stores them: what the numbers mean on the {pedal} isn't confirmed yet."
 
 #. placeholder {0}: name.length
-#: src/renderer/src/screens/rig/Scenes.tsx:915
+#: src/renderer/src/screens/rig/Scenes.tsx:916
 msgid "Shown on the scene footswitch · {0} of 16"
 msgstr "Shown on the scene footswitch · {0} of 16"
 
@@ -13596,6 +13600,10 @@ msgstr "The band parts are still updating. Wait for the update to finish."
 msgid "The band sync is full. Try again when a bandmate leaves."
 msgstr "The band sync is full. Try again when a bandmate leaves."
 
+#: src/renderer/src/screens/rig/Scenes.tsx:860
+msgid "the base"
+msgstr "the base"
+
 #: src/renderer/src/screens/song/BassNotes.tsx:85
 msgid "The bass plays"
 msgstr "The bass plays"
@@ -13942,7 +13950,7 @@ msgstr "The Rig has {unsaved} unsaved"
 msgid "The Rig played the saved preset as it is, so the pedal keeps no scene there."
 msgstr "The Rig played the saved preset as it is, so the pedal keeps no scene there."
 
-#: src/renderer/src/screens/rig/Scenes.tsx:939
+#: src/renderer/src/screens/rig/Scenes.tsx:940
 msgid "The Rig plays the saved preset as it is, so there is nothing to keep"
 msgstr "The Rig plays the saved preset as it is, so there is nothing to keep"
 
@@ -14047,7 +14055,7 @@ msgid "Then save this scene again"
 msgstr "Then save this scene again"
 
 #. placeholder {0}: letter(k)
-#: src/renderer/src/screens/rig/Scenes.tsx:889
+#: src/renderer/src/screens/rig/Scenes.tsx:890
 msgid "then the Rig plays scene {0} again"
 msgstr "then the Rig plays scene {0} again"
 
@@ -14844,8 +14852,8 @@ msgstr "under a minute"
 #: src/renderer/src/screens/capture/Head.tsx:183
 #: src/renderer/src/screens/capture/Head.tsx:187
 #: src/renderer/src/screens/library/RenameConfirmDialog.tsx:43
-#: src/renderer/src/screens/rig/RigHeader.tsx:162
-#: src/renderer/src/screens/rig/RigHeader.tsx:163
+#: src/renderer/src/screens/rig/RigHeader.tsx:144
+#: src/renderer/src/screens/rig/RigHeader.tsx:145
 #: src/renderer/src/screens/rig/RigHeader.tsx:325
 #: src/renderer/src/screens/song/MidiCueBuilder.tsx:436
 #: src/renderer/src/screens/song/SectionEditor.tsx:91
@@ -15636,7 +15644,7 @@ msgid "Writing {0}…"
 msgstr "Writing {0}…"
 
 #. placeholder {0}: Math.round(busy.progress * 100)
-#: src/renderer/src/screens/rig/RigHeader.tsx:215
+#: src/renderer/src/screens/rig/RigHeader.tsx:197
 msgid "Writing {0}%"
 msgstr "Writing {0}%"
 

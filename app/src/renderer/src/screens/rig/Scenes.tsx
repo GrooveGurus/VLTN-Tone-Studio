@@ -856,7 +856,8 @@ function SaveSceneDialog({ preset, target, onClose }: { preset: PresetState; tar
   const problem = sceneNameError(name);
   const empty = preview !== null && sceneIsEmpty(preview.scene);
   const changes = preview && base ? sceneRows(base, preview.scene).length : 0;
-  const from = editing === null ? "the base" : editing === k ? `scene ${letter(k)}` : `scene ${letter(editing)}`;
+  const sourceLetter = letter(editing ?? k);
+  const from = editing === null ? t`the base` : t`scene ${sourceLetter}`;
 
   const confirm = async () => {
     if (problem || running) return;
